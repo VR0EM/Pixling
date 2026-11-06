@@ -4,6 +4,7 @@
   "version": "0.9.0",
   "type": "module",
   "description": "Pixling: a little pixel buddy that lives on your desktop.",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

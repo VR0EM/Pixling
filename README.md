@@ -12,6 +12,7 @@
   <a href="https://github.com/VR0EM/Pixling/actions/workflows/ci.yml"><img alt="Checks" src="https://img.shields.io/github/actions/workflow/status/VR0EM/Pixling/ci.yml?branch=main&style=flat-square&label=checks&labelColor=2b2a40"></a>
   <img alt="macOS and Windows" src="https://img.shields.io/badge/macOS%20%7C%20Windows-7cc65a?style=flat-square&labelColor=2b2a40">
   <img alt="Built with Tauri 2" src="https://img.shields.io/badge/built%20with-Tauri%202-24c8db?style=flat-square&labelColor=2b2a40">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e8964a?style=flat-square&labelColor=2b2a40"></a>
 </p>
 
 <p align="center">
@@ -34,6 +35,7 @@
 - [How it works](#how-it-works)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -202,3 +204,9 @@ The full list is in the [roadmap](docs/ROADMAP.md).
 Ideas, bug reports and buddies are welcome: open an [issue](https://github.com/VR0EM/Pixling/issues), or share a `.pixling.json` file.
 
 For code: `npm run check` must pass, art follows the [style guide](docs/CREATING-BUDDIES.md#style-guide) (front view, stylised, its own silhouette), and anything you draw is checked with `npm run sprites`. The [decisions](docs/DECISIONS.md) explain why things are built the way they are.
+
+## License
+
+Pixling is released under the [MIT License](LICENSE): use it, change it and share it, as long as the copyright notice stays with it. Buddies and accessories you make and share are yours.
+
+The speech bubbles use [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), under the SIL Open Font License 1.1.
