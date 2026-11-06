@@ -28,4 +28,6 @@ export const FIXED: Record<string, string> = {
   Q: '#2f8fa0',
   n: '#26242e',
   z: '#2b2a40',
+  k: '#6b4226',
+  u: '#4b4fb0',
 };

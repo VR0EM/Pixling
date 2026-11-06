@@ -2,6 +2,7 @@ import './styles.css';
 import { Backpack } from './buddy/backpack.ts';
 import { Brain, type Input } from './buddy/brain.ts';
 import { ITEM_FOR, contextFor } from './buddy/context.ts';
+import { momentFor } from './buddy/moments.ts';
 import { View } from './buddy/view.ts';
 import * as bridge from './platform/bridge.ts';
 import { catalog } from './sprites/index.ts';
@@ -142,6 +143,7 @@ async function start(): Promise<void> {
   // Right-click opens the same menu as the menu bar icon; the browser's own menu never shows.
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('contextmenu', () => void bridge.showMenu());
+  canvas.addEventListener('dblclick', () => void bridge.openWardrobe());
 
   // Every frame while flying, being dragged or riding a window; about 20 fps otherwise.
   let last = performance.now();
@@ -154,8 +156,11 @@ async function start(): Promise<void> {
       brain.update((now - last) / 1000, input);
       last = now;
       lastDraw = now;
-      const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined);
-      view.draw(look, brain.pose(input), brain.x, brain.y, now, item);
+      // Priority: the backpack, then the app in front, then the time of day.
+      const moment = momentFor(new Date());
+      const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
+      const shown = look.accessory === 'geen' && moment.hat ? { ...look, accessory: moment.hat } : look;
+      view.draw(shown, brain.pose(input), brain.x, brain.y, now, item);
       if (brain.standingOn !== lastStand) {
         bridge.log(brain.standingOn === null ? 'van het venster af' : `op venster ${brain.standingOn}`);
         lastStand = brain.standingOn;

@@ -26,7 +26,8 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 - [x] Reageren op de actieve app: leesbril bij code, koptelefoon bij muziek, popcorn bij video, controller bij games
 - [ ] Muziek herkennen die op de achtergrond speelt, niet alleen als de muziekapp vooraan staat
 - [ ] Vensters en actieve app op Windows en Linux
-- [ ] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagmiddag, verjaardag, Sinterklaas
+- [x] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagavond, oudejaarsavond, Sinterklaas
+- [ ] Je verjaardag (vraagt een datum in de kleerkast)
 - [ ] Typtempo (alleen het tempo, nooit de toetsen)
 - [ ] Tekstballonnen met een eigen pixel-lettertype
 
@@ -42,7 +43,7 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 
 ## Fase 4: Hij is van jou
 
-- [ ] Kleerkast-venster met voorbeeld
+- [x] Kleerkast-venster met voorbeeld
 - [ ] Pixeleditor voor eigen accessoires, en eigen maatjes inladen
 - [ ] Karakter: rustig, druk, brutaal of lief; zelf zinnetjes schrijven
 - [ ] Regels: "als … dan …"

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kleerkast</title>
+  </head>
+  <body>
+    <main class="wardrobe">
+      <header class="hero">
+        <canvas id="preview" width="32" height="32" aria-label="Je maatje"></canvas>
+        <div>
+          <h1>Kleerkast</h1>
+          <p id="summary"></p>
+          <p class="hint">Alles wat je kiest, zie je meteen op je scherm.</p>
+        </div>
+      </header>
+
+      <section>
+        <h2>Maatje</h2>
+        <div id="species" class="cards"></div>
+      </section>
+
+      <section>
+        <h2>Kleur</h2>
+        <div id="palettes" class="swatches"></div>
+      </section>
+
+      <section>
+        <h2>Accessoire</h2>
+        <div id="accessories" class="pills"></div>
+      </section>
+
+      <section class="row">
+        <div>
+          <h2>Grootte</h2>
+          <div id="scale" class="pills"></div>
+        </div>
+        <div>
+          <h2>Focusduur</h2>
+          <div id="focus" class="pills"></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Gewoontes</h2>
+        <div id="habits" class="toggles"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/wardrobe.ts"></script>
+  </body>
+</html>

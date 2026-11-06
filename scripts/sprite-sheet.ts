@@ -24,6 +24,7 @@ const poses: RenderOptions[] = [
   { item: 'controller' },
   { item: 'boek' },
   { item: 'water' },
+  { item: 'koffie', accessory: 'slaapmuts' },
 ];
 
 const rows: [string, RenderOptions][][] = SPECIES.map((s) => poses.map((p) => [s.id, p] as [string, RenderOptions]));

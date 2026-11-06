@@ -129,6 +129,47 @@ fn active_app(state: State<'_, AppState>) -> Option<FrontApp> {
     state.front_app.lock().unwrap().clone()
 }
 
+/// Changes some settings at once (from the wardrobe): saves them, tells every window and updates the menu.
+#[tauri::command]
+fn update_config(app: AppHandle, state: State<'_, AppState>, patch: serde_json::Value) -> Result<Config, String> {
+    let cfg = {
+        let mut cfg = state.config.lock().unwrap();
+        let mut value = serde_json::to_value(&*cfg).map_err(|e| e.to_string())?;
+        if let (Some(target), Some(changes)) = (value.as_object_mut(), patch.as_object()) {
+            for (key, v) in changes {
+                target.insert(key.clone(), v.clone());
+            }
+        }
+        *cfg = serde_json::from_value(value).map_err(|e| e.to_string())?;
+        cfg.clone()
+    };
+    config::save(&app, &cfg).map_err(|e| e.to_string())?;
+    let _ = app.emit("config-changed", &cfg);
+    let _ = tray::refresh(&app);
+    Ok(cfg)
+}
+
+#[tauri::command]
+fn open_wardrobe(app: AppHandle) -> Result<(), String> {
+    overlay::open_wardrobe(&app).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_autostart(app: AppHandle) -> bool {
+    use tauri_plugin_autostart::ManagerExt;
+    app.autolaunch().is_enabled().unwrap_or(false)
+}
+
+#[tauri::command]
+fn set_autostart(app: AppHandle, on: bool) -> Result<(), String> {
+    use tauri_plugin_autostart::ManagerExt;
+    let autostart = app.autolaunch();
+    let result = if on { autostart.enable() } else { autostart.disable() };
+    result.map_err(|e| e.to_string())?;
+    let _ = tray::refresh(&app);
+    Ok(())
+}
+
 /// Text next to the menu bar icon, used for the focus timer.
 #[tauri::command]
 fn set_tray_title(app: AppHandle, title: Option<String>) -> Result<(), String> {
@@ -195,6 +236,10 @@ pub fn run() {
             windows,
             active_app,
             set_tray_title,
+            update_config,
+            open_wardrobe,
+            get_autostart,
+            set_autostart,
             log
         ])
         .run(tauri::generate_context!())

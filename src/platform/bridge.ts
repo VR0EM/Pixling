@@ -60,8 +60,11 @@ if (!inApp) {
   });
 }
 
+/** Outside the app the settings only live in memory. */
+let browserConfig: Config = { ...DEFAULT_CONFIG };
+
 export async function getConfig(): Promise<Config> {
-  return inApp ? invoke<Config>('get_config') : { ...DEFAULT_CONFIG };
+  return inApp ? invoke<Config>('get_config') : { ...browserConfig };
 }
 
 export async function setCatalog(catalog: Catalog): Promise<void> {
@@ -109,6 +112,25 @@ export function onBackpack(callback: (command: string) => void): void {
 /** Text next to the menu bar icon, or null to clear it. */
 export async function setTrayTitle(title: string | null): Promise<void> {
   if (inApp) await invoke('set_tray_title', { title });
+}
+
+/** Changes some settings at once; returns the full new config. */
+export async function updateConfig(patch: Partial<Config>): Promise<Config> {
+  if (inApp) return invoke<Config>('update_config', { patch });
+  browserConfig = { ...browserConfig, ...patch };
+  return { ...browserConfig };
+}
+
+export async function openWardrobe(): Promise<void> {
+  if (inApp) await invoke('open_wardrobe');
+}
+
+export async function getAutostart(): Promise<boolean> {
+  return inApp ? invoke<boolean>('get_autostart') : false;
+}
+
+export async function setAutostart(on: boolean): Promise<void> {
+  if (inApp) await invoke('set_autostart', { on });
 }
 
 /** Opens the menu bar menu at the cursor. */

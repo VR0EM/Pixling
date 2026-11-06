@@ -1,0 +1,163 @@
+:root {
+  --bg: #fbf6ec;
+  --panel: #fffdf8;
+  --ink: #2b2a40;
+  --muted: #6d6a7c;
+  --line: #2b2a40;
+  --soft: #e9e1d2;
+  --pick: #ffd54f;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1d1c27;
+    --panel: #26253330;
+    --ink: #ece9f5;
+    --muted: #a7a3b8;
+    --line: #ece9f5;
+    --soft: #34324a;
+    --pick: #c9a227;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 ui-rounded, -apple-system, system-ui, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.wardrobe {
+  padding: 22px 26px 26px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+section {
+  margin-top: 22px;
+}
+
+p {
+  margin: 0;
+}
+
+.hint {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+#preview {
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+  background: var(--soft);
+  border-radius: 14px;
+  padding: 0;
+}
+
+canvas {
+  image-rendering: pixelated;
+}
+
+.row {
+  display: flex;
+  gap: 40px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--panel);
+  border: 2px solid var(--soft);
+  border-radius: 10px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--line);
+  outline-offset: 2px;
+}
+
+button[aria-pressed='true'] {
+  border-color: var(--line);
+  box-shadow: 3px 3px 0 var(--pick);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px 8px;
+  font-size: 12px;
+}
+
+.card canvas {
+  width: 64px;
+  height: 64px;
+}
+
+.swatches,
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.pill {
+  padding: 6px 14px;
+}
+
+.toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ink);
+}

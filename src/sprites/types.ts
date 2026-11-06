@@ -29,6 +29,8 @@ export interface Accessory {
   /** Sits on the face, anchored at the eyes. */
   face?: boolean;
   noOutline?: boolean;
+  /** Not offered in the menu; the buddy puts it on by itself (a nightcap at night). */
+  hidden?: boolean;
   rows: string[];
 }
 

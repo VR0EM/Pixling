@@ -26,7 +26,12 @@ export function catalog() {
   return {
     species: SPECIES.map((s) => ({ id: s.id, name: s.name })),
     palettes: [{ id: 'eigen', name: 'Eigen kleur' }, ...Object.entries(PALETTES).map(([id, p]) => ({ id, name: p.name }))],
-    accessories: [{ id: 'geen', name: 'Geen' }, ...Object.entries(ACCESSORIES).map(([id, a]) => ({ id, name: a.name }))],
+    accessories: [
+      { id: 'geen', name: 'Geen' },
+      ...Object.entries(ACCESSORIES)
+        .filter(([, a]) => !a.hidden)
+        .map(([id, a]) => ({ id, name: a.name })),
+    ],
   };
 }
 

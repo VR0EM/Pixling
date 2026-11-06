@@ -24,3 +24,4 @@ Pixling is een desktopmaatje in pixelart: Tauri 2 (Rust) met een TypeScript-webp
 - `npm run check`: typecheck en tests
 - `npm run sprites`: sprite-overzicht
 - `npm run icons`: iconen opnieuw maken
+- `npm run install-mac`: releaseversie bouwen en naar /Applications kopiëren

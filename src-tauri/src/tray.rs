@@ -49,6 +49,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .and_then(|w| w.is_visible().ok())
         .unwrap_or(true);
 
+    let wardrobe = MenuItem::with_id(app, "wardrobe", "Kleerkast…", true, None::<&str>)?;
     let toggle = MenuItem::with_id(
         app,
         "toggle",
@@ -80,6 +81,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         app,
         &[
             &toggle,
+            &wardrobe,
             &PredefinedMenuItem::separator(app)?,
             &species,
             &palettes,
@@ -129,6 +131,12 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
+        "wardrobe" => {
+            if let Err(e) = overlay::open_wardrobe(app) {
+                eprintln!("Pixling: kon de kleerkast niet openen: {e}");
+            }
+            return; // the wardrobe should keep the focus
+        }
         "toggle" => {
             if let Some(window) = app.get_webview_window(overlay::LABEL) {
                 let _ = if window.is_visible().unwrap_or(true) { window.hide() } else { window.show() };

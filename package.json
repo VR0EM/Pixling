@@ -12,7 +12,8 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run test",
     "sprites": "node scripts/sprite-sheet.ts docs/sprites.png",
-    "icons": "node scripts/make-icons.ts && tauri icon build/app-icon.png"
+    "icons": "node scripts/make-icons.ts && tauri icon build/app-icon.png",
+    "install-mac": "tauri build --bundles app && rm -rf /Applications/Pixling.app && cp -R src-tauri/target/release/bundle/macos/Pixling.app /Applications/"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.12.4"

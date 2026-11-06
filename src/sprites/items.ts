@@ -57,6 +57,13 @@ export const ITEMS: Record<string, Item> = {
     rows: ['w..w', 'w..w', 'wttw', 'wttw', 'wwww'],
     at: [24, 19],
   },
+  koffie: {
+    name: 'Koffie',
+    slot: 'hand',
+    outline: true,
+    rows: ['.w.w..', 'wkkkw.', 'wwwwww', 'wwwww.', '.www..'],
+    at: [23, 20],
+  },
   controller: {
     name: 'Controller',
     slot: 'hand',

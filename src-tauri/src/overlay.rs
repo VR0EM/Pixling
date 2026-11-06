@@ -27,6 +27,24 @@ pub fn create(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     Ok(window)
 }
 
+pub const WARDROBE: &str = "kleerkast";
+
+/// Opens the wardrobe, a normal window for choosing the look and habits, or brings it forward.
+pub fn open_wardrobe(app: &AppHandle) -> tauri::Result<()> {
+    let window = match app.get_webview_window(WARDROBE) {
+        Some(window) => window,
+        None => WebviewWindowBuilder::new(app, WARDROBE, WebviewUrl::App("kleerkast.html".into()))
+            .title("Pixling · Kleerkast")
+            .inner_size(640.0, 760.0)
+            .resizable(false)
+            .center()
+            .build()?,
+    };
+    window.show()?;
+    window.set_focus()?;
+    Ok(())
+}
+
 /// Sizes the overlay to the main screen's work area, if it isn't already.
 pub fn fit_to_screen(window: &WebviewWindow) -> tauri::Result<()> {
     let Some(monitor) = window.primary_monitor()? else {

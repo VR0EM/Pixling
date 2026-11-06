@@ -16,6 +16,12 @@ export const ACCESSORIES: Record<string, Accessory> = {
     hat: true,
     rows: ['..rr..', '.rrrr.', 'rryyrr', 'ryyyyr', 'rryyrr', 'rryyrr', 'rrrrrr', 'yyyyyy', 'yyyyyy'],
   },
+  slaapmuts: {
+    name: 'Slaapmuts',
+    hat: true,
+    hidden: true,
+    rows: ['.......w', '.....uuw', '...uuuu.', '.uuuuu..', 'uuuuuu..', 'wwwwww..'],
+  },
   zonnebril: {
     name: 'Zonnebril',
     face: true,
