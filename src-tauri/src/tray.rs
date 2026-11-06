@@ -49,44 +49,44 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .and_then(|w| w.is_visible().ok())
         .unwrap_or(true);
 
-    let wardrobe = MenuItem::with_id(app, "wardrobe", "Kleerkast…", true, None::<&str>)?;
-    let atelier = MenuItem::with_id(app, "atelier", "Atelier…", true, None::<&str>)?;
-    let notes = MenuItem::with_id(app, "notes", "Notities…", true, None::<&str>)?;
-    let diary = MenuItem::with_id(app, "diary", "Dagboek…", true, None::<&str>)?;
-    let character = choices(app, "Karakter", "character", &catalog.characters, &cfg.character)?;
+    let wardrobe = MenuItem::with_id(app, "wardrobe", "Wardrobe…", true, None::<&str>)?;
+    let studio = MenuItem::with_id(app, "studio", "Studio…", true, None::<&str>)?;
+    let notes = MenuItem::with_id(app, "notes", "Notes…", true, None::<&str>)?;
+    let diary = MenuItem::with_id(app, "diary", "Diary…", true, None::<&str>)?;
+    let character = choices(app, "Character", "character", &catalog.characters, &cfg.character)?;
     let toggle = MenuItem::with_id(
         app,
         "toggle",
-        if visible { "Verstop Pixling" } else { "Toon Pixling" },
+        if visible { "Hide Pixling" } else { "Show Pixling" },
         true,
         None::<&str>,
     )?;
-    let species = choices(app, "Maatje", "species", &catalog.species, &cfg.species)?;
-    let palettes = choices(app, "Kleur", "palette", &catalog.palettes, &cfg.palette)?;
-    let accessories = choices(app, "Accessoire", "accessory", &catalog.accessories, &cfg.accessory)?;
+    let species = choices(app, "Buddy", "species", &catalog.species, &cfg.species)?;
+    let palettes = choices(app, "Colour", "palette", &catalog.palettes, &cfg.palette)?;
+    let accessories = choices(app, "Accessory", "accessory", &catalog.accessories, &cfg.accessory)?;
     let sizes: Vec<Choice> = (2..=4)
         .map(|s| Choice { id: s.to_string(), name: format!("{s}×") })
         .collect();
-    let size = choices(app, "Grootte", "scale", &sizes, &cfg.scale.to_string())?;
-    let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Kijkt mee met je apps", true, cfg.watch_apps, None::<&str>)?;
-    let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Klimt op vensters", true, cfg.climb_windows, None::<&str>)?;
+    let size = choices(app, "Size", "scale", &sizes, &cfg.scale.to_string())?;
+    let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Watches your apps", true, cfg.watch_apps, None::<&str>)?;
+    let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Climbs windows", true, cfg.climb_windows, None::<&str>)?;
     let login = CheckMenuItem::with_id(
         app,
         "autostart",
-        "Start bij inloggen",
+        "Start at login",
         true,
         app.autolaunch().is_enabled().unwrap_or(false),
         None::<&str>,
     )?;
     let backpack = backpack_menu(app, &cfg)?;
-    let quit = MenuItem::with_id(app, "quit", "Stop Pixling", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Pixling", true, None::<&str>)?;
 
     Menu::with_items(
         app,
         &[
             &toggle,
             &wardrobe,
-            &atelier,
+            &studio,
             &notes,
             &diary,
             &PredefinedMenuItem::separator(app)?,
@@ -113,15 +113,15 @@ fn backpack_menu(app: &AppHandle, cfg: &config::Config) -> tauri::Result<Submenu
     let stop = MenuItem::with_id(app, "backpack:stop", "Stop focus", true, None::<&str>)?;
     let lengths: Vec<Choice> = [15, 25, 50]
         .iter()
-        .map(|m| Choice { id: m.to_string(), name: format!("{m} minuten") })
+        .map(|m| Choice { id: m.to_string(), name: format!("{m} minutes") })
         .collect();
-    let length = choices(app, "Focusduur", "focus", &lengths, &cfg.focus_minutes.to_string())?;
-    let water = CheckMenuItem::with_id(app, "flag:water", "Waterherinnering", true, cfg.water, None::<&str>)?;
-    let breaks = CheckMenuItem::with_id(app, "flag:breaks", "Pauzeherinnering", true, cfg.breaks, None::<&str>)?;
-    let system = CheckMenuItem::with_id(app, "flag:watchSystem", "Let op batterij en drukte", true, cfg.watch_system, None::<&str>)?;
+    let length = choices(app, "Focus length", "focus", &lengths, &cfg.focus_minutes.to_string())?;
+    let water = CheckMenuItem::with_id(app, "flag:water", "Water reminder", true, cfg.water, None::<&str>)?;
+    let breaks = CheckMenuItem::with_id(app, "flag:breaks", "Break reminder", true, cfg.breaks, None::<&str>)?;
+    let system = CheckMenuItem::with_id(app, "flag:watchSystem", "Watch battery and load", true, cfg.watch_system, None::<&str>)?;
     Submenu::with_items(
         app,
-        "Rugzak",
+        "Backpack",
         true,
         &[&start, &stop, &length, &PredefinedMenuItem::separator(app)?, &water, &breaks, &system],
     )
@@ -140,15 +140,15 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
-        "wardrobe" | "notes" | "diary" | "atelier" => {
+        "wardrobe" | "notes" | "diary" | "studio" => {
             let label = match id {
                 "notes" => overlay::NOTES,
                 "diary" => overlay::DIARY,
-                "atelier" => overlay::ATELIER,
+                "studio" => overlay::STUDIO,
                 _ => overlay::WARDROBE,
             };
             if let Err(e) = overlay::open_page(app, label) {
-                eprintln!("Pixling: kon het venster niet openen: {e}");
+                eprintln!("Pixling: could not open the window: {e}");
             }
             return; // the new window should keep the focus
         }
@@ -162,7 +162,7 @@ fn handle(app: &AppHandle, id: &str) {
             let autostart = app.autolaunch();
             let result = if autostart.is_enabled().unwrap_or(false) { autostart.disable() } else { autostart.enable() };
             if let Err(e) = result {
-                eprintln!("Pixling: kon 'start bij inloggen' niet aanpassen: {e}");
+                eprintln!("Pixling: could not change 'start at login': {e}");
             }
         }
         "backpack:start" | "backpack:stop" => {
@@ -198,7 +198,7 @@ fn handle(app: &AppHandle, id: &str) {
                 cfg.clone()
             };
             if let Err(e) = config::save(app, &cfg) {
-                eprintln!("Pixling: kon de instellingen niet bewaren: {e}");
+                eprintln!("Pixling: could not save the settings: {e}");
             }
             let _ = app.emit("config-changed", &cfg);
         }

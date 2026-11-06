@@ -218,7 +218,7 @@ fn set_diary(app: AppHandle, diary: serde_json::Value) -> Result<(), String> {
     std::fs::write(dir.join("diary.json"), text).map_err(|e| e.to_string())
 }
 
-/// Home-made accessories from the atelier, kept in creations.json.
+/// Home-made accessories and buddies from the studio, kept in creations.json.
 #[tauri::command]
 fn get_creations(app: AppHandle) -> serde_json::Value {
     app.path()
@@ -240,9 +240,46 @@ fn set_creations(app: AppHandle, list: serde_json::Value) -> Result<(), String> 
     Ok(())
 }
 
+/// Reads a Pixling file the user dropped or picked. Only small JSON files, so nothing else gets read.
 #[tauri::command]
-fn open_atelier(app: AppHandle) -> Result<(), String> {
-    overlay::open_page(&app, overlay::ATELIER).map_err(|e| e.to_string())
+fn read_text_file(path: String) -> Result<String, String> {
+    let path = std::path::Path::new(&path);
+    if path.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("json")) != Some(true) {
+        return Err("Only .json files can be added.".into());
+    }
+    let size = std::fs::metadata(path).map_err(|e| e.to_string())?.len();
+    if size > 2_000_000 {
+        return Err("That file is too big to be a Pixling file.".into());
+    }
+    std::fs::read_to_string(path).map_err(|e| e.to_string())
+}
+
+/// Saves a creation to share in the Downloads folder, without overwriting anything, and shows it in Finder.
+#[tauri::command]
+fn export_file(app: AppHandle, name: String, contents: String) -> Result<String, String> {
+    let dir = app.path().download_dir().map_err(|e| e.to_string())?;
+    let safe: String = name.chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '.').collect();
+    let (stem, ext) = safe.split_once('.').unwrap_or((safe.as_str(), "json"));
+    let stem = if stem.is_empty() { "pixling" } else { stem };
+    let path = files::free_path(&dir, stem, ext);
+    std::fs::write(&path, contents).map_err(|e| e.to_string())?;
+    #[cfg(target_os = "macos")]
+    let _ = std::process::Command::new("open").arg("-R").arg(&path).status();
+    Ok(path.to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+fn copy_text(text: String) -> Result<(), String> {
+    if files::copy_text(&text) {
+        Ok(())
+    } else {
+        Err("Copying didn’t work.".into())
+    }
+}
+
+#[tauri::command]
+fn open_studio(app: AppHandle) -> Result<(), String> {
+    overlay::open_page(&app, overlay::STUDIO).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -340,12 +377,15 @@ pub fn run() {
             open_diary,
             get_creations,
             set_creations,
-            open_atelier,
+            open_studio,
+            read_text_file,
+            export_file,
+            copy_text,
             file_menu,
             get_autostart,
             set_autostart,
             log
         ])
         .run(tauri::generate_context!())
-        .expect("Pixling kon niet starten");
+        .expect("Pixling could not start");
 }

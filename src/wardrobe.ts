@@ -1,7 +1,7 @@
 import './wardrobe.css';
 import { PERSONALITIES } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
-import { PALETTES, SPECIES, accessory, catalog, render, setCreations, species, type Creation, type RenderOptions } from './sprites/index.ts';
+import { PALETTES, accessory, allSpecies, catalog, ownPalette, render, setCreations, species, type Creation, type RenderOptions } from './sprites/index.ts';
 
 type Config = bridge.Config;
 
@@ -42,21 +42,40 @@ async function start(): Promise<void> {
   };
 
   const looks = (o: RenderOptions = {}): RenderOptions => ({
-    palette: config.palette === 'eigen' ? undefined : config.palette,
-    accessory: config.accessory === 'geen' ? undefined : config.accessory,
+    palette: config.palette === 'default' ? undefined : config.palette,
+    accessory: config.accessory === 'none' ? undefined : config.accessory,
     ...o,
   });
 
-  // Species cards, each showing the species in the chosen colour and accessory.
+  /** Opens the studio on a particular kind of drawing; both pages share the same storage. */
+  const openStudio = (slot: 'buddy' | 'hat') => {
+    try {
+      localStorage.setItem('pixling.studio.start', slot);
+    } catch {
+      // Without storage the studio simply starts with a buddy.
+    }
+    void bridge.openStudio();
+  };
+
+  // Species cards, each showing the species in the chosen colour and accessory; home-made ones included.
   const speciesBox = document.getElementById('species')!;
-  const speciesCards = SPECIES.map((sp) => {
-    const button = el('button', { type: 'button', className: 'card' });
-    const canvas = el('canvas', { width: 32, height: 32 });
-    button.append(canvas, el('span', { textContent: sp.name }));
-    button.addEventListener('click', () => void change({ species: sp.id }));
-    speciesBox.append(button);
-    return { id: sp.id, button, canvas };
-  });
+  let speciesCards: { id: string; button: HTMLButtonElement; canvas: HTMLCanvasElement }[] = [];
+  const buildSpecies = () => {
+    speciesBox.replaceChildren();
+    speciesCards = allSpecies().map((sp) => {
+      const button = el('button', { type: 'button', className: 'card' });
+      const canvas = el('canvas', { width: 32, height: 32 });
+      button.append(canvas, el('span', { textContent: sp.name }));
+      button.addEventListener('click', () => void change({ species: sp.id }));
+      speciesBox.append(button);
+      return { id: sp.id, button, canvas };
+    });
+    const draw = el('button', { type: 'button', className: 'card new' });
+    draw.append(el('span', { className: 'plus', textContent: '+' }), el('span', { textContent: 'Draw your own…' }));
+    draw.addEventListener('click', () => openStudio('buddy'));
+    speciesBox.append(draw);
+  };
+  buildSpecies();
 
   const paletteBox = document.getElementById('palettes')!;
   const paletteButtons = list.palettes.map((p) => {
@@ -66,7 +85,7 @@ async function start(): Promise<void> {
     return { id: p.id, button };
   });
 
-  // Accessories, including home-made ones; rebuilt when the atelier saves something.
+  // Accessories, including home-made ones; rebuilt when the studio saves something.
   const accessoryBox = document.getElementById('accessories')!;
   let accessoryButtons: { id: string; button: HTMLButtonElement }[] = [];
   const buildAccessories = () => {
@@ -75,11 +94,12 @@ async function start(): Promise<void> {
       id: a.id,
       button: choice(accessoryBox, a.name, 'pill', () => void change({ accessory: a.id })),
     }));
-    choice(accessoryBox, 'Teken je eigen…', 'pill', () => void bridge.openAtelier());
+    choice(accessoryBox, 'Draw your own…', 'pill', () => openStudio('hat'));
   };
   buildAccessories();
   bridge.onCreationsChanged<Creation>((creations) => {
     setCreations(creations);
+    buildSpecies();
     buildAccessories();
     refresh();
   });
@@ -106,12 +126,12 @@ async function start(): Promise<void> {
   });
 
   const habits: [keyof Config | 'autostart', string][] = [
-    ['watchApps', 'Kijkt mee met je apps'],
-    ['climbWindows', 'Klimt op vensters'],
-    ['water', 'Waterherinnering'],
-    ['breaks', 'Pauzeherinnering'],
-    ['watchSystem', 'Let op batterij en drukte'],
-    ['autostart', 'Start bij inloggen'],
+    ['watchApps', 'Watches your apps'],
+    ['climbWindows', 'Climbs windows'],
+    ['water', 'Water reminder'],
+    ['breaks', 'Break reminder'],
+    ['watchSystem', 'Watches battery and load'],
+    ['autostart', 'Start at login'],
   ];
   const habitBox = document.getElementById('habits')!;
   const habitInputs = habits.map(([key, label]) => {
@@ -136,8 +156,8 @@ async function start(): Promise<void> {
 
   function refresh(): void {
     const sp = species(config.species);
-    const paletteName = PALETTES[config.palette]?.name ?? `eigen kleur (${PALETTES[sp.palette].name.toLowerCase()})`;
-    const accessoryName = accessory(config.accessory)?.name.toLowerCase() ?? 'geen accessoire';
+    const paletteName = PALETTES[config.palette]?.name ?? 'own colours';
+    const accessoryName = accessory(config.accessory)?.name.toLowerCase() ?? 'no accessory';
     summary.textContent = `${sp.name} · ${paletteName.toLowerCase()} · ${accessoryName}`;
 
     for (const card of speciesCards) {
@@ -145,8 +165,8 @@ async function start(): Promise<void> {
       card.button.setAttribute('aria-pressed', String(card.id === config.species));
     }
     for (const { id, button } of paletteButtons) {
-      const p = PALETTES[id] ?? PALETTES[sp.palette];
-      button.style.background = id === 'eigen' ? `linear-gradient(135deg, ${p.b} 50%, ${p.s} 50%)` : p.b;
+      const p = PALETTES[id] ?? ownPalette(sp.id);
+      button.style.background = id === 'default' ? `linear-gradient(135deg, ${p.b} 50%, ${p.s} 50%)` : p.b;
       button.setAttribute('aria-pressed', String(id === config.palette));
     }
     for (const { id, button } of accessoryButtons) button.setAttribute('aria-pressed', String(id === config.accessory));
@@ -180,4 +200,4 @@ async function start(): Promise<void> {
   refresh();
 }
 
-start().catch((e) => bridge.log(`kleerkast: ${String(e)}`));
+start().catch((e) => bridge.log(`wardrobe: ${String(e)}`));

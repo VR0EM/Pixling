@@ -13,10 +13,10 @@ const SCREEN = [
   '.pppppppppp.',
 ];
 
-export const robotje: Species = {
-  id: 'robotje',
-  name: 'Robotje',
-  palette: 'hemel',
+export const robot: Species = {
+  id: 'robot',
+  name: 'Robot',
+  palette: 'sky',
   build(o, accessory) {
     const f = frameParams('robot', o.frame);
     const d = f.d;

@@ -13,7 +13,7 @@ export interface BackpackSettings {
   breakMinutes: number;
 }
 
-export type Phase = 'uit' | 'focus' | 'pauze';
+export type Phase = 'off' | 'focus' | 'break';
 
 /** What the buddy should do right now because of the backpack. */
 export interface Advice {
@@ -46,7 +46,7 @@ const clock = (ms: number) => {
 };
 
 export class Backpack {
-  phase: Phase = 'uit';
+  phase: Phase = 'off';
   private phaseEnd = 0;
   private waterDue: number;
   private waterUntil: number | null = null;
@@ -65,8 +65,8 @@ export class Backpack {
   }
 
   stopFocus(): void {
-    if (this.phase === 'uit') return;
-    this.phase = 'uit';
+    if (this.phase === 'off') return;
+    this.phase = 'off';
     this.pending = { key: 'focusStop' };
   }
 
@@ -75,7 +75,7 @@ export class Backpack {
     if (this.waterUntil !== null) {
       this.waterUntil = null;
       this.waterDue = now + WATER_EVERY;
-      this.pending = { key: 'proost' };
+      this.pending = { key: 'cheers' };
       return true;
     }
     if (this.activeSince !== null && now - this.activeSince > TIRED_AFTER) {
@@ -89,15 +89,15 @@ export class Backpack {
 
   update(now: number, idleMs: number, settings: BackpackSettings): Advice {
     // Focus and break phases.
-    if (this.phase !== 'uit' && now >= this.phaseEnd) {
+    if (this.phase !== 'off' && now >= this.phaseEnd) {
       if (this.phase === 'focus') {
-        this.phase = 'pauze';
+        this.phase = 'break';
         this.phaseEnd = now + settings.breakMinutes * MIN;
-        this.pending = { key: 'pauze' };
+        this.pending = { key: 'breakStart' };
         this.activeSince = null;
       } else {
-        this.phase = 'uit';
-        this.pending = { key: 'pauzeKlaar' };
+        this.phase = 'off';
+        this.pending = { key: 'breakOver' };
       }
     }
 
@@ -105,14 +105,14 @@ export class Backpack {
     if (idleMs > BREAK_COUNTS) {
       this.activeSince = null;
       this.saidTired = false;
-    } else if (this.activeSince === null && this.phase !== 'pauze') {
+    } else if (this.activeSince === null && this.phase !== 'break') {
       this.activeSince = now - idleMs;
     }
     const worked = this.activeSince === null ? 0 : now - this.activeSince;
-    const tired = settings.breaks && this.phase === 'uit' && worked > TIRED_AFTER;
+    const tired = settings.breaks && this.phase === 'off' && worked > TIRED_AFTER;
     if (tired && !this.saidTired && worked > TIRED_AFTER + TIRED_SAYS) {
       this.saidTired = true;
-      this.pending = { key: 'moe' };
+      this.pending = { key: 'tired' };
     }
 
     // Water, never in the middle of a focus round, and only when someone is there to drink it.
@@ -128,7 +128,7 @@ export class Backpack {
     const say = this.pending;
     this.pending = undefined;
     let item: string | undefined;
-    if (this.phase === 'focus') item = 'boek';
+    if (this.phase === 'focus') item = 'book';
     else if (this.waterUntil !== null) item = 'water';
     return {
       item,
@@ -138,8 +138,8 @@ export class Backpack {
       trayTitle:
         this.phase === 'focus'
           ? clock(this.phaseEnd - now)
-          : this.phase === 'pauze'
-            ? `Pauze ${clock(this.phaseEnd - now)}`
+          : this.phase === 'break'
+            ? `Break ${clock(this.phaseEnd - now)}`
             : null,
     };
   }

@@ -141,7 +141,7 @@ export class Brain {
     const dx = win.x - this.standAt.x;
     this.standAt = { x: win.x, y: win.y };
     if (Math.abs(dx) > SHAKE) {
-      this.say('uitroep', 0.8);
+      this.say('exclaim', 0.8);
       return this.drop(clamp(dx * 20, -1500, 1500), -200);
     }
     this.x += dx;
@@ -168,23 +168,23 @@ export class Brain {
         }
         // Someone is coming to it, maybe with a file: stop and wait.
         const waiting = !!input.dragging || this.near(input);
-        if (input.dragging && !this.wasDragging && this.near(input, 260)) this.say('uitroep', 0.8);
+        if (input.dragging && !this.wasDragging && this.near(input, 260)) this.say('exclaim', 0.8);
         this.wasDragging = !!input.dragging;
         if (waiting) {
           if (this.mode === 'walk') this.setMode('idle', 1);
           this.followAt = null;
           break;
         }
-        if (this.context === 'muziek' && this.time > this.nextNoteAt) {
-          this.say('noot', 1);
+        if (this.context === 'music' && this.time > this.nextNoteAt) {
+          this.say('note', 1);
           this.nextNoteAt = this.time + this.between(3, 6);
         }
         if (this.sweaty && this.time > this.nextSweatAt) {
-          this.say('zweet', 1.2);
+          this.say('sweat', 1.2);
           this.nextSweatAt = this.time + this.between(6, 10);
         }
         if (this.tired && this.time > this.nextYawnAt) {
-          this.say('slaap', 1.2);
+          this.say('zzz', 1.2);
           this.nextYawnAt = this.time + this.between(8, 15);
         }
         if (this.followAt !== null && this.time >= this.followAt) {
@@ -200,7 +200,7 @@ export class Brain {
       case 'sleep':
         if (input.idleMs < 400) {
           this.setMode('idle', this.between(2, 4));
-          this.say('uitroep', 0.9);
+          this.say('exclaim', 0.9);
           this.hop();
         }
         break;
@@ -210,7 +210,7 @@ export class Brain {
       case 'land':
         if (this.elapsed() > 0.2) {
           this.setMode('idle', this.between(1.5, 3));
-          if (this.impact > 1500) this.say('vraag', 1.4);
+          if (this.impact > 1500) this.say('question', 1.4);
         }
         break;
       case 'drag':
@@ -225,7 +225,7 @@ export class Brain {
     this.grabDx = this.x - px;
     this.grabDy = this.y - py;
     this.trail = [{ x: px, y: py, t }];
-    this.say('uitroep', 0.7);
+    this.say('exclaim', 0.7);
   }
 
   dragTo(px: number, py: number, t: number): void {
@@ -258,7 +258,7 @@ export class Brain {
   /** A click without dragging. */
   pet(): void {
     if (this.mode === 'sleep') this.setMode('idle', 3);
-    this.say('hart', 1.1);
+    this.say('heart', 1.1);
     this.hop();
   }
 
@@ -301,7 +301,7 @@ export class Brain {
         break;
       case 'idle':
         if (this.tired) frame = Math.floor(t / 0.9) % 2 ? 'B' : 'A'; // slow, heavy breathing
-        if (this.context === 'muziek') frame = Math.floor(t / 0.3) % 2 ? 'B' : 'A'; // bobbing along
+        if (this.context === 'music') frame = Math.floor(t / 0.3) % 2 ? 'B' : 'A'; // bobbing along
         if (input.cursor && this.context !== 'video') {
           const dx = input.cursor.x - this.x;
           if (Math.abs(dx) > 60) faceDx = Math.sign(dx);
@@ -312,7 +312,7 @@ export class Brain {
     let emote = t < this.emoteUntil ? this.emote : null;
     let emoteRise = emote ? Math.min(3, Math.floor((t - this.emoteStart) / 0.25)) : 0;
     if (this.mode === 'sleep' && !emote) {
-      emote = 'slaap';
+      emote = 'zzz';
       emoteRise = Math.floor(t / 0.5) % 4;
     }
 

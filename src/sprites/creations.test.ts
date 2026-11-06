@@ -3,14 +3,14 @@ import { isEmpty, toAccessory, type Creation } from './creations.ts';
 import { SPECIES, catalog, render, setCreations } from './index.ts';
 
 const hat: Creation = {
-  id: 'eigen-1',
-  name: 'Mijn pet',
-  slot: 'hoed',
+  id: 'custom-1',
+  name: 'My cap',
+  slot: 'hat',
   outline: true,
   rows: ['............', '....rrrr....', '...rrrrrr...', '..rrrrrrrrr.', '............', '............'],
 };
-const held: Creation = { id: 'eigen-2', name: 'Bloem', slot: 'hand', outline: true, rows: ['.mm.', 'mymm', '.mm.', '.g..', '.g..'] };
-const shades: Creation = { id: 'eigen-3', name: 'Masker', slot: 'gezicht', outline: false, rows: ['nnnnnnnnnnnn', 'n..nnnnnn..n'] };
+const held: Creation = { id: 'custom-2', name: 'Flower', slot: 'hand', outline: true, rows: ['.mm.', 'mymm', '.mm.', '.g..', '.g..'] };
+const shades: Creation = { id: 'custom-3', name: 'Mask', slot: 'face', outline: false, rows: ['nnnnnnnnnnnn', 'n..nnnnnn..n'] };
 
 afterEach(() => setCreations([]));
 
@@ -24,7 +24,7 @@ describe('creations', () => {
 
   it('shows up in the menu and on every species, in every slot', () => {
     setCreations([hat, held, shades]);
-    expect(catalog().accessories.map((a) => a.name)).toEqual(expect.arrayContaining(['Mijn pet', 'Bloem', 'Masker']));
+    expect(catalog().accessories.map((a) => a.name)).toEqual(expect.arrayContaining(['My cap', 'Flower', 'Mask']));
     for (const sp of SPECIES) {
       for (const c of [hat, held, shades]) {
         const plain = render(sp.id).pixels.flat().join();
@@ -37,16 +37,16 @@ describe('creations', () => {
 
   it('is forgotten when deleted, without breaking the buddy that wore it', () => {
     setCreations([hat]);
-    const worn = render('paddo', { accessory: hat.id }).pixels.flat().join();
+    const worn = render('shroom', { accessory: hat.id }).pixels.flat().join();
     setCreations([]);
-    expect(render('paddo', { accessory: hat.id }).pixels.flat().join()).not.toBe(worn);
+    expect(render('shroom', { accessory: hat.id }).pixels.flat().join()).not.toBe(worn);
     expect(catalog().accessories.map((a) => a.id)).not.toContain(hat.id);
   });
 
   it('centres a home-made hat on the head', () => {
     setCreations([{ ...hat, rows: ['....rrrr....'] }]);
-    const top = render('robotje', { accessory: hat.id }).pixels.findIndex((row) => row.includes('#e8454f'));
-    const row = render('robotje', { accessory: hat.id }).pixels[top];
+    const top = render('robot', { accessory: hat.id }).pixels.findIndex((row) => row.includes('#e8454f'));
+    const row = render('robot', { accessory: hat.id }).pixels[top];
     const xs = row.map((c, x) => (c === '#e8454f' ? x : -1)).filter((x) => x >= 0);
     expect((xs[0] + xs[xs.length - 1]) / 2).toBe(15.5);
   });

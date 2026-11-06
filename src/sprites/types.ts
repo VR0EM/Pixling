@@ -56,9 +56,9 @@ export interface Accessory {
 }
 
 export interface RenderOptions {
-  /** Palette id; leave out (or 'eigen') for the species' own colours. */
+  /** Palette id; leave out (or 'default') for the species' own colours. */
   palette?: string;
-  /** Accessory id; leave out (or 'geen') for none. */
+  /** Accessory id; leave out (or 'none') for none. */
   accessory?: string;
   /** Breathing frame: B is the "exhale" pose. */
   frame?: 'A' | 'B';

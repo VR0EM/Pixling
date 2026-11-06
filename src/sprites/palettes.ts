@@ -1,14 +1,14 @@
 import type { Palette } from './types.ts';
 
 export const PALETTES: Record<string, Palette> = {
-  rood: { name: 'Rood', o: '#5a1a22', b: '#e8524f', s: '#b83a3e', h: '#ff8f80', a: '#fbe9d0', c: '#ff9fb0' },
+  red: { name: 'Red', o: '#5a1a22', b: '#e8524f', s: '#b83a3e', h: '#ff8f80', a: '#fbe9d0', c: '#ff9fb0' },
   terracotta: { name: 'Terracotta', o: '#4a2416', b: '#cd7a52', s: '#a75a38', h: '#e7a07c', a: '#f2c9a8', c: '#e5858a' },
-  gember: { name: 'Gember', o: '#4a2414', b: '#e8964a', s: '#bf6a2e', h: '#f6c48c', a: '#fbe6cc', c: '#e5858a' },
-  zand: { name: 'Zand', o: '#3b2e25', b: '#b8a084', s: '#8f7860', h: '#d9c7b2', a: '#f4ede4', c: '#d98b8b' },
-  mos: { name: 'Mos', o: '#1d3524', b: '#6dab5c', s: '#478244', h: '#9dd07e', a: '#ece0a0', c: '#d98b8b' },
-  spookwit: { name: 'Spookwit', o: '#4a5180', b: '#f2f5ff', s: '#c8d1ef', h: '#ffffff', a: '#ffd6e5', c: '#ffb0c6' },
-  hemel: { name: 'Hemel', o: '#21406b', b: '#a0d4ff', s: '#68a7e6', h: '#e8f5ff', a: '#ffe08a', c: '#ff9fb8' },
-  houtskool: { name: 'Houtskool', o: '#15161c', b: '#5d5f6c', s: '#43454f', h: '#868896', a: '#a9abb8', c: '#ff8fa3', e: '#ffe27a' },
+  ginger: { name: 'Ginger', o: '#4a2414', b: '#e8964a', s: '#bf6a2e', h: '#f6c48c', a: '#fbe6cc', c: '#e5858a' },
+  sand: { name: 'Sand', o: '#3b2e25', b: '#b8a084', s: '#8f7860', h: '#d9c7b2', a: '#f4ede4', c: '#d98b8b' },
+  moss: { name: 'Moss', o: '#1d3524', b: '#6dab5c', s: '#478244', h: '#9dd07e', a: '#ece0a0', c: '#d98b8b' },
+  snow: { name: 'Snow', o: '#4a5180', b: '#f2f5ff', s: '#c8d1ef', h: '#ffffff', a: '#ffd6e5', c: '#ffb0c6' },
+  sky: { name: 'Sky', o: '#21406b', b: '#a0d4ff', s: '#68a7e6', h: '#e8f5ff', a: '#ffe08a', c: '#ff9fb8' },
+  charcoal: { name: 'Charcoal', o: '#15161c', b: '#5d5f6c', s: '#43454f', h: '#868896', a: '#a9abb8', c: '#ff8fa3', e: '#ffe27a' },
 };
 
 /** Colours that never change with the palette: eyes, leaves, hats, the robot's screen. */

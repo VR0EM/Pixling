@@ -2,13 +2,13 @@ import { grid, stamp } from '../grid.ts';
 import { bodyMask, frameParams } from '../body.ts';
 import type { Species } from '../types.ts';
 
-export const spookje: Species = {
-  id: 'spookje',
-  name: 'Spookje',
-  palette: 'spookwit',
+export const ghost: Species = {
+  id: 'ghost',
+  name: 'Ghost',
+  palette: 'snow',
   floats: true,
   build(o) {
-    const f = frameParams('spook', o.frame);
+    const f = frameParams('ghost', o.frame);
     const d = f.d;
     const fx = o.faceDx ?? 0;
 
@@ -23,7 +23,7 @@ export const spookje: Species = {
 
     return {
       layers: [
-        [bodyMask('spook', f, o.tick ?? 0), 'o'],
+        [bodyMask('ghost', f, o.tick ?? 0), 'o'],
         [face, null],
       ],
       hat: [13, 10 + d],

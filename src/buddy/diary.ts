@@ -2,18 +2,18 @@ import type { Character } from './voice.ts';
 
 /** What happened on one day; the diary turns it into a sentence. */
 export interface DayStats {
-  aai: number;
-  gegooid: number;
+  pets: number;
+  throws: number;
   focus: number;
   water: number;
-  notities: number;
-  bestanden: number;
-  vensters: number;
+  notes: number;
+  files: number;
+  climbs: number;
 }
 
 export interface DiaryDay extends DayStats {
   /** The sentence, written once the day is over. */
-  zin?: string;
+  sentence?: string;
 }
 
 /** Stored in diary.json: one entry per day, keyed by date (YYYY-MM-DD). */
@@ -21,7 +21,7 @@ export interface Diary {
   days: Record<string, DiaryDay>;
 }
 
-export const emptyDay = (): DiaryDay => ({ aai: 0, gegooid: 0, focus: 0, water: 0, notities: 0, bestanden: 0, vensters: 0 });
+export const emptyDay = (): DiaryDay => ({ pets: 0, throws: 0, focus: 0, water: 0, notes: 0, files: 0, climbs: 0 });
 
 /** Local date as YYYY-MM-DD. */
 export function dayKey(date: Date): string {
@@ -36,17 +36,18 @@ export function daysTogether(metOn: string, today: string): number {
 }
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const times = (n: number) => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`);
 
 /** The day in a few words, most remarkable things first, at most three of them. */
 function facts(s: DayStats): string[] {
   const all: [number, string][] = [
-    [s.focus * 3, plural(s.focus, 'focusronde', 'focusrondes')],
-    [s.bestanden * 2, `${plural(s.bestanden, 'bestand', 'bestanden')} opgegeten`],
-    [s.notities * 2, plural(s.notities, 'notitie', 'notities')],
-    [s.water * 2, `${s.water}× water`],
-    [s.vensters, `${s.vensters}× op een venster geklommen`],
-    [s.gegooid, `${s.gegooid}× door de lucht gevlogen`],
-    [s.aai * 0.5, `${s.aai}× geaaid`],
+    [s.focus * 3, plural(s.focus, 'focus round', 'focus rounds')],
+    [s.files * 2, `${plural(s.files, 'file', 'files')} eaten`],
+    [s.notes * 2, plural(s.notes, 'note', 'notes')],
+    [s.water * 2, `water ${times(s.water)}`],
+    [s.climbs, `climbed a window ${times(s.climbs)}`],
+    [s.throws, `flew through the air ${times(s.throws)}`],
+    [s.pets * 0.5, `petted ${times(s.pets)}`],
   ];
   return all
     .filter(([weight]) => weight > 0)
@@ -55,24 +56,24 @@ function facts(s: DayStats): string[] {
     .map(([, text]) => text);
 }
 
-const join = (parts: string[]) => (parts.length < 2 ? parts.join('') : `${parts.slice(0, -1).join(', ')} en ${parts[parts.length - 1]}`);
+const join = (parts: string[]) => (parts.length < 2 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
 
 /** One sentence about the day, in the buddy's character. */
 export function sentence(stats: DayStats, character: Character): string {
   const list = facts(stats);
   if (list.length === 0) {
     return {
-      lief: 'Een stille dag samen. Ook gezellig.',
-      druk: 'Er gebeurde NIKS vandaag. Saai!',
-      rustig: 'Een rustige dag. Fijn zo.',
-      brutaal: 'Je liet me de hele dag links liggen.',
+      sweet: 'A quiet day together. Cosy too.',
+      hyper: 'NOTHING happened today. Boring!',
+      calm: 'A calm day. Good.',
+      cheeky: 'You ignored me all day.',
     }[character];
   }
   const what = join(list);
   return {
-    lief: `Vandaag: ${what}. Wat een fijne dag!`,
-    druk: `Wat een dag! ${what}! Morgen nog meer!`,
-    rustig: `Vandaag ${what}.`,
-    brutaal: `${what[0].toUpperCase()}${what.slice(1)}. En ik kreeg niet eens een koekje.`,
+    sweet: `Today: ${what}. What a lovely day!`,
+    hyper: `What a day! ${what}! More tomorrow!`,
+    calm: `Today: ${what}.`,
+    cheeky: `${what[0].toUpperCase()}${what.slice(1)}. And I didn’t even get a cookie.`,
   }[character];
 }

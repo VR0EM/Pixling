@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Pixling: een klein pixelmaatje dat op je bureaublad woont.",
+  "description": "Pixling: a little pixel buddy that lives on your desktop.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

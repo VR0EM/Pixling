@@ -1,24 +1,24 @@
 import type { Accessory } from './types.ts';
 
 export const ACCESSORIES: Record<string, Accessory> = {
-  feesthoed: {
-    name: 'Feesthoedje',
+  partyhat: {
+    name: 'Party hat',
     hat: true,
     rows: ['..yy..', '..yy..', '..mm..', '..tt..', '.mmmm.', '.tttt.', 'mmmmmm', 'tttttt'],
   },
-  kroon: {
-    name: 'Kroontje',
+  crown: {
+    name: 'Crown',
     hat: true,
     rows: ['y.yy.y', 'yyyyyy', 'yyrryy', 'YYYYYY'],
   },
-  strikje: {
-    name: 'Strikje',
+  bow: {
+    name: 'Bow',
     hat: true,
     centered: true,
     rows: ['mm...mm', 'mmm.mmm', 'mmmMmmm', 'mmm.mmm', 'mm...mm'],
   },
-  wintermuts: {
-    name: 'Wintermuts',
+  beanie: {
+    name: 'Beanie',
     hat: true,
     centered: true,
     rows: [
@@ -32,18 +32,18 @@ export const ACCESSORIES: Record<string, Accessory> = {
       'RrRrRrRrRrRrRr',
     ],
   },
-  slaapmuts: {
-    name: 'Slaapmuts',
+  nightcap: {
+    name: 'Nightcap',
     hat: true,
     hidden: true,
     rows: ['.......w', '.....uuw', '...uuuu.', '.uuuuu..', 'uuuuuu..', 'wwwwww..'],
   },
-  zonnebril: {
-    name: 'Zonnebril',
+  sunglasses: {
+    name: 'Sunglasses',
     face: true,
     noOutline: true,
     rows: ['nnnnnnnnnnnn', 'nwnnn..nwnnn', '.nnn....nnn.'],
     // The robot's face is a screen, so its shades light up on it instead.
-    variants: { robotje: { at: [10, 17], rows: ['qqqqqqqqqqqq', 'qwnnq..qwnnq', '.qqq....qqq.'] } },
+    variants: { robot: { at: [10, 17], rows: ['qqqqqqqqqqqq', 'qwnnq..qwnnq', '.qqq....qqq.'] } },
   },
 };

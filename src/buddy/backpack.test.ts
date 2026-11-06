@@ -9,7 +9,7 @@ describe('Backpack', () => {
     const bp = new Backpack(0);
     bp.startFocus(0, settings);
     let a = bp.update(0, 0, settings);
-    expect(a.item).toBe('boek');
+    expect(a.item).toBe('book');
     expect(a.stayPut).toBe(true);
     expect(a.say).toEqual({ key: 'focusStart', vars: { min: 25 } });
     expect(a.trayTitle).toBe('25:00');
@@ -17,12 +17,12 @@ describe('Backpack', () => {
     expect(a.trayTitle).toBe('14:30');
     expect(a.say).toBeUndefined();
     a = bp.update(25 * MIN, 0, settings);
-    expect(bp.phase).toBe('pauze');
+    expect(bp.phase).toBe('break');
     expect(a.item).toBeUndefined();
-    expect(a.say?.key).toBe('pauze');
-    expect(a.trayTitle).toBe('Pauze 5:00');
+    expect(a.say?.key).toBe('breakStart');
+    expect(a.trayTitle).toBe('Break 5:00');
     a = bp.update(30 * MIN, 0, settings);
-    expect(bp.phase).toBe('uit');
+    expect(bp.phase).toBe('off');
     expect(a.trayTitle).toBeNull();
   });
 
@@ -42,13 +42,13 @@ describe('Backpack', () => {
     expect(bp.answer(WATER_EVERY + 1000)).toBe(true);
     const b = bp.update(WATER_EVERY + 1000, 0, settings);
     expect(b.item).toBeUndefined();
-    expect(b.say?.key).toBe('proost');
+    expect(b.say?.key).toBe('cheers');
   });
 
   it('waits with water until a focus round is over, and skips it when nobody is there', () => {
     const bp = new Backpack(0);
     bp.startFocus(WATER_EVERY - 1, settings);
-    expect(bp.update(WATER_EVERY + MIN, 0, settings).item).toBe('boek');
+    expect(bp.update(WATER_EVERY + MIN, 0, settings).item).toBe('book');
     bp.stopFocus();
     expect(bp.update(WATER_EVERY + 2 * MIN, 10 * MIN, settings).item).toBeUndefined();
     expect(bp.update(WATER_EVERY + 3 * MIN, 0, settings).item).toBe('water');
@@ -61,7 +61,7 @@ describe('Backpack', () => {
     expect(a.tired).toBe(true);
     expect(a.say).toBeUndefined();
     a = bp.update(TIRED_AFTER + 6 * MIN, 1000, { ...settings, water: false });
-    expect(a.say?.key).toBe('moe');
+    expect(a.say?.key).toBe('tired');
     a = bp.update(TIRED_AFTER + 20 * MIN, BREAK_COUNTS + 1, { ...settings, water: false });
     expect(a.tired).toBe(false);
   });

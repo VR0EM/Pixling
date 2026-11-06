@@ -27,12 +27,12 @@ export class SystemWatch {
     const low = level !== null && !info.charging && level <= 20;
 
     if (level !== null && !info.charging) {
-      if (level <= 10 && this.warned > 10) say = { key: 'batterij10', vars: { pct: level } };
-      else if (level <= 20 && this.warned > 20) say = { key: 'batterij20', vars: { pct: level } };
+      if (level <= 10 && this.warned > 10) say = { key: 'battery10', vars: { pct: level } };
+      else if (level <= 20 && this.warned > 20) say = { key: 'battery20', vars: { pct: level } };
       if (level <= 20) this.warned = Math.min(this.warned, level <= 10 ? 10 : 20);
     }
     if (info.charging || (level !== null && level > 25)) this.warned = 100;
-    if (this.wasCharging === false && info.charging && level !== null && level <= 50) say = { key: 'stroom' };
+    if (this.wasCharging === false && info.charging && level !== null && level <= 50) say = { key: 'charging' };
     this.wasCharging = info.charging;
 
     return { say, tired: low, sweaty: info.busy };

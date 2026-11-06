@@ -6,10 +6,10 @@ describe('SystemWatch', () => {
     const w = new SystemWatch();
     expect(w.react({ battery: 50, charging: false, busy: false }, true).say).toBeUndefined();
     const at20 = w.react({ battery: 19, charging: false, busy: false }, true);
-    expect(at20.say).toEqual({ key: 'batterij20', vars: { pct: 19 } });
+    expect(at20.say).toEqual({ key: 'battery20', vars: { pct: 19 } });
     expect(at20.tired).toBe(true);
     expect(w.react({ battery: 15, charging: false, busy: false }, true).say).toBeUndefined();
-    expect(w.react({ battery: 9, charging: false, busy: false }, true).say).toEqual({ key: 'batterij10', vars: { pct: 9 } });
+    expect(w.react({ battery: 9, charging: false, busy: false }, true).say).toEqual({ key: 'battery10', vars: { pct: 9 } });
     expect(w.react({ battery: 8, charging: false, busy: false }, true).say).toBeUndefined();
   });
 
@@ -17,10 +17,10 @@ describe('SystemWatch', () => {
     const w = new SystemWatch();
     w.react({ battery: 18, charging: false, busy: false }, true);
     const plugged = w.react({ battery: 18, charging: true, busy: false }, true);
-    expect(plugged.say?.key).toBe('stroom');
+    expect(plugged.say?.key).toBe('charging');
     expect(plugged.tired).toBe(false);
     w.react({ battery: 90, charging: false, busy: false }, true);
-    expect(w.react({ battery: 20, charging: false, busy: false }, true).say?.key).toBe('batterij20');
+    expect(w.react({ battery: 20, charging: false, busy: false }, true).say?.key).toBe('battery20');
   });
 
   it('sweats when the computer is busy, and stays quiet when switched off', () => {

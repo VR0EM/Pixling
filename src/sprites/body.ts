@@ -2,7 +2,7 @@ import { grid, set, stamp, H, W } from './grid.ts';
 import type { Grid } from './types.ts';
 
 /** The rounded bodies of the robot and the ghost are drawn from a formula instead of by hand. */
-export type BodyShape = 'robot' | 'spook';
+export type BodyShape = 'robot' | 'ghost';
 
 export interface FrameParams {
   cy: number;
@@ -13,7 +13,7 @@ export interface FrameParams {
 }
 
 export function frameParams(shape: BodyShape, frame: 'A' | 'B' = 'A'): FrameParams {
-  if (shape === 'spook') {
+  if (shape === 'ghost') {
     return frame === 'B' ? { cy: 18.5, ryTop: 8.5, ryBottom: 7.5, d: -1 } : { cy: 19.5, ryTop: 8.5, ryBottom: 7.5, d: 0 };
   }
   return frame === 'B' ? { cy: 20, ryTop: 8, ryBottom: 7, d: 1 } : { cy: 19.5, ryTop: 8.5, ryBottom: 7.5, d: 0 };
@@ -33,7 +33,7 @@ export function bodyMask(shape: BodyShape, f: FrameParams, tick: number): Grid {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       let fill: boolean;
-      if (shape === 'spook') {
+      if (shape === 'ghost') {
         const yy = y + 0.5 - f.cy;
         fill = yy < 0 ? inside(x, y, f, p) : x >= 7 && x <= 24 && y <= 26 + f.d;
       } else {
@@ -42,7 +42,7 @@ export function bodyMask(shape: BodyShape, f: FrameParams, tick: number): Grid {
       if (fill) m[y][x] = 'b';
     }
   }
-  if (shape === 'spook') {
+  if (shape === 'ghost') {
     // The wavy hem ripples between two positions.
     const base = 27 + f.d;
     const hem = tick % 2 ? [[7, 8], [11, 14], [17, 20], [23, 24]] : [[8, 11], [14, 17], [20, 23]];

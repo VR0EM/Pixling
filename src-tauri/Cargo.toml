@@ -1,7 +1,7 @@
 [package]
 name = "pixling"
 version = "0.1.0"
-description = "Pixling: een klein pixelmaatje dat op je bureaublad woont"
+description = "Pixling: a little pixel buddy that lives on your desktop"
 authors = ["VR0EM"]
 edition = "2021"
 

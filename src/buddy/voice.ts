@@ -3,33 +3,35 @@
  * {braces} are filled in by `line()`.
  */
 
-export type Character = 'lief' | 'druk' | 'rustig' | 'brutaal';
+export type Character = 'sweet' | 'hyper' | 'calm' | 'cheeky';
 
 export type Situation =
-  | 'groet'
-  | 'aai'
-  | 'gegooid'
-  | 'wakker'
-  | 'venster'
-  | 'genoteerd'
+  | 'greeting'
+  | 'petted'
+  | 'thrown'
+  | 'woke'
+  | 'onWindow'
+  | 'noted'
   | 'nom'
   | 'water'
-  | 'proost'
+  | 'cheers'
   | 'focusStart'
   | 'focusStop'
-  | 'pauze'
-  | 'pauzeKlaar'
-  | 'moe'
+  | 'breakStart'
+  | 'breakOver'
+  | 'tired'
   | 'snooze'
-  | 'batterij20'
-  | 'batterij10'
-  | 'stroom'
-  | 'kletsen'
-  | 'kletsenCode'
-  | 'kletsenMuziek'
-  | 'kletsenVideo'
-  | 'kletsenGame'
-  | 'kletsenNacht';
+  | 'battery20'
+  | 'battery10'
+  | 'charging'
+  | 'chat'
+  | 'chatCode'
+  | 'chatMusic'
+  | 'chatVideo'
+  | 'chatGame'
+  | 'chatNight'
+  | 'newFriend'
+  | 'newThing';
 
 /** Something to say: a situation plus the values for its placeholders. */
 export interface Line {
@@ -51,137 +53,145 @@ export interface Personality {
 }
 
 export const PERSONALITIES: Record<Character, Personality> = {
-  lief: { name: 'Lief', description: 'Zacht en bemoedigend', speed: 30, walkiness: 0.65, chatter: [8, 14], talksWhenPetted: 0.4 },
-  druk: { name: 'Druk', description: 'Rent rond en praat veel', speed: 46, walkiness: 0.85, chatter: [3, 6], talksWhenPetted: 0.7 },
-  rustig: { name: 'Rustig', description: 'Kalm, zegt weinig', speed: 20, walkiness: 0.4, chatter: [15, 25], talksWhenPetted: 0.2 },
-  brutaal: { name: 'Brutaal', description: 'Grote mond, klein hartje', speed: 32, walkiness: 0.6, chatter: [6, 11], talksWhenPetted: 0.5 },
+  sweet: { name: 'Sweet', description: 'Gentle and encouraging', speed: 30, walkiness: 0.65, chatter: [8, 14], talksWhenPetted: 0.4 },
+  hyper: { name: 'Hyper', description: 'Runs around and talks a lot', speed: 46, walkiness: 0.85, chatter: [3, 6], talksWhenPetted: 0.7 },
+  calm: { name: 'Calm', description: 'Easygoing, says little', speed: 20, walkiness: 0.4, chatter: [15, 25], talksWhenPetted: 0.2 },
+  cheeky: { name: 'Cheeky', description: 'Big mouth, soft heart', speed: 32, walkiness: 0.6, chatter: [6, 11], talksWhenPetted: 0.5 },
 };
 
 type Lines = Partial<Record<Situation, string[]>>;
 
-const LIEF: Record<Situation, string[]> = {
-  groet: ['{dagdeel}! Fijn dat je er bent.', '{dagdeel}! Ik heb je gemist.', 'Daar ben je! {dagdeel}.'],
-  aai: ['Hihi, dat kriebelt.', 'Jij bent lief.', 'Nog eens?'],
-  gegooid: ['Wieee!', 'Oei, dat ging snel!'],
-  wakker: ['Oh! Ik was even weg.', 'Ik droomde over pixels.'],
-  venster: ['Mooi uitzicht hier.', 'Hoi daarboven!'],
-  genoteerd: ['Genoteerd!', 'Staat erin!'],
-  nom: ['Nom!', 'Mmm, een bestand!'],
-  water: ['Slokje water?', 'Samen een slokje water?'],
-  proost: ['Proost!', 'Op ons!'],
-  focusStart: ['Focus! {min} minuten, ik lees wel even.', 'Jij werkt, ik lees. {min} minuten.'],
-  focusStop: ['Gestopt. Goed gedaan!'],
-  pauze: ['Pauze! Even rekken en strekken.', 'Goed gedaan! Even pauze.'],
-  pauzeKlaar: ['Pauze voorbij. Nog een ronde?'],
-  moe: ['Even pauze nemen? Ik word er moe van.'],
-  snooze: ['Oké, nog even dan.'],
-  batterij20: ['Mijn batterij raakt op... die van jou ook: {pct}%.'],
-  batterij10: ['Nog maar {pct}%! Stekker erin?'],
-  stroom: ['Mmm, stroom!'],
-  kletsen: ['Ik vind het fijn om naast je te zitten.', 'Vergeet niet te knipperen.', 'Alles goed met je?'],
-  kletsenCode: ['Je bent goed bezig!', 'Mooie code, volgens mij.'],
-  kletsenMuziek: ['Wat een plaatje!', 'Ik dans mee.'],
-  kletsenVideo: ['Spannend!', 'Mag ik ook wat popcorn?'],
-  kletsenGame: ['Jij kan dit!', 'Ik duim voor je.'],
-  kletsenNacht: ['Het is al laat, hoor.', 'Niet te lang meer, oké?'],
+const SWEET: Record<Situation, string[]> = {
+  greeting: ['{greeting}! So glad you’re here.', '{greeting}! I missed you.', 'There you are! {greeting}.'],
+  petted: ['Hehe, that tickles.', 'You’re sweet.', 'Again?'],
+  thrown: ['Wheee!', 'Whoa, that was fast!'],
+  woke: ['Oh! I drifted off.', 'I was dreaming about pixels.'],
+  onWindow: ['Nice view up here.', 'Hi down there!'],
+  noted: ['Noted!', 'Got it!'],
+  nom: ['Nom!', 'Yum, a file!'],
+  water: ['Sip of water?', 'Shall we have some water?'],
+  cheers: ['Cheers!', 'To us!'],
+  focusStart: ['Focus! {min} minutes, I’ll read a bit.', 'You work, I read. {min} minutes.'],
+  focusStop: ['Stopped. Well done!'],
+  breakStart: ['Break! Time for a stretch.', 'Well done! Take a break.'],
+  breakOver: ['Break’s over. Another round?'],
+  tired: ['Maybe take a break? I’m getting tired.'],
+  snooze: ['Okay, a little longer then.'],
+  battery20: ['My battery is running low... and so is yours: {pct}%.'],
+  battery10: ['Only {pct}% left! Plug in?'],
+  charging: ['Mmm, power!'],
+  chat: ['I like sitting next to you.', 'Don’t forget to blink.', 'Are you doing okay?'],
+  chatCode: ['You’re doing great!', 'Nice code, if you ask me.'],
+  chatMusic: ['What a tune!', 'I’m dancing along.'],
+  chatVideo: ['Exciting!', 'Can I have some popcorn too?'],
+  chatGame: ['You’ve got this!', 'Fingers crossed for you.'],
+  chatNight: ['It’s getting late, you know.', 'Not too much longer, okay?'],
+  newFriend: ['A new friend! Hi {name}!', 'Welcome, {name}!'],
+  newThing: ['Ooh, {name}! For me?', 'I got {name}!'],
 };
 
-const DRUK: Lines = {
-  groet: ['{dagdeel}!! Wat gaan we doen?', 'JAAA je bent er! {dagdeel}!', '{dagdeel}! Ik heb zó veel energie!'],
-  aai: ['Hahaha! Nog eens! Nog eens!', 'Jaaa!', 'Meer aaien!'],
-  gegooid: ['WIEEEE!', 'Nog een keer!!', 'Ik kan vliegen!'],
-  wakker: ['Wat? Wie? Ik ben wakker!', 'Ik sliep niet hoor!'],
-  venster: ['Ik ben de koning van dit venster!', 'Uitzicht! Wauw!'],
-  genoteerd: ['Opgeschreven! Snel he?', 'Genoteerd! Volgende!'],
-  nom: ['NOM NOM NOM!', 'Lekker bestand!'],
-  water: ['Water! Water! Drinken!', 'Slokje? Slokje? Slokje?'],
-  proost: ['PROOST!', 'Gezondheid! Nee wacht. Proost!'],
-  focusStart: ['Focus! {min} minuten! Ik ben heel stil! Echt!', 'Gaan! {min} minuten!'],
-  focusStop: ['Klaar?! Oké!'],
-  pauze: ['PAUZE! Springen! Rekken! Dansen!', 'Pauze! Kom, even bewegen!'],
-  pauzeKlaar: ['Nog een ronde? Ja toch?!'],
-  moe: ['Ik ben moe... en jij ook! Pauze!'],
-  snooze: ['Oké oké oké, nog eventjes!'],
-  batterij20: ['Help! Nog maar {pct}% batterij!'],
-  batterij10: ['{pct}%!!! STEKKER!!!'],
-  stroom: ['Stroom! Ik voel me SUPER!'],
-  kletsen: ['Weet je wat leuk is? Alles!', 'Zullen we iets doen?', 'Ik verveel me een heel klein beetje!'],
-  kletsenCode: ['Tik tik tik! Je bent snel!', 'Is het al af? Is het al af?'],
-  kletsenMuziek: ['DANSEN!', 'Harder! Harder!'],
-  kletsenVideo: ['Ooooh! Wat gebeurt er?!', 'Popcorn!!'],
-  kletsenGame: ['Winnen! Winnen!', 'Pas op! Achter je!'],
-  kletsenNacht: ['Het is nacht! Spannend!', 'Slapen? Nee joh!'],
+const HYPER: Lines = {
+  greeting: ['{greeting}!! What are we doing?', 'YESSS you’re here! {greeting}!', '{greeting}! I have SO much energy!'],
+  petted: ['Hahaha! Again! Again!', 'Yesss!', 'More pets!'],
+  thrown: ['WHEEEE!', 'One more time!!', 'I can fly!'],
+  woke: ['What? Who? I’m awake!', 'I wasn’t sleeping!'],
+  onWindow: ['I’m the king of this window!', 'A view! Wow!'],
+  noted: ['Written down! Fast, huh?', 'Noted! Next!'],
+  nom: ['NOM NOM NOM!', 'Tasty file!'],
+  water: ['Water! Water! Drink!', 'Sip? Sip? Sip?'],
+  cheers: ['CHEERS!', 'Bless you! No wait. Cheers!'],
+  focusStart: ['Focus! {min} minutes! I’ll be super quiet! Really!', 'Go! {min} minutes!'],
+  focusStop: ['Done?! Okay!'],
+  breakStart: ['BREAK! Jump! Stretch! Dance!', 'Break! Come on, move a bit!'],
+  breakOver: ['Another round? Right?!'],
+  tired: ['I’m tired... and so are you! Break!'],
+  snooze: ['Okay okay okay, a little longer!'],
+  battery20: ['Help! Only {pct}% battery!'],
+  battery10: ['{pct}%!!! PLUG IN!!!'],
+  charging: ['Power! I feel SUPER!'],
+  chat: ['You know what’s fun? Everything!', 'Shall we do something?', 'I’m a tiny little bit bored!'],
+  chatCode: ['Tap tap tap! You’re fast!', 'Is it done yet? Is it done yet?'],
+  chatMusic: ['DANCE!', 'Louder! Louder!'],
+  chatVideo: ['Ooooh! What’s happening?!', 'Popcorn!!'],
+  chatGame: ['Win! Win!', 'Watch out! Behind you!'],
+  chatNight: ['It’s night! Exciting!', 'Sleep? No way!'],
+  newFriend: ['NEW FRIEND! HI {name}!!'],
+  newThing: ['{name}! I LOVE IT!'],
 };
 
-const RUSTIG: Lines = {
-  groet: ['{dagdeel}.', 'Hoi. {dagdeel}.', '{dagdeel}. Rustig aan.'],
-  aai: ['Mm.', 'Fijn.', '...'],
-  gegooid: ['Oh.', 'Zo.'],
-  wakker: ['Hm? Oh, jij.', 'Ik rustte even.'],
-  venster: ['Mooi hier.', 'Rustig plekje.'],
-  genoteerd: ['Genoteerd.'],
+const CALM: Lines = {
+  greeting: ['{greeting}.', 'Hi. {greeting}.', '{greeting}. Take it easy.'],
+  petted: ['Mm.', 'Nice.', '...'],
+  thrown: ['Oh.', 'Well.'],
+  woke: ['Hm? Oh, you.', 'I was resting.'],
+  onWindow: ['Nice up here.', 'Quiet spot.'],
+  noted: ['Noted.'],
   nom: ['Nom.'],
   water: ['Water?'],
-  proost: ['Proost.'],
-  focusStart: ['{min} minuten. Ik lees.'],
-  focusStop: ['Goed.'],
-  pauze: ['Pauze. Adem even.'],
-  pauzeKlaar: ['Verder?'],
-  moe: ['Misschien even pauze.'],
-  snooze: ['Goed.'],
-  batterij20: ['Batterij: {pct}%.'],
-  batterij10: ['{pct}%. Stekker?'],
-  stroom: ['Fijn, stroom.'],
-  kletsen: ['...', 'Stil hier. Fijn.', 'Alles op zijn tijd.'],
-  kletsenCode: ['Stap voor stap.', 'Je komt er wel.'],
-  kletsenMuziek: ['Mooi nummer.'],
-  kletsenVideo: ['Hm. Spannend.'],
-  kletsenGame: ['Rustig blijven.'],
-  kletsenNacht: ['Het is laat.'],
+  cheers: ['Cheers.'],
+  focusStart: ['{min} minutes. I’ll read.'],
+  focusStop: ['Good.'],
+  breakStart: ['Break. Breathe a little.'],
+  breakOver: ['Carry on?'],
+  tired: ['Maybe a short break.'],
+  snooze: ['Fine.'],
+  battery20: ['Battery: {pct}%.'],
+  battery10: ['{pct}%. Charger?'],
+  charging: ['Good, power.'],
+  chat: ['...', 'Quiet here. Nice.', 'All in good time.'],
+  chatCode: ['Step by step.', 'You’ll get there.'],
+  chatMusic: ['Nice song.'],
+  chatVideo: ['Hm. Exciting.'],
+  chatGame: ['Stay calm.'],
+  chatNight: ['It’s late.'],
+  newFriend: ['Hello, {name}.'],
+  newThing: ['{name}. Nice.'],
 };
 
-const BRUTAAL: Lines = {
-  groet: ['{dagdeel}. Je bent laat.', 'Ah, daar ben je eindelijk. {dagdeel}.', '{dagdeel}! Wat heb je voor me meegebracht?'],
-  aai: ['Ja ja, ik weet dat ik schattig ben.', 'Oké, nog één keer. Meer niet.', 'Pff. Ga maar door.'],
-  gegooid: ['Hé! Voorzichtig!', 'Wat was DAT?!', 'Ik zie je wel, hoor.'],
-  wakker: ['Ik sliep niet. Ik dacht na.', 'Moest dat nou?'],
-  venster: ['Ik zit hier hoger dan jij.', 'Dit venster is nu van mij.'],
-  genoteerd: ['Genoteerd. Vergeet het nu niet weer.', 'Staat erin. Graag gedaan.'],
-  nom: ['Nom. Kon wel wat meer saus op.', 'Nom! Wat is dit, een rapport?'],
-  water: ['Drink eens wat. Je ziet er droog uit.', 'Water. Nu. Toe maar.'],
-  proost: ['Proost. Was dat nou zo moeilijk?'],
-  focusStart: ['{min} minuten focus. Niet stiekem scrollen.', 'Ik hou je in de gaten. {min} minuten.'],
-  focusStop: ['Nu al opgeven? Oké dan.'],
-  pauze: ['Pauze. Sta op, je zit krom.', 'Pauze! En niet op je telefoon.'],
-  pauzeKlaar: ['Pauze voorbij. Aan de slag.'],
-  moe: ['Jij moet echt even pauze nemen. Ik zie het.'],
-  snooze: ['Prima. Maar ik zei het wel.'],
-  batterij20: ['{pct}%. Zoek eens een stopcontact.'],
-  batterij10: ['{pct}%! Ik ga zo dood, weet je dat?'],
-  stroom: ['Eindelijk. Stroom.'],
-  kletsen: ['Verveel je je ook zo?', 'Ik zou dit anders doen.', 'Wanneer krijg ik eigenlijk een koekje?'],
-  kletsenCode: ['Weer een bug? Typisch.', 'Heb je dat al getest? Ik dacht het niet.'],
-  kletsenMuziek: ['Dit nummer weer?', 'Oké, deze is goed. Toegegeven.'],
-  kletsenVideo: ['Nog één aflevering, zeker?'],
-  kletsenGame: ['Dat kon beter.', 'Ik had hem al lang verslagen.'],
-  kletsenNacht: ['Ga slapen. Serieus.', 'Morgen ben je moe. Zeg ik alvast.'],
+const CHEEKY: Lines = {
+  greeting: ['{greeting}. You’re late.', 'Ah, there you are at last. {greeting}.', '{greeting}! What did you bring me?'],
+  petted: ['Yes yes, I know I’m cute.', 'Okay, one more. That’s it.', 'Pff. Fine, keep going.'],
+  thrown: ['Hey! Careful!', 'What was THAT?!', 'I saw that, you know.'],
+  woke: ['I wasn’t sleeping. I was thinking.', 'Was that really necessary?'],
+  onWindow: ['I’m higher up than you now.', 'This window is mine now.'],
+  noted: ['Noted. Don’t forget it again.', 'Written down. You’re welcome.'],
+  nom: ['Nom. Could use more sauce.', 'Nom! What is this, a report?'],
+  water: ['Drink something. You look dry.', 'Water. Now. Go on.'],
+  cheers: ['Cheers. Was that so hard?'],
+  focusStart: ['{min} minutes of focus. No sneaky scrolling.', 'I’m watching you. {min} minutes.'],
+  focusStop: ['Giving up already? Fine.'],
+  breakStart: ['Break. Stand up, you’re all hunched.', 'Break! And not on your phone.'],
+  breakOver: ['Break’s over. Back to work.'],
+  tired: ['You really need a break. I can tell.'],
+  snooze: ['Fine. But I did tell you.'],
+  battery20: ['{pct}%. Go find a socket.'],
+  battery10: ['{pct}%! I’m about to die, you know?'],
+  charging: ['Finally. Power.'],
+  chat: ['Are you bored too?', 'I’d do this differently.', 'When do I get a cookie, anyway?'],
+  chatCode: ['Another bug? Typical.', 'Did you test that? Didn’t think so.'],
+  chatMusic: ['This song again?', 'Okay, this one’s good. I admit it.'],
+  chatVideo: ['Just one more episode, right?'],
+  chatGame: ['Could be better.', 'I’d have beaten him ages ago.'],
+  chatNight: ['Go to sleep. Seriously.', 'You’ll be tired tomorrow. Just saying.'],
+  newFriend: ['Who’s {name}? Fine, they can stay.'],
+  newThing: ['{name}? It suits me, obviously.'],
 };
 
-const VOICES: Record<Character, Lines> = { lief: LIEF, druk: DRUK, rustig: RUSTIG, brutaal: BRUTAAL };
+const VOICES: Record<Character, Lines> = { sweet: SWEET, hyper: HYPER, calm: CALM, cheeky: CHEEKY };
 
 /** The greeting for this time of day. */
-export function dagdeel(date: Date): string {
+export function greetingFor(date: Date): string {
   const h = date.getHours();
-  if (h < 6) return 'Hallo nachtuil';
-  if (h < 12) return 'Goedemorgen';
-  if (h < 18) return 'Goedemiddag';
-  return 'Goedenavond';
+  if (h < 6) return 'Hello night owl';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
-/** Picks something to say. Missing lines fall back to the 'lief' voice, which has them all. */
+/** Picks something to say. Missing lines fall back to the sweet voice, which has them all. */
 export function line(character: Character, { key, vars = {} }: Line, random: () => number = Math.random): string {
-  const options = VOICES[character]?.[key] ?? LIEF[key];
-  const text = options[Math.floor(random() * options.length)] ?? LIEF[key][0];
+  const options = VOICES[character]?.[key] ?? SWEET[key];
+  const text = options[Math.floor(random() * options.length)] ?? SWEET[key][0];
   return text.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? ''));
 }
 

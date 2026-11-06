@@ -18,7 +18,7 @@ for (let y = inset; y < SIZE - inset; y++) {
   const x0 = Math.ceil(inset + dx);
   icon.fill(x0, y, SIZE - 2 * x0, 1, '#fdf0d5');
 }
-const robot = render('robotje', { palette: 'hemel' });
+const robot = render('robot', { palette: 'sky' });
 const scale = 24;
 const { x0, y0, x1, y1 } = robot.box;
 const left = Math.round(SIZE / 2 - ((x0 + x1 + 1) / 2) * scale);

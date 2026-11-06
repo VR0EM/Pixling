@@ -126,6 +126,19 @@ button[aria-pressed='true'] {
   height: 64px;
 }
 
+.card.new {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.card.new .plus {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  font: 500 28px/1 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+}
+
 .swatches,
 .pills {
   display: flex;

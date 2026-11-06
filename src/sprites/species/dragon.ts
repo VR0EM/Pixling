@@ -34,10 +34,10 @@ const WING = ['b......', 'bb.....', 'bsb....', 'bssb...', 'bsssbb.', 'bssssbb', 
 const TAIL = ['......aa.', '.....aaaa', '......aa.', '.....bb..', '..bbbb...', 'bbbb.....'];
 
 /** A baby dragon: a big round head with little horns, folded wings and a curled tail. */
-export const draakje: Species = {
-  id: 'draakje',
-  name: 'Draakje',
-  palette: 'mos',
+export const dragon: Species = {
+  id: 'dragon',
+  name: 'Dragon',
+  palette: 'moss',
   build(o) {
     const d = o.frame === 'B' ? 1 : 0;
     const fx = o.faceDx ?? 0;

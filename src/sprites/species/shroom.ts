@@ -41,10 +41,10 @@ const STEM = [
 ];
 
 /** A mushroom: a spotted cap on top, a little face on its cream stem. The palette colours the cap. */
-export const paddo: Species = {
-  id: 'paddo',
-  name: 'Paddo',
-  palette: 'rood',
+export const shroom: Species = {
+  id: 'shroom',
+  name: 'Shroom',
+  palette: 'red',
   build(o) {
     const d = o.frame === 'B' ? 1 : 0;
     const fx = o.faceDx ?? 0;
@@ -59,13 +59,14 @@ export const paddo: Species = {
     stamp(cap, 3, 6 + d, CAP);
     for (const [x, y, rows] of SPOTS) stamp(cap, x, y + d, rows);
 
+    // The face sits on the cream stem, so it stays dark in every palette (charcoal has yellow eyes).
     for (const x of [12 + fx, 18 + fx]) {
-      if (o.blink) stamp(face, x, 19 + d, ['ee']);
-      else stamp(face, x, 17 + d, ['we', 'ee', 'ee']);
+      if (o.blink) stamp(face, x, 19 + d, ['nn']);
+      else stamp(face, x, 17 + d, ['wn', 'nn', 'nn']);
     }
     set(face, 11 + fx, 20 + d, 'c');
     set(face, 20 + fx, 20 + d, 'c');
-    stamp(face, 14 + fx, 20 + d, ['e..e', '.ee.']);
+    stamp(face, 14 + fx, 20 + d, ['n..n', '.nn.']);
 
     return {
       layers: [

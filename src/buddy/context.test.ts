@@ -6,8 +6,8 @@ describe('contextFor', () => {
     expect(contextFor({ bundleId: 'com.microsoft.VSCode', name: 'Code' })).toBe('code');
     expect(contextFor({ bundleId: 'com.apple.Terminal', name: 'Terminal' })).toBe('code');
     expect(contextFor({ bundleId: 'com.example.ide', name: 'Antigravity' })).toBe('code');
-    expect(contextFor({ bundleId: 'com.spotify.client', name: 'Spotify' })).toBe('muziek');
-    expect(contextFor({ bundleId: 'com.apple.Music', name: 'Muziek' })).toBe('muziek');
+    expect(contextFor({ bundleId: 'com.spotify.client', name: 'Spotify' })).toBe('music');
+    expect(contextFor({ bundleId: 'com.apple.Music', name: 'Muziek' })).toBe('music');
     expect(contextFor({ bundleId: 'com.apple.TV', name: 'TV' })).toBe('video');
     expect(contextFor({ bundleId: 'com.stremio.stremio-shell-macos', name: 'Stremio' })).toBe('video');
     expect(contextFor({ bundleId: 'com.valvesoftware.steam', name: 'Steam' })).toBe('game');
@@ -20,6 +20,6 @@ describe('contextFor', () => {
   });
 
   it('has an item for every context', () => {
-    expect(Object.keys(ITEM_FOR).sort()).toEqual(['code', 'game', 'muziek', 'video']);
+    expect(Object.keys(ITEM_FOR).sort()).toEqual(['code', 'game', 'music', 'video']);
   });
 });

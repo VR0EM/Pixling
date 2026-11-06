@@ -24,7 +24,7 @@ pub fn load(app: &AppHandle) -> Vec<Note> {
 }
 
 pub fn save(app: &AppHandle, notes: &[Note]) -> io::Result<()> {
-    let path = path(app).ok_or_else(|| io::Error::other("geen map voor notities"))?;
+    let path = path(app).ok_or_else(|| io::Error::other("no folder for notes"))?;
     if let Some(dir) = path.parent() {
         fs::create_dir_all(dir)?;
     }

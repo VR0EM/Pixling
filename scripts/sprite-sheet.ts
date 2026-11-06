@@ -1,7 +1,8 @@
 // Renders every buddy in a few poses to a PNG, so the pixel art can be checked without starting the app.
 // Usage: node scripts/sprite-sheet.ts <out.png> [scale]
-import { writeFileSync } from 'node:fs';
-import { PALETTES, SPECIES, render, type RenderOptions } from '../src/sprites/index.ts';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { parsePixling, TEMPLATE } from '../src/sprites/format.ts';
+import { PALETTES, SPECIES, render, setCreations, type Creation, type RenderOptions } from '../src/sprites/index.ts';
 import { Canvas } from './png.ts';
 
 const out = process.argv[2] ?? 'docs/sprites.png';
@@ -13,24 +14,33 @@ const poses: RenderOptions[] = [
   { blink: true },
   { walk: 0, faceDx: -1 },
   { walk: 2, faceDx: 1, tick: 3 },
-  { accessory: 'feesthoed' },
-  { accessory: 'kroon' },
-  { accessory: 'strikje' },
-  { accessory: 'wintermuts' },
-  { accessory: 'zonnebril' },
-  { palette: 'houtskool' },
+  { accessory: 'partyhat' },
+  { accessory: 'crown' },
+  { accessory: 'bow' },
+  { accessory: 'beanie' },
+  { accessory: 'sunglasses' },
+  { palette: 'charcoal' },
   { item: 'laptop' },
-  { item: 'koptelefoon' },
-  { item: 'koptelefoon', accessory: 'kroon', frame: 'B' },
+  { item: 'headphones' },
+  { item: 'headphones', accessory: 'crown', frame: 'B' },
   { item: 'popcorn' },
   { item: 'controller' },
-  { item: 'boek' },
+  { item: 'book' },
   { item: 'water' },
-  { item: 'koffie', accessory: 'slaapmuts' },
+  { item: 'coffee', accessory: 'nightcap' },
 ];
 
-const rows: [string, RenderOptions][][] = SPECIES.map((s) => poses.map((p) => [s.id, p] as [string, RenderOptions]));
-rows.push(Object.keys(PALETTES).map((p) => ['robotje', { palette: p, accessory: 'kroon' }]));
+// Home-made buddies go through the same poses: the studio's template and the example files.
+const custom: Creation[] = [TEMPLATE];
+for (const file of readdirSync('examples').filter((f) => f.endsWith('.pixling.json'))) {
+  const result = parsePixling(readFileSync(`examples/${file}`, 'utf8'), () => file.replace('.pixling.json', ''));
+  if (result.ok) custom.push(...result.creations);
+}
+setCreations(custom);
+const buddies = [...SPECIES.map((s) => s.id), ...custom.filter((c) => c.slot === 'buddy').map((c) => c.id)];
+
+const rows: [string, RenderOptions][][] = buddies.map((id) => poses.map((p) => [id, p] as [string, RenderOptions]));
+rows.push(Object.keys(PALETTES).map((p) => ['robot', { palette: p, accessory: 'crown' }]));
 
 const cell = 34;
 const cols = Math.max(...rows.map((r) => r.length));

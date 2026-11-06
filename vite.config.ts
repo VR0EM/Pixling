@@ -11,7 +11,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     rollupOptions: {
-      input: { main: 'index.html', kleerkast: 'kleerkast.html', notities: 'notities.html', dagboek: 'dagboek.html', atelier: 'atelier.html' },
+      input: { main: 'index.html', wardrobe: 'wardrobe.html', notes: 'notes.html', diary: 'diary.html', studio: 'studio.html' },
     },
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },

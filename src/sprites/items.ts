@@ -24,7 +24,7 @@ export interface Item {
 
 /** Headphones drawn around each built-in head; the generic version is a boombox. */
 const HEADPHONES: Record<string, Variant> = /*HP*/ {
-  robotje: {
+  robot: {
     slot: 'head',
     outline: false,
     at: [1, 8],
@@ -46,7 +46,7 @@ const HEADPHONES: Record<string, Variant> = /*HP*/ {
       '.nnnn....................nnnn.',
     ],
   },
-  spookje: {
+  ghost: {
     slot: 'head',
     outline: false,
     at: [1, 8],
@@ -68,7 +68,7 @@ const HEADPHONES: Record<string, Variant> = /*HP*/ {
       '.nnnn....................nnnn.',
     ],
   },
-  paddo: {
+  shroom: {
     slot: 'head',
     outline: false,
     at: [5, 17],
@@ -82,7 +82,7 @@ const HEADPHONES: Record<string, Variant> = /*HP*/ {
       '.nnnn............nnnn.',
     ],
   },
-  draakje: {
+  dragon: {
     slot: 'head',
     outline: false,
     at: [2, 3],
@@ -133,10 +133,10 @@ export const ITEMS: Record<string, Item> = {
     frames: LAPTOP,
     gaze: 1,
     // The mug's handle is on the right, so its laptop stands on the left.
-    variants: { mokje: { at: [1, 21], gaze: -1 } },
+    variants: { mug: { at: [1, 21], gaze: -1 } },
   },
-  koptelefoon: {
-    name: 'Muziek',
+  headphones: {
+    name: 'Music',
     slot: 'hand',
     outline: true,
     fixed: true,
@@ -144,7 +144,7 @@ export const ITEMS: Record<string, Item> = {
     rows: BOOMBOX,
     variants: {
       ...HEADPHONES,
-      mokje: { at: [0, 22], rows: BOOMBOX },
+      mug: { at: [0, 22], rows: BOOMBOX },
     },
   },
   popcorn: {
@@ -154,14 +154,14 @@ export const ITEMS: Record<string, Item> = {
     rows: ['.y.w.', 'wywyw', 'rwrwr', 'rwrwr', 'rwrwr', '.rwr.'],
     at: [23, 19],
   },
-  boek: {
-    name: 'Boek',
+  book: {
+    name: 'Book',
     slot: 'hand',
     outline: true,
     fixed: true,
     rows: BOOK,
     at: [11, 23],
-    variants: { boontje: { at: [11, 24], rows: BOOK } },
+    variants: { sprout: { at: [11, 24], rows: BOOK } },
   },
   water: {
     name: 'Water',
@@ -170,13 +170,13 @@ export const ITEMS: Record<string, Item> = {
     rows: ['w..w', 'w..w', 'wttw', 'wttw', 'wwww'],
     at: [24, 19],
   },
-  koffie: {
-    name: 'Koffie',
+  coffee: {
+    name: 'Coffee',
     slot: 'hand',
     outline: true,
     rows: ['.w.w..', 'wkkkw.', 'wwwwww', 'wwwww.', '.www..'],
     at: [23, 20],
-    variants: { mokje: null },
+    variants: { mug: null },
   },
   controller: {
     name: 'Controller',
@@ -185,7 +185,7 @@ export const ITEMS: Record<string, Item> = {
     fixed: true,
     rows: ['.XXXXXXXX.', 'XXNXXXXrXX', 'XNNNXXtXyX', 'XXNXXXXgXX', 'xXX....XXx'],
     at: [11, 23],
-    variants: { boontje: { at: [11, 24], rows: ['.XXXXXXXX.', 'XXNXXXXrXX', 'XNNNXXtXyX', 'XXNXXXXgXX', 'xXX....XXx'] } },
+    variants: { sprout: { at: [11, 24], rows: ['.XXXXXXXX.', 'XXNXXXXrXX', 'XNNNXXtXyX', 'XXNXXXXgXX', 'xXX....XXx'] } },
   },
 };
 

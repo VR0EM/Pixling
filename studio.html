@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Studio</title>
+  </head>
+  <body>
+    <main class="studio">
+      <section class="workbench">
+        <header class="studio-head">
+          <h1>Studio</h1>
+          <div class="pills">
+            <button id="open-import" type="button" class="pill">Add a file…</button>
+            <button id="copy-prompt" type="button" class="pill" title="Copy instructions for an AI assistant">Copy AI prompt</button>
+          </div>
+        </header>
+        <div id="slots" class="pills"></div>
+        <div id="layers" class="pills layers" hidden></div>
+        <canvas id="board" aria-label="Drawing board"></canvas>
+        <div id="paints" class="paints"></div>
+        <div class="colour-edit">
+          <label class="toggle"><span id="colour-label">Colour</span> <input id="colour" type="color" /></label>
+          <span id="colour-hint" class="hint"></span>
+        </div>
+        <div class="tools">
+          <label class="toggle"><input id="mirror" type="checkbox" checked /> <span>Mirror</span></label>
+          <label class="toggle"><input id="outline" type="checkbox" checked /> <span>Outline</span></label>
+          <label id="floats-row" class="toggle" hidden><input id="floats" type="checkbox" /> <span>Floats</span></label>
+          <button id="clear" type="button" class="pill">Clear</button>
+        </div>
+        <form id="save" class="save">
+          <input id="name" type="text" placeholder="Name" maxlength="24" autocomplete="off" />
+          <button type="submit" class="pill primary">Save and use</button>
+        </form>
+        <p id="message" class="hint" role="status"></p>
+      </section>
+      <section class="side">
+        <div id="import" class="import" hidden>
+          <h2>Add a Pixling file</h2>
+          <textarea id="import-text" spellcheck="false" placeholder="Paste a Pixling file here, for example the answer of your AI assistant."></textarea>
+          <div class="pills">
+            <button id="import-add" type="button" class="pill primary">Add</button>
+            <button id="import-pick" type="button" class="pill">Choose file…</button>
+            <input id="import-file" type="file" accept=".json,application/json" multiple hidden />
+          </div>
+          <p id="import-message" class="hint" role="status">Or drop a .pixling.json file on this window, or on your buddy.</p>
+        </div>
+        <h2 id="preview-title">Preview</h2>
+        <div id="previews" class="previews"></div>
+        <h2>Your creations</h2>
+        <ul id="mine"></ul>
+        <p id="none" class="hint">Nothing saved yet. Draw something on the left, or add a file.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/studio.ts"></script>
+  </body>
+</html>

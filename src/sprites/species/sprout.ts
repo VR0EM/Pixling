@@ -14,9 +14,9 @@ const POT = [
 ];
 
 /** A bean plant in a pot, on two little legs. The palette colours the pot; the plant stays green. */
-export const boontje: Species = {
-  id: 'boontje',
-  name: 'Boontje',
+export const sprout: Species = {
+  id: 'sprout',
+  name: 'Sprout',
   palette: 'terracotta',
   build(o) {
     const droop = o.frame === 'B' ? 1 : 0;

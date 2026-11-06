@@ -23,15 +23,15 @@ fn extension(path: &Path) -> String {
 /// Remembers the dropped files and shows what can be done with them, at the cursor.
 pub fn show_menu(app: &AppHandle, window: &WebviewWindow, paths: Vec<String>) -> tauri::Result<()> {
     let has_images = paths.iter().any(|p| IMAGES.contains(&extension(Path::new(p)).as_str()));
-    let count = if paths.len() == 1 { "1 bestand".to_string() } else { format!("{} bestanden", paths.len()) };
+    let count = if paths.len() == 1 { "1 file".to_string() } else { format!("{} files", paths.len()) };
     *app.state::<AppState>().dropped.lock().unwrap() = paths;
 
     let title = MenuItem::with_id(app, "file:none", format!("Nom! {count}"), false, None::<&str>)?;
-    let zip = MenuItem::with_id(app, "file:zip", "Maak er een zip van", true, None::<&str>)?;
-    let png = MenuItem::with_id(app, "file:png", "Zet om naar PNG", has_images, None::<&str>)?;
-    let jpg = MenuItem::with_id(app, "file:jpg", "Zet om naar JPG", has_images, None::<&str>)?;
-    let copy = MenuItem::with_id(app, "file:copy", "Kopieer het pad", true, None::<&str>)?;
-    let reveal = MenuItem::with_id(app, "file:reveal", "Toon in Finder", true, None::<&str>)?;
+    let zip = MenuItem::with_id(app, "file:zip", "Make a zip", true, None::<&str>)?;
+    let png = MenuItem::with_id(app, "file:png", "Convert to PNG", has_images, None::<&str>)?;
+    let jpg = MenuItem::with_id(app, "file:jpg", "Convert to JPG", has_images, None::<&str>)?;
+    let copy = MenuItem::with_id(app, "file:copy", "Copy the path", true, None::<&str>)?;
+    let reveal = MenuItem::with_id(app, "file:reveal", "Show in Finder", true, None::<&str>)?;
     let menu: Menu<Wry> = Menu::with_items(
         app,
         &[&title, &PredefinedMenuItem::separator(app)?, &zip, &png, &jpg, &copy, &reveal],
@@ -46,7 +46,7 @@ pub fn run(app: &AppHandle, action: &str) {
     let app = app.clone();
     std::thread::spawn(move || {
         let message = if !cfg!(target_os = "macos") {
-            "Dat kan ik hier nog niet.".to_string()
+            "I can’t do that here yet.".to_string()
         } else {
             match action.as_str() {
                 "zip" => zip(&paths),
@@ -62,7 +62,7 @@ pub fn run(app: &AppHandle, action: &str) {
 }
 
 /// `name.ext` → the first of `name.ext`, `name 2.ext`, ... that doesn't exist yet.
-fn free_path(dir: &Path, stem: &str, ext: &str) -> PathBuf {
+pub fn free_path(dir: &Path, stem: &str, ext: &str) -> PathBuf {
     let mut candidate = dir.join(format!("{stem}.{ext}"));
     let mut n = 2;
     while candidate.exists() {
@@ -74,7 +74,7 @@ fn free_path(dir: &Path, stem: &str, ext: &str) -> PathBuf {
 
 fn parts(path: &Path) -> (PathBuf, String) {
     let dir = path.parent().map(Path::to_path_buf).unwrap_or_default();
-    let stem = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| "bestand".into());
+    let stem = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| "file".into());
     (dir, stem)
 }
 
@@ -90,9 +90,9 @@ fn zip(paths: &[PathBuf]) -> String {
         }
     }
     match ok {
-        0 => "Zippen lukte niet.".into(),
-        1 => "Gezipt! Hij staat ernaast.".into(),
-        n => format!("{n} zips gemaakt!"),
+        0 => "Zipping didn’t work.".into(),
+        1 => "Zipped! It’s right next to it.".into(),
+        n => format!("{n} zips made!"),
     }
 }
 
@@ -108,15 +108,20 @@ fn convert(paths: &[PathBuf], format: &str, ext: &str) -> String {
     }
     let label = ext.to_uppercase();
     match ok {
-        0 => format!("Omzetten naar {label} lukte niet."),
-        1 => format!("Omgezet naar {label}!"),
-        n => format!("{n} afbeeldingen omgezet naar {label}!"),
+        0 => format!("Converting to {label} didn’t work."),
+        1 => format!("Converted to {label}!"),
+        n => format!("{n} images converted to {label}!"),
     }
 }
 
 fn copy(paths: &[PathBuf]) -> String {
     let text = paths.iter().map(|p| p.to_string_lossy()).collect::<Vec<_>>().join("\n");
-    let copied = Command::new("pbcopy")
+    if copy_text(&text) { "Path copied!".into() } else { "Copying didn’t work.".into() }
+}
+
+/// Puts text on the clipboard (macOS).
+pub fn copy_text(text: &str) -> bool {
+    Command::new("pbcopy")
         .stdin(Stdio::piped())
         .spawn()
         .and_then(|mut child| {
@@ -124,14 +129,13 @@ fn copy(paths: &[PathBuf]) -> String {
             child.wait()
         })
         .map(|s| s.success())
-        .unwrap_or(false);
-    if copied { "Pad gekopieerd!".into() } else { "Kopiëren lukte niet.".into() }
+        .unwrap_or(false)
 }
 
 fn reveal(paths: &[PathBuf]) -> String {
     match paths.first() {
-        Some(path) if Command::new("open").arg("-R").arg(path).status().is_ok() => "Daar is het!".into(),
-        _ => "Ik vond het niet terug.".into(),
+        Some(path) if Command::new("open").arg("-R").arg(path).status().is_ok() => "There it is!".into(),
+        _ => "I couldn’t find it.".into(),
     }
 }
 
@@ -143,16 +147,16 @@ mod tests {
     fn zips_and_converts_next_to_the_original() {
         let dir = std::env::temp_dir().join(format!("pixling-files-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        let png = dir.join("plaatje.png");
+        let png = dir.join("picture.png");
         std::fs::copy(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/32x32.png"), &png).unwrap();
 
-        assert_eq!(zip(&[png.clone()]), "Gezipt! Hij staat ernaast.");
-        assert!(dir.join("plaatje.png.zip").exists());
-        assert_eq!(convert(&[png.clone()], "jpeg", "jpg"), "Omgezet naar JPG!");
-        assert!(dir.join("plaatje.jpg").exists());
+        assert_eq!(zip(&[png.clone()]), "Zipped! It’s right next to it.");
+        assert!(dir.join("picture.png.zip").exists());
+        assert_eq!(convert(&[png.clone()], "jpeg", "jpg"), "Converted to JPG!");
+        assert!(dir.join("picture.jpg").exists());
         // A second zip doesn't overwrite the first one.
         zip(&[png]);
-        assert!(dir.join("plaatje.png 2.zip").exists());
+        assert!(dir.join("picture.png 2.zip").exists());
 
         std::fs::remove_dir_all(&dir).unwrap();
     }

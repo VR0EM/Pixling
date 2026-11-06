@@ -14,12 +14,12 @@ export function momentFor(date: Date): Moment {
   const month = date.getMonth() + 1;
   const dayOfMonth = date.getDate();
 
-  if (hour >= 23 || hour < 6) return { hat: 'slaapmuts' };
+  if (hour >= 23 || hour < 6) return { hat: 'nightcap' };
   const newYear = (month === 12 && dayOfMonth === 31 && hour >= 18) || (month === 1 && dayOfMonth === 1);
   const fridayEvening = day === 5 && hour >= 17;
   const moment: Moment = {};
-  if (newYear || fridayEvening) moment.hat = 'feesthoed';
-  else if (month === 12 || month <= 2) moment.hat = 'wintermuts';
-  if (hour >= 7 && hour < 10) moment.item = 'koffie';
+  if (newYear || fridayEvening) moment.hat = 'partyhat';
+  else if (month === 12 || month <= 2) moment.hat = 'beanie';
+  if (hour >= 7 && hour < 10) moment.item = 'coffee';
   return moment;
 }

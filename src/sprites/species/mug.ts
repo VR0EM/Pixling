@@ -28,10 +28,10 @@ const STEAM = [
 ];
 
 /** A coffee mug with a face, little legs and steam curling up. The palette colours the mug. */
-export const mokje: Species = {
-  id: 'mokje',
-  name: 'Mokje',
-  palette: 'gember',
+export const mug: Species = {
+  id: 'mug',
+  name: 'Mug',
+  palette: 'ginger',
   build(o, accessory) {
     const fx = o.faceDx ?? 0;
     // Breathing: the mug settles a pixel onto its legs.

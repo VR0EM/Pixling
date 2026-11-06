@@ -1,70 +1,75 @@
 # Pixling
 
-Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant van je scherm, kijkt naar je muis, valt in slaap als je even weg bent en laat zich oppakken en weggooien. Je past het aan via het icoontje in de menubalk.
+A little pixel buddy that lives on your desktop. It walks along the bottom of your screen, watches your mouse, falls asleep when you're away and lets you pick it up and throw it. You change it from the icon in the menu bar.
 
-![Alle maatjes in een paar houdingen](docs/sprites.png)
+![Every buddy in a few poses](docs/sprites.png)
 
-## Wat het nu kan (v0.7)
+## What it does (v0.8)
 
-- Zes maatjes: Robotje, Spookje, Boontje, Paddo, Mokje en Draakje
-- Acht kleuren, vijf accessoires (feesthoedje, kroontje, strikje, wintermuts, zonnebril) en drie groottes
-- Wandelt rond, ademt, knippert en kijkt naar je cursor
-- Valt na een minuut zonder muisbeweging in slaap en wordt wakker zodra je de muis beweegt
-- Laat zich oppakken en slepen; laat je los terwijl je beweegt, dan gooi je hem, met zwaartekracht en stuiteren
-- Een klik is een aai: hij springt op en er verschijnt een hartje; je eigen app blijft gewoon actief
-- **Klimt op je vensters:** zet je een venster vooraan, dan springt hij op de bovenrand; laat je hem los voor een venster, dan springt hij erop. Hij rijdt mee als je het venster sleept en valt eraf als je het sluit of hard opzij rukt. Gemaximaliseerde vensters laten boven zich geen ruimte, daar blijft hij af
-- **Kijkt mee met je apps:** een laptop bij je code-editor of terminal (hij blijft dan zitten en kijkt naar het scherm terwijl de code verschijnt), muziek bij Spotify of Muziek (een koptelefoon op maat van elk maatje, en meewiebelen), popcorn bij video, een controller bij Steam. Hij kijkt alleen wélke app vooraan staat, nooit wat erin gebeurt
-- **Rugzak** (in het menu): een focustimer waarbij hij naast je zit te lezen en de resterende tijd naast het menubalkicoon staat, met daarna een pauze; af en toe een glas water; en na een uur doorwerken wordt hij moe en gaapt hij, pas later zegt hij het. Klik op hem om een herinnering te beantwoorden
-- **Notities** (in het menu): typ, druk op Enter, klaar; vink af of gooi weg. Je maatje zegt "Genoteerd!"
-- **Batterij en drukte:** onder 20% wordt hij slap en zegt hij het (en nog eens onder 10%), met de stekker erin is hij blij, en als je computer hard werkt zweet hij
-- **Bestanden voeren:** sleep een bestand op je maatje en hij eet het op ("Nom!"); kies dan: zip maken, omzetten naar PNG of JPG, pad kopiëren of tonen in Finder. Het resultaat komt naast het origineel
-- **Karakter:** lief, druk, rustig of brutaal (in de kleerkast of het menu). Het bepaalt wat hij zegt, hoe vaak hij uit zichzelf iets zegt, en hoe snel en graag hij rondloopt. Tekstballonnen in een pixel-lettertype
-- **Dagboek** (in het menu): hoe lang jullie al maatjes zijn, en elke dag één zinnetje over jullie dag, in zijn eigen karakter
-- **Atelier** (in het menu of via "Teken je eigen…" in de kleerkast): teken je eigen hoedje, iets voor op het gezicht of iets om vast te houden, met spiegelen en een automatische rand; je ziet het meteen op alle zes de maatjes. Bewaarde creaties staan tussen de gewone accessoires
-- **Kleerkast:** een venster met een levend voorbeeld waarin je soort, kleur, accessoire, grootte, focusduur en gewoontes kiest. Open het via het menu of met een dubbelklik op het maatje
-- **Tijd van de dag:** koffie 's ochtends, een slaapmuts 's nachts, een feesthoedje op vrijdagavond en oudejaarsavond, een wintermuts van december tot en met februari. Hoedjes alleen als je zelf geen accessoire koos
-- Klikken gaan dwars door het venster heen, behalve op het maatje zelf
-- Leeft in de menubalk, zonder Dock-icoon; rechtsklik op het maatje opent hetzelfde menu. Daar zet je ook meekijken, klimmen en starten bij inloggen aan of uit
+- Six buddies: Robot, Ghost, Sprout, Shroom, Mug and Dragon, plus any you draw or add yourself
+- Eight colours, five accessories (party hat, crown, bow, beanie, sunglasses) and three sizes
+- Walks around, breathes, blinks and looks at your cursor
+- Falls asleep after a minute without mouse movement and wakes up as soon as you move it
+- Pick it up and drag it; let go while moving and you throw it, with gravity and bouncing
+- A click is a pat on the head: it hops and a heart appears; your own app stays active
+- **Climbs your windows:** bring a window to the front and it jumps onto the top edge; drop it in front of a window and it jumps on. It rides along when you drag the window and falls off when you close it or yank it aside. Maximised windows leave no room above them, so it stays off those
+- **Watches your apps:** a laptop for your code editor or terminal (it sits still and watches the code appear), music for Spotify or Music (headphones made for each buddy, and bobbing along), popcorn for video, a controller for Steam. It only knows *which* app is in front, never what happens in it
+- **Backpack** (in the menu): a focus timer where it sits reading next to you while the time left shows next to the menu bar icon, followed by a break; a glass of water now and then; and after an hour of work it gets tired and yawns, and only later says so. Click it to answer a reminder
+- **Notes** (in the menu): type, press Enter, done; tick off or throw away. Your buddy says "Noted!"
+- **Battery and load:** under 20% it goes limp and says so (and again under 10%), it's happy when you plug in, and it sweats when your computer works hard
+- **Feed it files:** drag a file onto your buddy and it eats it ("Nom!"); then pick: make a zip, convert to PNG or JPG, copy the path or show in Finder. The result lands next to the original
+- **Character:** sweet, hyper, calm or cheeky (in the wardrobe or the menu). It decides what it says, how often it talks by itself, and how fast and how much it walks. Speech bubbles in a pixel font
+- **Diary** (in the menu): how long you've been buddies, and one sentence about each day, in its own character
+- **Studio** (in the menu, or "Draw your own…" in the wardrobe): draw your own buddy in layers, or a hat, glasses or something to hold, with mirroring, your own colours and an automatic outline. You see it come alive right away
+- **Share and add:** every creation is a small `.pixling.json` file. Share one with a click, add one by pasting it, picking it or dropping it on the studio or on your buddy. Ask an AI assistant to make one with "Copy AI prompt". See [Creating buddies](docs/CREATING-BUDDIES.md)
+- **Wardrobe:** a window with a living preview where you pick the buddy, colour, accessory, size, focus length and habits. Open it from the menu or by double-clicking your buddy
+- **Time of day:** coffee in the morning, a nightcap at night, a party hat on Friday evening and New Year's Eve, a beanie from December to February. Hats only when you didn't pick an accessory yourself
+- Clicks go straight through the window, except on the buddy itself
+- Lives in the menu bar, without a Dock icon; right-clicking the buddy opens the same menu. That's also where you switch watching, climbing and starting at login on or off
 
-Het standaardmaatje is het Robotje in hemelblauw.
+The default buddy is the sky-blue Robot.
 
-## Starten
+## Getting started
 
-Nodig: Node.js 22 of nieuwer, Rust (via rustup) en de Xcode Command Line Tools.
+You need Node.js 22 or newer, Rust (through rustup) and the Xcode Command Line Tools.
 
-| Commando | Wat het doet |
+| Command | What it does |
 | --- | --- |
-| `npm install` | Pakketten installeren (één keer) |
-| `npm run tauri dev` | Pixling starten in ontwikkelmodus |
-| `npm run tauri build` | Een `.app` en `.dmg` bouwen |
-| `npm run install-mac` | De releaseversie bouwen en in Programma's zetten |
-| `npm run check` | Typecheck en tests; moet slagen voor elke commit |
-| `npm run sprites` | Alle maatjes tekenen naar `docs/sprites.png`, om tekenwerk na te kijken |
-| `npm run icons` | App-icoon en menubalkicoon opnieuw maken |
-| `npm run dev` | Alleen de webpagina in je browser, handig voor tekenwerk |
+| `npm install` | Install the packages (once) |
+| `npm run tauri dev` | Start Pixling in development mode |
+| `npm run tauri build` | Build a `.app` and a `.dmg` |
+| `npm run install-mac` | Build the release and put it in Applications |
+| `npm run check` | Typecheck and tests; must pass before every commit |
+| `npm run sprites` | Draw every buddy to `docs/sprites.png`, to check art |
+| `npm run icons` | Make the app icon and menu bar icon again |
+| `npm run dev` | Only the web pages in your browser, handy for art |
 
-## Hoe het in elkaar zit
+## How it fits together
 
-| Map | Inhoud |
+| Folder | Contents |
 | --- | --- |
-| `src/sprites/` | De maatjes, in code getekend: één bestand per soort, plus kleuren, accessoires en emotes |
-| `src/buddy/brain.ts` | Het gedrag: rondlopen, slapen, slepen, gooien, aaien en op vensters klimmen, los van het scherm zodat het testbaar is |
-| `src/buddy/backpack.ts` | De rugzak: focustimer, water- en pauzeherinnering, los van het scherm zodat het testbaar is |
-| `src/buddy/moments.ts` | Wat er bij welk uur of welke dag hoort (koffie, slaapmuts, feest, Sinterklaas) |
-| `src/atelier.ts`, `src/sprites/creations.ts` | De pixeleditor en hoe eigen creaties accessoires worden |
-| `src/wardrobe.ts`, `src/notes.ts` | Het kleerkast- en het notitievenster |
-| `src/buddy/voice.ts` | Wat hij zegt, per karakter en situatie |
-| `src/buddy/diary.ts`, `src/diary-page.ts` | Het dagboek: tellingen per dag en de zin die erbij hoort |
-| `src/buddy/system-watch.ts` | Hoe hij reageert op batterij en drukte |
-| `src/buddy/context.ts` | Welke app bij welke context hoort (code, muziek, video, game) |
-| `src/buddy/view.ts` | Tekent het maatje en zijn tekstballon op het canvas |
-| `src/main.ts` | Verbindt alles: cursor en vensters opvragen, klikken doorlaten, de tekenlus |
-| `src-tauri/` | De Rust-kant: het doorzichtige venster, de menubalk en de instellingen; `macos.rs` haalt de vensterlijst en de app vooraan op |
-| `scripts/` | Bouwhulpjes: sprite-overzicht en iconen, getekend met dezelfde engine |
-| `docs/` | Visie, roadmap en beslissingen |
+| `src/sprites/` | The buddies, drawn in code: one file per species, plus colours, accessories, items and emotes |
+| `src/sprites/buddy.ts` | How a home-made buddy comes alive: breathing, walking, blinking, anchors |
+| `src/sprites/format.ts` | Pixling files: reading, checking and writing them, and the AI prompt |
+| `src/studio.ts`, `src/sprites/creations.ts` | The studio and the data behind home-made creations |
+| `src/buddy/brain.ts` | Behaviour: walking, sleeping, dragging, throwing, petting and climbing windows, apart from the screen so it can be tested |
+| `src/buddy/backpack.ts` | The backpack: focus timer, water and break reminders, apart from the screen so it can be tested |
+| `src/buddy/moments.ts` | What goes with which hour or day (coffee, nightcap, party, winter) |
+| `src/wardrobe.ts`, `src/notes.ts` | The wardrobe and notes windows |
+| `src/buddy/voice.ts` | What it says, per character and situation |
+| `src/buddy/diary.ts`, `src/diary-page.ts` | The diary: counts per day and the sentence that goes with them |
+| `src/buddy/system-watch.ts` | How it reacts to the battery and load |
+| `src/buddy/context.ts` | Which app belongs to which context (code, music, video, game) |
+| `src/buddy/view.ts` | Draws the buddy and its speech bubble on the canvas |
+| `src/main.ts` | Ties it all together: asks for the cursor and windows, lets clicks through, the draw loop |
+| `src/legacy.ts` | Translates settings saved while Pixling was in Dutch |
+| `src-tauri/` | The Rust side: the transparent window, the menu bar and the settings; `macos.rs` reads the window list and the app in front |
+| `scripts/` | Build helpers: sprite sheet and icons, drawn with the same engine |
+| `examples/` | Example Pixling files |
+| `docs/` | Vision, roadmap, decisions and the guide to creating buddies |
 
-Meer uitleg: [visie](docs/VISIE.md), [roadmap](docs/ROADMAP.md), [beslissingen](docs/BESLISSINGEN.md).
+More: [vision](docs/VISION.md), [roadmap](docs/ROADMAP.md), [decisions](docs/DECISIONS.md), [creating buddies](docs/CREATING-BUDDIES.md).
 
-## Platformen
+## Platforms
 
-Eerst macOS, daarna Windows, als laatste Linux. Tauri draait op alle drie, maar doorzichtige vensters en klikken doorlaten gedragen zich per systeem anders, dus Windows en Linux moeten nog getest en bijgestuurd worden.
+macOS first, then Windows, Linux last. Tauri runs on all three, but transparent windows and letting clicks through behave differently on each system, so Windows and Linux still need testing and tuning.

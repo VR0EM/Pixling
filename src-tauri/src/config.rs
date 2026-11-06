@@ -8,17 +8,17 @@ use tauri::{AppHandle, Manager};
 #[serde(rename_all = "camelCase", default)]
 pub struct Config {
     pub species: String,
-    /// A palette id, or "eigen" for the species' own colours.
+    /// A palette id, or "default" for the species' own colours.
     pub palette: String,
-    /// An accessory id, or "geen" for none.
+    /// An accessory id, or "none" for none.
     pub accessory: String,
     /// How many screen pixels one sprite pixel takes.
     pub scale: u32,
-    /// Dresses up for the app in front (glasses for code, headphones for music, ...).
+    /// Dresses up for the app in front (a laptop for code, headphones for music, ...).
     pub watch_apps: bool,
     /// Climbs onto windows and rides along when they move.
     pub climb_windows: bool,
-    /// Its character: lief, druk, rustig or brutaal. Changes what it says and how lively it is.
+    /// Its character: sweet, hyper, calm or cheeky. Changes what it says and how lively it is.
     pub character: String,
     /// The day the two of you met (YYYY-MM-DD), set by the webpage on the first start.
     pub met_on: Option<String>,
@@ -37,13 +37,13 @@ impl Default for Config {
     fn default() -> Self {
         // The look picked while sketching: the sky-blue robot.
         Self {
-            species: "robotje".into(),
-            palette: "hemel".into(),
-            accessory: "geen".into(),
+            species: "robot".into(),
+            palette: "sky".into(),
+            accessory: "none".into(),
             scale: 3,
             watch_apps: true,
             climb_windows: true,
-            character: "lief".into(),
+            character: "sweet".into(),
             met_on: None,
             watch_system: true,
             water: true,
@@ -67,7 +67,7 @@ pub fn load(app: &AppHandle) -> Config {
 }
 
 pub fn save(app: &AppHandle, config: &Config) -> io::Result<()> {
-    let path = path(app).ok_or_else(|| io::Error::other("geen map voor instellingen"))?;
+    let path = path(app).ok_or_else(|| io::Error::other("no folder for settings"))?;
     if let Some(dir) = path.parent() {
         fs::create_dir_all(dir)?;
     }

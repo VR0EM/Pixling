@@ -29,25 +29,25 @@ pub fn create(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     Ok(window)
 }
 
-pub const WARDROBE: &str = "kleerkast";
-pub const NOTES: &str = "notities";
-pub const DIARY: &str = "dagboek";
-pub const ATELIER: &str = "atelier";
+pub const WARDROBE: &str = "wardrobe";
+pub const NOTES: &str = "notes";
+pub const DIARY: &str = "diary";
+pub const STUDIO: &str = "studio";
 
 /// Opens one of the normal windows (the wardrobe or the notes), or brings it forward.
 pub fn open_page(app: &AppHandle, label: &str) -> tauri::Result<()> {
     let (title, width, height) = match label {
-        NOTES => ("Pixling · Notities", 420.0, 520.0),
-        DIARY => ("Pixling · Dagboek", 460.0, 600.0),
-        ATELIER => ("Pixling · Atelier", 820.0, 640.0),
-        _ => ("Pixling · Kleerkast", 640.0, 880.0),
+        NOTES => ("Pixling · Notes", 420.0, 520.0),
+        DIARY => ("Pixling · Diary", 460.0, 600.0),
+        STUDIO => ("Pixling · Studio", 1040.0, 760.0),
+        _ => ("Pixling · Wardrobe", 640.0, 880.0),
     };
     let window = match app.get_webview_window(label) {
         Some(window) => window,
         None => WebviewWindowBuilder::new(app, label, WebviewUrl::App(format!("{label}.html").into()))
             .title(title)
             .inner_size(width, height)
-            .resizable(label != WARDROBE && label != ATELIER)
+            .resizable(label != WARDROBE && label != STUDIO)
             .center()
             .build()?,
     };
@@ -81,7 +81,7 @@ pub fn follow_screen_changes(app: &AppHandle) {
         std::thread::sleep(Duration::from_secs(3));
         if let Some(window) = app.get_webview_window(LABEL) {
             if let Err(e) = fit_to_screen(&window) {
-                eprintln!("Pixling: kon het venster niet passend maken: {e}");
+                eprintln!("Pixling: could not fit the window to the screen: {e}");
             }
         }
     });

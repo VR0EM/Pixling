@@ -1,15 +1,15 @@
 import { FIXED } from './palettes.ts';
 
 /** Little icons that float above the buddy's head instead of text. */
-export type Emote = 'hart' | 'uitroep' | 'vraag' | 'slaap' | 'noot' | 'zweet';
+export type Emote = 'heart' | 'exclaim' | 'question' | 'zzz' | 'note' | 'sweat';
 
 const MAPS: Record<Emote, string[]> = {
-  hart: ['.r.r.', 'rrrrr', 'rrrrr', '.rrr.', '..r..'],
-  uitroep: ['yy', 'yy', 'yy', 'yy', '..', 'yy'],
-  vraag: ['.www.', 'w...w', '...w.', '..w..', '.....', '..w..'],
-  slaap: ['wwww', '..w.', '.w..', 'wwww'],
-  noot: ['..ww', '..ww', '..w.', 'www.', 'ww..'],
-  zweet: ['.t..', '.tt.', 'tttt', 'tttt', '.tt.'],
+  heart: ['.r.r.', 'rrrrr', 'rrrrr', '.rrr.', '..r..'],
+  exclaim: ['yy', 'yy', 'yy', 'yy', '..', 'yy'],
+  question: ['.www.', 'w...w', '...w.', '..w..', '.....', '..w..'],
+  zzz: ['wwww', '..w.', '.w..', 'wwww'],
+  note: ['..ww', '..ww', '..w.', 'www.', 'ww..'],
+  sweat: ['.t..', '.tt.', 'tttt', 'tttt', '.tt.'],
 };
 
 const cache = new Map<Emote, (string | null)[][]>();

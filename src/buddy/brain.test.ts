@@ -35,7 +35,7 @@ describe('Brain', () => {
     run(brain, 1, { cursor: null, idleMs: SLEEP_AFTER_MS + 1 });
     expect(brain.mode).toBe('sleep');
     expect(brain.pose(awake).blink).toBe(true);
-    expect(brain.pose({ cursor: null, idleMs: SLEEP_AFTER_MS + 1 }).emote).toBe('slaap');
+    expect(brain.pose({ cursor: null, idleMs: SLEEP_AFTER_MS + 1 }).emote).toBe('zzz');
     run(brain, 0.1, awake);
     expect(brain.mode).toBe('idle');
   });
@@ -69,7 +69,7 @@ describe('Brain', () => {
     brain.pet();
     brain.update(0.05, awake);
     const pose = brain.pose(awake);
-    expect(pose.emote).toBe('hart');
+    expect(pose.emote).toBe('heart');
     expect(pose.lift).toBeGreaterThan(0);
   });
 
@@ -97,7 +97,7 @@ describe('Brain', () => {
     const brain = new Brain(800, 600, seeded(22));
     const coming: Input = { cursor: { x: brain.x - 200, y: brain.y - 150 }, idleMs: 0, dragging: true };
     brain.update(1 / 30, coming);
-    expect(brain.pose(coming).emote).toBe('uitroep');
+    expect(brain.pose(coming).emote).toBe('exclaim');
     const x = brain.x;
     for (let i = 0; i < 30 * 20; i++) {
       brain.update(1 / 30, coming);
@@ -262,18 +262,18 @@ describe('Brain', () => {
       let yawned = false;
       for (let i = 0; i < 30 * 5; i++) {
         brain.update(1 / 30, awake);
-        if (brain.pose(awake).emote === 'slaap') yawned = true;
+        if (brain.pose(awake).emote === 'zzz') yawned = true;
       }
       expect(yawned).toBe(true);
     });
 
     it('shows music notes while a music app is in front', () => {
       const brain = new Brain(800, 600, seeded(15));
-      brain.context = 'muziek';
+      brain.context = 'music';
       let notes = false;
       for (let i = 0; i < 30 * 10; i++) {
         brain.update(1 / 30, awake);
-        if (brain.pose(awake).emote === 'noot') notes = true;
+        if (brain.pose(awake).emote === 'note') notes = true;
       }
       expect(notes).toBe(true);
     });

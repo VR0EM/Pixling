@@ -35,7 +35,7 @@ export class View {
     canvas.width = SPRITE;
     canvas.height = SPRITE + HEADROOM;
     const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas 2D is niet beschikbaar');
+    if (!ctx) throw new Error('Canvas 2D is not available');
     this.ctx = ctx;
   }
 
@@ -52,8 +52,8 @@ export class View {
   /** `item` is something picked up because of the app in front, such as headphones. */
   draw(look: Look, pose: Pose, x: number, y: number, now: number, item?: string): void {
     const options: RenderOptions = {
-      palette: look.palette === 'eigen' ? undefined : look.palette,
-      accessory: look.accessory === 'geen' ? undefined : look.accessory,
+      palette: look.palette === 'default' ? undefined : look.palette,
+      accessory: look.accessory === 'none' ? undefined : look.accessory,
       frame: pose.frame,
       tick: pose.tick,
       blink: pose.blink,

@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Wat de Pixling-vensters mogen doen",
-  "windows": ["buddy", "kleerkast", "notities", "dagboek", "atelier"],
+  "description": "What the Pixling windows may do",
+  "windows": ["buddy", "wardrobe", "notes", "diary", "studio"],
   "permissions": ["core:default"]
 }

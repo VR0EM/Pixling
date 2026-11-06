@@ -43,13 +43,13 @@ export interface Catalog {
 }
 
 export const DEFAULT_CONFIG: Config = {
-  species: 'robotje',
-  palette: 'hemel',
-  accessory: 'geen',
+  species: 'robot',
+  palette: 'sky',
+  accessory: 'none',
   scale: 3,
   watchApps: true,
   climbWindows: true,
-  character: 'lief',
+  character: 'sweet',
   metOn: null,
   watchSystem: true,
   water: true,
@@ -62,7 +62,7 @@ export const DEFAULT_CONFIG: Config = {
 export const inApp = isTauri();
 
 let browserCursor: { x: number; y: number } | null = null;
-if (!inApp) {
+if (!inApp && typeof window !== 'undefined') {
   window.addEventListener('mousemove', (e) => {
     browserCursor = { x: e.clientX, y: e.clientY };
   });
@@ -206,8 +206,27 @@ export function onCreationsChanged<T>(callback: (list: T[]) => void): void {
   if (inApp) void listen<T[]>('creations-changed', (event) => callback(event.payload));
 }
 
-export async function openAtelier(): Promise<void> {
-  if (inApp) await invoke('open_atelier');
+export async function openStudio(): Promise<void> {
+  if (inApp) await invoke('open_studio');
+}
+
+/** Reads a dropped or picked .json file (a shared Pixling file). */
+export async function readTextFile(path: string): Promise<string> {
+  if (!inApp) throw new Error('Files can only be read in the app.');
+  return invoke<string>('read_text_file', { path });
+}
+
+/** Saves a file to share in Downloads and shows it in Finder; returns where it went. */
+export async function exportFile(name: string, contents: string): Promise<string> {
+  if (inApp) return invoke<string>('export_file', { name, contents });
+  const link = Object.assign(document.createElement('a'), { download: name, href: URL.createObjectURL(new Blob([contents])) });
+  link.click();
+  return name;
+}
+
+export async function copyText(text: string): Promise<void> {
+  if (inApp) await invoke('copy_text', { text });
+  else await navigator.clipboard.writeText(text);
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

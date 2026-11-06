@@ -7,8 +7,10 @@ import { dayKey, emptyDay, sentence, type DayStats, type Diary } from './buddy/d
 import { momentFor } from './buddy/moments.ts';
 import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
 import { View } from './buddy/view.ts';
-import { PERSONALITIES, dagdeel, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
+import { PERSONALITIES, greetingFor, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
+import { migrateConfig, migrateCreations, migrateDiary } from './legacy.ts';
 import * as bridge from './platform/bridge.ts';
+import { parsePixling } from './sprites/format.ts';
 import { catalog, setCreations, type Creation } from './sprites/index.ts';
 
 const MIN = 60_000;
@@ -21,10 +23,13 @@ async function start(): Promise<void> {
   const brain = new Brain(window.innerWidth, window.innerHeight);
 
   let look = await bridge.getConfig();
+  // Settings saved while Pixling was still in Dutch.
+  const fixes = migrateConfig(look);
+  if (fixes) look = await bridge.updateConfig(fixes);
   // Remember the day you met, the first time.
   if (!look.metOn) look = await bridge.updateConfig({ metOn: dayKey(new Date()) });
 
-  const character = (): Character => (isCharacter(look.character) ? look.character : 'lief');
+  const character = (): Character => (isCharacter(look.character) ? look.character : 'sweet');
   const personality = () => PERSONALITIES[character()];
   /** Says something in the buddy's own voice. */
   const say = (what: Line | Situation, ms = 4500) =>
@@ -37,8 +42,14 @@ async function start(): Promise<void> {
     brain.walkiness = personality().walkiness;
   };
   applyLook();
-  // Home-made accessories from the atelier, and the menu that lists them.
-  setCreations(await bridge.getCreations<Creation>());
+  // Home-made accessories and buddies from the studio, and the menu that lists them.
+  let creations = await bridge.getCreations<Creation>();
+  const renamed = migrateCreations(creations);
+  if (renamed) {
+    creations = renamed;
+    await bridge.setCreations(creations);
+  }
+  setCreations(creations);
   const sendCatalog = () =>
     bridge.setCatalog({
       ...catalog(),
@@ -46,6 +57,7 @@ async function start(): Promise<void> {
     });
   await sendCatalog();
   bridge.onCreationsChanged<Creation>((list) => {
+    creations = list;
     setCreations(list);
     void sendCatalog();
   });
@@ -64,6 +76,7 @@ async function start(): Promise<void> {
   // sentence once, in the character the buddy had that evening.
   const diary = await bridge.getDiary<Diary>();
   diary.days ??= {};
+  const oldDiary = migrateDiary(diary as never);
   let today = dayKey(new Date());
   let saveTimer: number | undefined;
   const saveDiary = () => {
@@ -73,8 +86,8 @@ async function start(): Promise<void> {
   const closeOldDays = () => {
     let changed = false;
     for (const [key, day] of Object.entries(diary.days)) {
-      if (key < today && !day.zin) {
-        day.zin = sentence(day, character());
+      if (key < today && !day.sentence) {
+        day.sentence = sentence(day, character());
         changed = true;
       }
     }
@@ -86,6 +99,7 @@ async function start(): Promise<void> {
     saveDiary();
   };
   closeOldDays();
+  if (oldDiary) saveDiary();
 
   // The backpack: focus timer and reminders, checked once a second.
   const backpack = new Backpack(Date.now());
@@ -113,9 +127,9 @@ async function start(): Promise<void> {
     const quiet = brain.stayPut || brain.mode === 'sleep' || now - lastMove > 2 * MIN || !bubble.hidden;
     if (quiet) return;
     const hour = new Date().getHours();
-    const specific: Record<string, Situation> = { code: 'kletsenCode', muziek: 'kletsenMuziek', video: 'kletsenVideo', game: 'kletsenGame' };
-    let key: Situation = 'kletsen';
-    if (hour >= 23 || hour < 5) key = 'kletsenNacht';
+    const specific: Record<string, Situation> = { code: 'chatCode', music: 'chatMusic', video: 'chatVideo', game: 'chatGame' };
+    let key: Situation = 'chat';
+    if (hour >= 23 || hour < 5) key = 'chatNight';
     else if (brain.context && Math.random() < 0.6) key = specific[brain.context];
     say(key, 5000);
   };
@@ -133,8 +147,8 @@ async function start(): Promise<void> {
     brain.tired = advice.tired || reaction.tired;
     brain.sweaty = reaction.sweaty;
     if (advice.say) {
-      if (advice.say.key === 'pauze') count('focus');
-      if (advice.say.key === 'proost') count('water');
+      if (advice.say.key === 'breakStart') count('focus');
+      if (advice.say.key === 'cheers') count('water');
       say(advice.say, 5000);
     }
     if (advice.trayTitle !== trayTitle) {
@@ -175,7 +189,7 @@ async function start(): Promise<void> {
       }
       near = fileDrag || (c !== null && Math.abs(c.x - brain.x) < 300 && Math.abs(c.y - brain.y) < 300);
     } catch (e) {
-      bridge.log(`cursor opvragen mislukt: ${String(e)}`);
+      bridge.log(`reading the cursor failed: ${String(e)}`);
     } finally {
       setTimeout(() => void pollCursor(), near ? 33 : 120);
     }
@@ -183,18 +197,18 @@ async function start(): Promise<void> {
   void pollCursor();
   setInterval(checkBackpack, 1000);
 
-  bridge.log(`gestart; app vooraan: ${front?.name ?? 'onbekend'}; karakter: ${character()}`);
+  bridge.log(`started; app in front: ${front?.name ?? 'unknown'}; character: ${character()}`);
 
   // The windows of other apps, as places to stand. Often while riding one, rarely otherwise.
   let firstLook = true;
   const pollWindows = async () => {
     try {
       const list = look.climbWindows ? await bridge.windows() : [];
-      if (firstLook && look.climbWindows) bridge.log(`vensters gezien: ${list.length}`);
+      if (firstLook && look.climbWindows) bridge.log(`windows seen: ${list.length}`);
       firstLook = false;
       brain.setWindows(list);
     } catch (e) {
-      bridge.log(`vensters opvragen mislukt: ${String(e)}`);
+      bridge.log(`reading the windows failed: ${String(e)}`);
     } finally {
       const busy = brain.standingOn !== null || brain.mode === 'fall' || brain.mode === 'drag';
       setTimeout(() => void pollWindows(), busy ? 33 : 400);
@@ -222,16 +236,16 @@ async function start(): Promise<void> {
     if (dragging) {
       brain.release();
       if (Math.hypot(brain.vx, brain.vy) > 900) {
-        count('gegooid');
-        say('gegooid', 2000);
+        count('throws');
+        say('thrown', 2000);
       }
     } else {
       // A click answers a reminder (water, a break) as well as being a pat on the head.
       const answered = backpack.answer(Date.now());
       if (answered) checkBackpack();
       brain.pet();
-      count('aai');
-      if (!answered && Math.random() < personality().talksWhenPetted) say('aai', 2500);
+      count('pets');
+      if (!answered && Math.random() < personality().talksWhenPetted) say('petted', 2500);
     }
     pressed = null;
     dragging = false;
@@ -250,8 +264,8 @@ async function start(): Promise<void> {
   let openNotes = (await bridge.getNotes()).filter((n) => !n.done).length;
   bridge.onNotesChanged((open) => {
     if (open > openNotes) {
-      count('notities', open - openNotes);
-      say('genoteerd', 2500);
+      count('notes', open - openNotes);
+      say('noted', 2500);
       brain.pet();
     }
     openNotes = open;
@@ -263,16 +277,37 @@ async function start(): Promise<void> {
     // The cursor we track ourselves is the most reliable place of the drop; the event's own position
     // is only a fallback.
     const onBuddy = cursor ? view.hit(cursor.x, cursor.y, 60) : view.hit(x, y, 60);
-    if (kind === 'drop') bridge.log(`bestand losgelaten (${paths.length}); op het maatje: ${onBuddy}`);
-    if (kind === 'over' && onBuddy && !tasting) brain.notice('uitroep');
+    if (kind === 'drop') bridge.log(`file dropped (${paths.length}); on the buddy: ${onBuddy}`);
+    if (kind === 'over' && onBuddy && !tasting) brain.notice('exclaim');
     tasting = kind === 'over' && onBuddy;
     if (kind === 'drop' && onBuddy && paths.length > 0) {
       brain.pet();
-      count('bestanden', paths.length);
-      say('nom', 1500);
-      void bridge.fileMenu(paths);
+      void adopt(paths).then((added) => {
+        if (added) return;
+        count('files', paths.length);
+        say('nom', 1500);
+        void bridge.fileMenu(paths);
+      });
     }
   });
+
+  /** Pixling files dropped on the buddy are added right away: a new friend, or a new thing to wear. */
+  const adopt = async (paths: string[]): Promise<boolean> => {
+    if (!paths.every((p) => p.toLowerCase().endsWith('.json'))) return false;
+    const found: Creation[] = [];
+    for (const path of paths) {
+      const result = parsePixling(await bridge.readTextFile(path).catch(() => ''));
+      if (!result.ok) return false;
+      found.push(...result.creations);
+    }
+    creations = [...creations, ...found];
+    await bridge.setCreations(creations);
+    const first = found[0];
+    look = await bridge.updateConfig(first.slot === 'buddy' ? { species: first.id } : { accessory: first.id });
+    say({ key: first.slot === 'buddy' ? 'newFriend' : 'newThing', vars: { name: first.name } }, 4000);
+    bridge.log(`added ${found.length} Pixling file(s)`);
+    return true;
+  };
   bridge.onFileDone((message) => view.say(message, 4000, performance.now()));
 
   // Every frame while flying, being dragged or riding a window; about 20 fps otherwise.
@@ -290,16 +325,16 @@ async function start(): Promise<void> {
       // Priority: the backpack, then the app in front, then the time of day.
       const moment = momentFor(new Date());
       const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
-      const shown = look.accessory === 'geen' && moment.hat ? { ...look, accessory: moment.hat } : look;
+      const shown = look.accessory === 'none' && moment.hat ? { ...look, accessory: moment.hat } : look;
       view.draw(shown, brain.pose(input), brain.x, brain.y, now, item);
       if (brain.standingOn !== lastStand) {
         if (brain.standingOn !== null) {
-          count('vensters');
-          if (Math.random() < 0.3) say('venster', 2500);
+          count('climbs');
+          if (Math.random() < 0.3) say('onWindow', 2500);
         }
         lastStand = brain.standingOn;
       }
-      if (lastMode === 'sleep' && brain.mode !== 'sleep' && Math.random() < 0.6) say('wakker', 2500);
+      if (lastMode === 'sleep' && brain.mode !== 'sleep' && Math.random() < 0.6) say('woke', 2500);
       lastMode = brain.mode;
       brain.margin = view.halfWidth;
       brain.tall = view.height;
@@ -308,10 +343,10 @@ async function start(): Promise<void> {
   };
   requestAnimationFrame(frame);
 
-  say({ key: 'groet', vars: { dagdeel: dagdeel(new Date()) } }, 4500);
+  say({ key: 'greeting', vars: { greeting: greetingFor(new Date()) } }, 4500);
 }
 
-window.addEventListener('error', (e) => bridge.log(`fout: ${e.message}`));
-window.addEventListener('unhandledrejection', (e) => bridge.log(`fout: ${String(e.reason)}`));
+window.addEventListener('error', (e) => bridge.log(`error: ${e.message}`));
+window.addEventListener('unhandledrejection', (e) => bridge.log(`error: ${String(e.reason)}`));
 
-start().catch((e) => bridge.log(`starten mislukt: ${String(e)}`));
+start().catch((e) => bridge.log(`starting failed: ${String(e)}`));

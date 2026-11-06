@@ -9,7 +9,7 @@ const empty = document.getElementById('empty') as HTMLElement;
 
 let notes: bridge.Note[] = [];
 
-const when = new Intl.DateTimeFormat('nl', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const when = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 async function save(): Promise<void> {
   await bridge.setNotes(notes);
@@ -24,15 +24,15 @@ function draw(): void {
     const li = document.createElement('li');
     li.classList.toggle('done', note.done);
     const box = Object.assign(document.createElement('input'), { type: 'checkbox', checked: note.done });
-    box.setAttribute('aria-label', 'Klaar');
+    box.setAttribute('aria-label', 'Done');
     box.addEventListener('change', () => {
       note.done = box.checked;
       void save();
     });
     const text = Object.assign(document.createElement('span'), { textContent: note.text });
     const time = Object.assign(document.createElement('time'), { textContent: when.format(note.id) });
-    const remove = Object.assign(document.createElement('button'), { type: 'button', textContent: '×', title: 'Weggooien' });
-    remove.setAttribute('aria-label', 'Weggooien');
+    const remove = Object.assign(document.createElement('button'), { type: 'button', textContent: '×', title: 'Throw away' });
+    remove.setAttribute('aria-label', 'Throw away');
     remove.addEventListener('click', () => {
       notes = notes.filter((n) => n.id !== note.id);
       void save();
@@ -58,4 +58,4 @@ bridge
     notes = loaded;
     draw();
   })
-  .catch((e) => bridge.log(`notities: ${String(e)}`));
+  .catch((e) => bridge.log(`notes: ${String(e)}`));

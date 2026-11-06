@@ -1,0 +1,18 @@
+{
+  "pixling": 1,
+  "type": "accessory",
+  "name": "Heart glasses",
+  "author": "Pixling",
+  "slot": "face",
+  "outline": false,
+  "colors": {
+    "1": "#ff5c8a",
+    "2": "#c2407e"
+  },
+  "pixels": [
+    "11.11..11.11",
+    "1w111221w111",
+    ".111....111.",
+    "..1......1.."
+  ]
+}
