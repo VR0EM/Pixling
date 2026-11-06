@@ -29,7 +29,7 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 - [x] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagavond, oudejaarsavond, Sinterklaas
 - [ ] Je verjaardag (vraagt een datum in de kleerkast)
 - [ ] Typtempo (alleen het tempo, nooit de toetsen)
-- [ ] Tekstballonnen met een eigen pixel-lettertype
+- [x] Tekstballonnen met een eigen pixel-lettertype (Pixelify Sans)
 
 ## Fase 3: Hij helpt
 
@@ -46,9 +46,10 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 
 - [x] Kleerkast-venster met voorbeeld
 - [ ] Pixeleditor voor eigen accessoires, en eigen maatjes inladen
-- [ ] Karakter: rustig, druk, brutaal of lief; zelf zinnetjes schrijven
+- [x] Karakter: rustig, druk, brutaal of lief
+- [ ] Zelf zinnetjes schrijven
 - [ ] Regels: "als … dan …"
-- [ ] Dagboek en "al zo lang maatjes"
+- [x] Dagboek en "al zo lang maatjes"
 
 ## Later
 

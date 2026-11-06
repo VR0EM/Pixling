@@ -1,4 +1,5 @@
 import './wardrobe.css';
+import { PERSONALITIES } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
 import { ACCESSORIES, PALETTES, SPECIES, catalog, render, species, type RenderOptions } from './sprites/index.ts';
 
@@ -82,6 +83,15 @@ async function start(): Promise<void> {
     button: choice(focusBox, `${m} min`, 'pill', () => void change({ focusMinutes: m })),
   }));
 
+  const characterBox = document.getElementById('characters')!;
+  const characterButtons = Object.entries(PERSONALITIES).map(([id, p]) => {
+    const button = el('button', { type: 'button', className: 'character' });
+    button.append(el('strong', { textContent: p.name }), el('span', { textContent: p.description }));
+    button.addEventListener('click', () => void change({ character: id }));
+    characterBox.append(button);
+    return { id, button };
+  });
+
   const habits: [keyof Config | 'autostart', string][] = [
     ['watchApps', 'Kijkt mee met je apps'],
     ['climbWindows', 'Klimt op vensters'],
@@ -128,6 +138,7 @@ async function start(): Promise<void> {
     }
     for (const { id, button } of accessoryButtons) button.setAttribute('aria-pressed', String(id === config.accessory));
     for (const { id, button } of scaleButtons) button.setAttribute('aria-pressed', String(id === config.scale));
+    for (const { id, button } of characterButtons) button.setAttribute('aria-pressed', String(id === config.character));
     for (const { id, button } of focusButtons) button.setAttribute('aria-pressed', String(id === config.focusMinutes));
     for (const { key, input } of habitInputs) input.checked = key === 'autostart' ? autostart : Boolean(config[key]);
   }

@@ -51,6 +51,8 @@ pub struct Catalog {
     pub species: Vec<Choice>,
     pub palettes: Vec<Choice>,
     pub accessories: Vec<Choice>,
+    #[serde(default)]
+    pub characters: Vec<Choice>,
 }
 
 /// The app in front, so the buddy can dress for it. Only the app is known, never what's in it.
@@ -197,6 +199,30 @@ fn open_notes(app: AppHandle) -> Result<(), String> {
     overlay::open_page(&app, overlay::NOTES).map_err(|e| e.to_string())
 }
 
+/// The diary is owned by the webpage; Rust only keeps it in diary.json.
+#[tauri::command]
+fn get_diary(app: AppHandle) -> serde_json::Value {
+    app.path()
+        .app_config_dir()
+        .ok()
+        .and_then(|dir| std::fs::read_to_string(dir.join("diary.json")).ok())
+        .and_then(|text| serde_json::from_str(&text).ok())
+        .unwrap_or_else(|| serde_json::json!({ "days": {} }))
+}
+
+#[tauri::command]
+fn set_diary(app: AppHandle, diary: serde_json::Value) -> Result<(), String> {
+    let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let text = serde_json::to_string_pretty(&diary).map_err(|e| e.to_string())?;
+    std::fs::write(dir.join("diary.json"), text).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn open_diary(app: AppHandle) -> Result<(), String> {
+    overlay::open_page(&app, overlay::DIARY).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn system_info() -> system::SystemInfo {
     system::read()
@@ -282,6 +308,9 @@ pub fn run() {
             set_notes,
             open_notes,
             system_info,
+            get_diary,
+            set_diary,
+            open_diary,
             file_menu,
             get_autostart,
             set_autostart,

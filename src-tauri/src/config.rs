@@ -18,6 +18,10 @@ pub struct Config {
     pub watch_apps: bool,
     /// Climbs onto windows and rides along when they move.
     pub climb_windows: bool,
+    /// Its character: lief, druk, rustig or brutaal. Changes what it says and how lively it is.
+    pub character: String,
+    /// The day the two of you met (YYYY-MM-DD), set by the webpage on the first start.
+    pub met_on: Option<String>,
     /// Backpack: reacts to the battery and to a busy processor.
     pub watch_system: bool,
     /// Backpack: holds up a glass of water now and then.
@@ -39,6 +43,8 @@ impl Default for Config {
             scale: 3,
             watch_apps: true,
             climb_windows: true,
+            character: "lief".into(),
+            met_on: None,
             watch_system: true,
             water: true,
             breaks: true,

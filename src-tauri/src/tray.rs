@@ -51,6 +51,8 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
 
     let wardrobe = MenuItem::with_id(app, "wardrobe", "Kleerkast…", true, None::<&str>)?;
     let notes = MenuItem::with_id(app, "notes", "Notities…", true, None::<&str>)?;
+    let diary = MenuItem::with_id(app, "diary", "Dagboek…", true, None::<&str>)?;
+    let character = choices(app, "Karakter", "character", &catalog.characters, &cfg.character)?;
     let toggle = MenuItem::with_id(
         app,
         "toggle",
@@ -84,11 +86,13 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &toggle,
             &wardrobe,
             &notes,
+            &diary,
             &PredefinedMenuItem::separator(app)?,
             &species,
             &palettes,
             &accessories,
             &size,
+            &character,
             &PredefinedMenuItem::separator(app)?,
             &backpack,
             &PredefinedMenuItem::separator(app)?,
@@ -134,8 +138,12 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
-        "wardrobe" | "notes" => {
-            let label = if id == "notes" { overlay::NOTES } else { overlay::WARDROBE };
+        "wardrobe" | "notes" | "diary" => {
+            let label = match id {
+                "notes" => overlay::NOTES,
+                "diary" => overlay::DIARY,
+                _ => overlay::WARDROBE,
+            };
             if let Err(e) = overlay::open_page(app, label) {
                 eprintln!("Pixling: kon het venster niet openen: {e}");
             }
@@ -166,6 +174,7 @@ fn handle(app: &AppHandle, id: &str) {
                     ("species", _) => cfg.species = value.to_string(),
                     ("palette", _) => cfg.palette = value.to_string(),
                     ("accessory", _) => cfg.accessory = value.to_string(),
+                    ("character", _) => cfg.character = value.to_string(),
                     ("scale", _) => {
                         if let Ok(scale) = value.parse() {
                             cfg.scale = scale;

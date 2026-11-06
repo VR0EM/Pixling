@@ -10,6 +10,8 @@ export interface Config {
   scale: number;
   watchApps: boolean;
   climbWindows: boolean;
+  character: string;
+  metOn: string | null;
   watchSystem: boolean;
   water: boolean;
   breaks: boolean;
@@ -37,6 +39,7 @@ export interface Catalog {
   species: { id: string; name: string }[];
   palettes: { id: string; name: string }[];
   accessories: { id: string; name: string }[];
+  characters: { id: string; name: string }[];
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -46,6 +49,8 @@ export const DEFAULT_CONFIG: Config = {
   scale: 3,
   watchApps: true,
   climbWindows: true,
+  character: 'lief',
+  metOn: null,
   watchSystem: true,
   water: true,
   breaks: true,
@@ -169,6 +174,21 @@ export async function openNotes(): Promise<void> {
 /** Fires with the number of open notes after they were saved. */
 export function onNotesChanged(callback: (open: number) => void): void {
   if (inApp) void listen<number>('notes-changed', (event) => callback(event.payload));
+}
+
+let browserDiary: unknown = { days: {} };
+
+export async function getDiary<T>(): Promise<T> {
+  return (inApp ? invoke('get_diary') : browserDiary) as Promise<T>;
+}
+
+export async function setDiary(diary: unknown): Promise<void> {
+  if (inApp) await invoke('set_diary', { diary });
+  else browserDiary = diary;
+}
+
+export async function openDiary(): Promise<void> {
+  if (inApp) await invoke('open_diary');
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dagboek</title>
+  </head>
+  <body>
+    <main class="diary">
+      <header class="hero">
+        <canvas id="preview" width="32" height="32" aria-hidden="true"></canvas>
+        <div>
+          <h1 id="together"></h1>
+          <p id="since" class="hint"></p>
+        </div>
+      </header>
+      <section>
+        <h2>Vandaag tot nu toe</h2>
+        <p id="today" class="entry"></p>
+      </section>
+      <section>
+        <h2>Eerder</h2>
+        <ol id="days"></ol>
+        <p id="empty" class="hint">Morgen staat hier je eerste dag.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/diary-page.ts"></script>
+  </body>
+</html>

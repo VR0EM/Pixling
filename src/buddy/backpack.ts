@@ -1,3 +1,5 @@
+import type { Line } from './voice.ts';
+
 /**
  * The backpack: small helpers that work through the buddy's behaviour rather than notifications.
  * A focus timer, a water reminder and a break reminder. Pure logic with times in milliseconds, so it
@@ -21,8 +23,8 @@ export interface Advice {
   stayPut: boolean;
   /** Tired: yawns now and then. */
   tired: boolean;
-  /** Text for the balloon, given once when something starts. */
-  say?: string;
+  /** Something to say, given once when something starts (the voice picks the words). */
+  say?: Line;
   /** Text next to the menu bar icon, or null for none. */
   trayTitle: string | null;
 }
@@ -50,7 +52,7 @@ export class Backpack {
   private waterUntil: number | null = null;
   private activeSince: number | null = null;
   private saidTired = false;
-  private pending: string | undefined;
+  private pending: Line | undefined;
 
   constructor(now: number) {
     this.waterDue = now + WATER_EVERY;
@@ -59,13 +61,13 @@ export class Backpack {
   startFocus(now: number, settings: BackpackSettings): void {
     this.phase = 'focus';
     this.phaseEnd = now + settings.focusMinutes * MIN;
-    this.pending = `Focus! ${settings.focusMinutes} minuten, ik lees wel even.`;
+    this.pending = { key: 'focusStart', vars: { min: settings.focusMinutes } };
   }
 
   stopFocus(): void {
     if (this.phase === 'uit') return;
     this.phase = 'uit';
-    this.pending = 'Gestopt. Goed gedaan!';
+    this.pending = { key: 'focusStop' };
   }
 
   /** The buddy was clicked: that answers a water or break reminder. Returns true if it did. */
@@ -73,13 +75,13 @@ export class Backpack {
     if (this.waterUntil !== null) {
       this.waterUntil = null;
       this.waterDue = now + WATER_EVERY;
-      this.pending = 'Proost!';
+      this.pending = { key: 'proost' };
       return true;
     }
     if (this.activeSince !== null && now - this.activeSince > TIRED_AFTER) {
       this.activeSince = now; // snooze: it starts counting again
       this.saidTired = false;
-      this.pending = 'Oké, nog even dan.';
+      this.pending = { key: 'snooze' };
       return true;
     }
     return false;
@@ -91,11 +93,11 @@ export class Backpack {
       if (this.phase === 'focus') {
         this.phase = 'pauze';
         this.phaseEnd = now + settings.breakMinutes * MIN;
-        this.pending = 'Pauze! Even rekken en strekken.';
+        this.pending = { key: 'pauze' };
         this.activeSince = null;
       } else {
         this.phase = 'uit';
-        this.pending = 'Pauze voorbij. Nog een ronde?';
+        this.pending = { key: 'pauzeKlaar' };
       }
     }
 
@@ -110,7 +112,7 @@ export class Backpack {
     const tired = settings.breaks && this.phase === 'uit' && worked > TIRED_AFTER;
     if (tired && !this.saidTired && worked > TIRED_AFTER + TIRED_SAYS) {
       this.saidTired = true;
-      this.pending = 'Even pauze nemen? Ik word er moe van.';
+      this.pending = { key: 'moe' };
     }
 
     // Water, never in the middle of a focus round, and only when someone is there to drink it.
@@ -120,7 +122,7 @@ export class Backpack {
       this.waterDue = now + WATER_EVERY;
     } else if (this.waterUntil === null && now >= this.waterDue && this.phase !== 'focus' && idleMs < MIN) {
       this.waterUntil = now + WATER_SHOWN;
-      this.pending = 'Slokje water?';
+      this.pending = { key: 'water' };
     }
 
     const say = this.pending;

@@ -4,7 +4,7 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 
 ![Alle maatjes in een paar houdingen](docs/sprites.png)
 
-## Wat het nu kan (v0.5)
+## Wat het nu kan (v0.6)
 
 - Zes maatjes: Robotje, Spookje, Boontje, Kat, Konijn en Draakje
 - Zeven kleuren, vier accessoires (feesthoedje, kroontje, mijter, zonnebril) en drie groottes
@@ -18,6 +18,8 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 - **Notities** (in het menu): typ, druk op Enter, klaar; vink af of gooi weg. Je maatje zegt "Genoteerd!"
 - **Batterij en drukte:** onder 20% wordt hij slap en zegt hij het (en nog eens onder 10%), met de stekker erin is hij blij, en als je computer hard werkt zweet hij
 - **Bestanden voeren:** sleep een bestand op je maatje en hij eet het op ("Nom!"); kies dan: zip maken, omzetten naar PNG of JPG, pad kopiëren of tonen in Finder. Het resultaat komt naast het origineel
+- **Karakter:** lief, druk, rustig of brutaal (in de kleerkast of het menu). Het bepaalt wat hij zegt, hoe vaak hij uit zichzelf iets zegt, en hoe snel en graag hij rondloopt. Tekstballonnen in een pixel-lettertype
+- **Dagboek** (in het menu): hoe lang jullie al maatjes zijn, en elke dag één zinnetje over jullie dag, in zijn eigen karakter
 - **Kleerkast:** een venster met een levend voorbeeld waarin je soort, kleur, accessoire, grootte, focusduur en gewoontes kiest. Open het via het menu of met een dubbelklik op het maatje
 - **Tijd van de dag:** koffie 's ochtends, een slaapmuts 's nachts, een feesthoedje op vrijdagavond en oudejaarsavond, een mijter rond Sinterklaas. Hoedjes alleen als je zelf geen accessoire koos
 - Klikken gaan dwars door het venster heen, behalve op het maatje zelf
@@ -49,6 +51,8 @@ Nodig: Node.js 22 of nieuwer, Rust (via rustup) en de Xcode Command Line Tools.
 | `src/buddy/backpack.ts` | De rugzak: focustimer, water- en pauzeherinnering, los van het scherm zodat het testbaar is |
 | `src/buddy/moments.ts` | Wat er bij welk uur of welke dag hoort (koffie, slaapmuts, feest, Sinterklaas) |
 | `src/wardrobe.ts`, `src/notes.ts` | Het kleerkast- en het notitievenster |
+| `src/buddy/voice.ts` | Wat hij zegt, per karakter en situatie |
+| `src/buddy/diary.ts`, `src/diary-page.ts` | Het dagboek: tellingen per dag en de zin die erbij hoort |
 | `src/buddy/system-watch.ts` | Hoe hij reageert op batterij en drukte |
 | `src/buddy/context.ts` | Welke app bij welke context hoort (code, muziek, video, game) |
 | `src/buddy/view.ts` | Tekent het maatje en zijn tekstballon op het canvas |

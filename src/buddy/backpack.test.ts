@@ -11,7 +11,7 @@ describe('Backpack', () => {
     let a = bp.update(0, 0, settings);
     expect(a.item).toBe('boek');
     expect(a.stayPut).toBe(true);
-    expect(a.say).toMatch(/Focus/);
+    expect(a.say).toEqual({ key: 'focusStart', vars: { min: 25 } });
     expect(a.trayTitle).toBe('25:00');
     a = bp.update(10 * MIN + 30_000, 0, settings);
     expect(a.trayTitle).toBe('14:30');
@@ -19,7 +19,7 @@ describe('Backpack', () => {
     a = bp.update(25 * MIN, 0, settings);
     expect(bp.phase).toBe('pauze');
     expect(a.item).toBeUndefined();
-    expect(a.say).toMatch(/Pauze/);
+    expect(a.say?.key).toBe('pauze');
     expect(a.trayTitle).toBe('Pauze 5:00');
     a = bp.update(30 * MIN, 0, settings);
     expect(bp.phase).toBe('uit');
@@ -38,11 +38,11 @@ describe('Backpack', () => {
     expect(bp.update(WATER_EVERY - 1, 0, settings).item).toBeUndefined();
     const a = bp.update(WATER_EVERY, 0, settings);
     expect(a.item).toBe('water');
-    expect(a.say).toBe('Slokje water?');
+    expect(a.say?.key).toBe('water');
     expect(bp.answer(WATER_EVERY + 1000)).toBe(true);
     const b = bp.update(WATER_EVERY + 1000, 0, settings);
     expect(b.item).toBeUndefined();
-    expect(b.say).toBe('Proost!');
+    expect(b.say?.key).toBe('proost');
   });
 
   it('waits with water until a focus round is over, and skips it when nobody is there', () => {
@@ -61,7 +61,7 @@ describe('Backpack', () => {
     expect(a.tired).toBe(true);
     expect(a.say).toBeUndefined();
     a = bp.update(TIRED_AFTER + 6 * MIN, 1000, { ...settings, water: false });
-    expect(a.say).toMatch(/pauze/);
+    expect(a.say?.key).toBe('moe');
     a = bp.update(TIRED_AFTER + 20 * MIN, BREAK_COUNTS + 1, { ...settings, water: false });
     expect(a.tired).toBe(false);
   });

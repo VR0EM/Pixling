@@ -1,14 +1,18 @@
+import '@fontsource/pixelify-sans/500.css';
 import './styles.css';
 import { Backpack } from './buddy/backpack.ts';
-import { Brain, type Input } from './buddy/brain.ts';
+import { Brain, type Input, type Mode } from './buddy/brain.ts';
 import { ITEM_FOR, contextFor } from './buddy/context.ts';
+import { dayKey, emptyDay, sentence, type DayStats, type Diary } from './buddy/diary.ts';
 import { momentFor } from './buddy/moments.ts';
 import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
 import { View } from './buddy/view.ts';
+import { PERSONALITIES, dagdeel, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
 import { catalog } from './sprites/index.ts';
 
-const GREETINGS = ['Hoi! Ik ben je Pixling.', 'Daar ben ik weer!', 'Hallo hallo!'];
+const MIN = 60_000;
+const between = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
 
 async function start(): Promise<void> {
   const canvas = document.getElementById('buddy') as HTMLCanvasElement;
@@ -17,22 +21,63 @@ async function start(): Promise<void> {
   const brain = new Brain(window.innerWidth, window.innerHeight);
 
   let look = await bridge.getConfig();
+  // Remember the day you met, the first time.
+  if (!look.metOn) look = await bridge.updateConfig({ metOn: dayKey(new Date()) });
+
+  const character = (): Character => (isCharacter(look.character) ? look.character : 'lief');
+  const personality = () => PERSONALITIES[character()];
+  /** Says something in the buddy's own voice. */
+  const say = (what: Line | Situation, ms = 4500) =>
+    view.say(line(character(), typeof what === 'string' ? { key: what } : what), ms, performance.now());
+
   let front = await bridge.activeApp();
-  const applyContext = () => {
+  const applyLook = () => {
     brain.context = look.watchApps ? contextFor(front) : null;
+    brain.speed = personality().speed;
+    brain.walkiness = personality().walkiness;
   };
-  applyContext();
-  await bridge.setCatalog(catalog());
+  applyLook();
+  await bridge.setCatalog({
+    ...catalog(),
+    characters: Object.entries(PERSONALITIES).map(([id, p]) => ({ id, name: p.name })),
+  });
   bridge.onConfigChanged((config) => {
     look = config;
-    applyContext();
+    applyLook();
     brain.pet();
   });
   bridge.onActiveApp((app) => {
     front = app;
-    applyContext();
+    applyLook();
   });
   window.addEventListener('resize', () => brain.resize(window.innerWidth, window.innerHeight));
+
+  // The diary: today's counts, saved a few seconds after something happened. Finished days get their
+  // sentence once, in the character the buddy had that evening.
+  const diary = await bridge.getDiary<Diary>();
+  diary.days ??= {};
+  let today = dayKey(new Date());
+  let saveTimer: number | undefined;
+  const saveDiary = () => {
+    clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(() => void bridge.setDiary(diary), 3000);
+  };
+  const closeOldDays = () => {
+    let changed = false;
+    for (const [key, day] of Object.entries(diary.days)) {
+      if (key < today && !day.zin) {
+        day.zin = sentence(day, character());
+        changed = true;
+      }
+    }
+    if (changed) saveDiary();
+  };
+  const count = (what: keyof DayStats, n = 1) => {
+    const day = (diary.days[today] ??= emptyDay());
+    day[what] += n;
+    saveDiary();
+  };
+  closeOldDays();
 
   // The backpack: focus timer and reminders, checked once a second.
   const backpack = new Backpack(Date.now());
@@ -46,25 +91,49 @@ async function start(): Promise<void> {
 
   // Battery and processor; the app reports changes every half minute.
   const systemWatch = new SystemWatch();
-  let system = await bridge.systemInfo();
-  let reaction: SystemReaction = systemWatch.react(system, look.watchSystem);
+  let reaction: SystemReaction = systemWatch.react(await bridge.systemInfo(), look.watchSystem);
   bridge.onSystem((info) => {
-    system = info;
     reaction = systemWatch.react(info, look.watchSystem);
-    if (reaction.say) view.say(reaction.say, 6000, performance.now());
+    if (reaction.say) say(reaction.say, 6000);
   });
+
+  // Now and then it says something by itself, fitting what you're doing.
+  let nextChat = performance.now() + between(...personality().chatter) * MIN;
+  const chatter = (now: number) => {
+    if (now < nextChat) return;
+    nextChat = now + between(...personality().chatter) * MIN;
+    const quiet = brain.stayPut || brain.mode === 'sleep' || now - lastMove > 2 * MIN || !bubble.hidden;
+    if (quiet) return;
+    const hour = new Date().getHours();
+    const specific: Record<string, Situation> = { code: 'kletsenCode', muziek: 'kletsenMuziek', video: 'kletsenVideo', game: 'kletsenGame' };
+    let key: Situation = 'kletsen';
+    if (hour >= 23 || hour < 5) key = 'kletsenNacht';
+    else if (brain.context && Math.random() < 0.6) key = specific[brain.context];
+    say(key, 5000);
+  };
+
   let trayTitle: string | null = null;
   const checkBackpack = () => {
-    advice = backpack.update(Date.now(), performance.now() - lastMove, backpackSettings());
+    const now = new Date();
+    if (dayKey(now) !== today) {
+      today = dayKey(now);
+      closeOldDays();
+    }
+    advice = backpack.update(now.getTime(), performance.now() - lastMove, backpackSettings());
     brain.stayPut = advice.stayPut;
     if (!look.watchSystem) reaction = { tired: false, sweaty: false };
     brain.tired = advice.tired || reaction.tired;
     brain.sweaty = reaction.sweaty;
-    if (advice.say) view.say(advice.say, 5000, performance.now());
+    if (advice.say) {
+      if (advice.say.key === 'pauze') count('focus');
+      if (advice.say.key === 'proost') count('water');
+      say(advice.say, 5000);
+    }
     if (advice.trayTitle !== trayTitle) {
       trayTitle = advice.trayTitle;
       void bridge.setTrayTitle(trayTitle);
     }
+    chatter(performance.now());
   };
   bridge.onBackpack((command) => {
     if (command === 'start') backpack.startFocus(Date.now(), backpackSettings());
@@ -106,7 +175,7 @@ async function start(): Promise<void> {
   void pollCursor();
   setInterval(checkBackpack, 1000);
 
-  bridge.log(`gestart; app vooraan: ${front?.name ?? 'onbekend'}`);
+  bridge.log(`gestart; app vooraan: ${front?.name ?? 'onbekend'}; karakter: ${character()}`);
 
   // The windows of other apps, as places to stand. Often while riding one, rarely otherwise.
   let firstLook = true;
@@ -142,11 +211,19 @@ async function start(): Promise<void> {
   });
   const letGo = () => {
     if (!pressed) return;
-    if (dragging) brain.release();
-    else {
+    if (dragging) {
+      brain.release();
+      if (Math.hypot(brain.vx, brain.vy) > 900) {
+        count('gegooid');
+        say('gegooid', 2000);
+      }
+    } else {
       // A click answers a reminder (water, a break) as well as being a pat on the head.
-      if (backpack.answer(Date.now())) checkBackpack();
+      const answered = backpack.answer(Date.now());
+      if (answered) checkBackpack();
       brain.pet();
+      count('aai');
+      if (!answered && Math.random() < personality().talksWhenPetted) say('aai', 2500);
     }
     pressed = null;
     dragging = false;
@@ -165,7 +242,8 @@ async function start(): Promise<void> {
   let openNotes = (await bridge.getNotes()).filter((n) => !n.done).length;
   bridge.onNotesChanged((open) => {
     if (open > openNotes) {
-      view.say('Genoteerd!', 2500, performance.now());
+      count('notities', open - openNotes);
+      say('genoteerd', 2500);
       brain.pet();
     }
     openNotes = open;
@@ -182,7 +260,8 @@ async function start(): Promise<void> {
     tasting = kind === 'over' && onBuddy;
     if (kind === 'drop' && onBuddy && paths.length > 0) {
       brain.pet();
-      view.say('Nom!', 1500, performance.now());
+      count('bestanden', paths.length);
+      say('nom', 1500);
       void bridge.fileMenu(paths);
     }
   });
@@ -192,6 +271,7 @@ async function start(): Promise<void> {
   let last = performance.now();
   let lastDraw = 0;
   let lastStand: number | null = null;
+  let lastMode: Mode = brain.mode;
   const frame = (now: number) => {
     const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.standingOn !== null;
     if (busy || now - lastDraw >= 50) {
@@ -205,9 +285,14 @@ async function start(): Promise<void> {
       const shown = look.accessory === 'geen' && moment.hat ? { ...look, accessory: moment.hat } : look;
       view.draw(shown, brain.pose(input), brain.x, brain.y, now, item);
       if (brain.standingOn !== lastStand) {
-        bridge.log(brain.standingOn === null ? 'van het venster af' : `op venster ${brain.standingOn}`);
+        if (brain.standingOn !== null) {
+          count('vensters');
+          if (Math.random() < 0.3) say('venster', 2500);
+        }
         lastStand = brain.standingOn;
       }
+      if (lastMode === 'sleep' && brain.mode !== 'sleep' && Math.random() < 0.6) say('wakker', 2500);
+      lastMode = brain.mode;
       brain.margin = view.halfWidth;
       brain.tall = view.height;
     }
@@ -215,7 +300,7 @@ async function start(): Promise<void> {
   };
   requestAnimationFrame(frame);
 
-  view.say(GREETINGS[Math.floor(Math.random() * GREETINGS.length)], 4000, performance.now());
+  say({ key: 'groet', vars: { dagdeel: dagdeel(new Date()) } }, 4500);
 }
 
 window.addEventListener('error', (e) => bridge.log(`fout: ${e.message}`));

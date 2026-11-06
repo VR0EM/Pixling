@@ -16,6 +16,7 @@
     "install-mac": "tauri build --bundles app && rm -rf /Applications/Pixling.app && cp -R src-tauri/target/release/bundle/macos/Pixling.app /Applications/"
   },
   "dependencies": {
+    "@fontsource/pixelify-sans": "^5.3.0",
     "@tauri-apps/api": "^2.12.4"
   },
   "devDependencies": {

@@ -74,6 +74,9 @@ export class Brain {
   tired = false;
   /** The computer is working hard: wipes its brow now and then. */
   sweaty = false;
+  /** Walking speed in px per second and how keen it is to walk; set from its character. */
+  speed = WALK_SPEED;
+  walkiness = 0.65;
 
   private time = 0;
   private modeStart = 0;
@@ -399,7 +402,7 @@ export class Brain {
       this.drop(this.dir * 80, -300);
       return;
     }
-    const walkChance = this.tired ? 0.2 : this.context === 'code' ? 0.35 : 0.65;
+    const walkChance = this.tired ? 0.2 : this.context === 'code' ? this.walkiness * 0.55 : this.walkiness;
     if (this.mode === 'walk' || this.random() > walkChance) {
       this.setMode('idle', this.between(2, 6));
       return;
@@ -452,7 +455,7 @@ export class Brain {
 
   /** Moves along; returns true when it hopped off the edge of a window. */
   private walk(dt: number): boolean {
-    const step = WALK_SPEED * dt;
+    const step = this.speed * dt;
     this.x += this.dir * step;
     this.walked += step;
     const [left, right] = this.floor();
