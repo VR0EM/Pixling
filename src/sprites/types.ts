@@ -31,6 +31,10 @@ export interface Accessory {
   noOutline?: boolean;
   /** Not offered in the menu; the buddy puts it on by itself (a nightcap at night). */
   hidden?: boolean;
+  /** Held at the side, like the items from the backpack. */
+  hand?: boolean;
+  /** Centred on the head instead of starting at the 6-wide hat anchor (for home-made hats). */
+  centered?: boolean;
   rows: string[];
 }
 

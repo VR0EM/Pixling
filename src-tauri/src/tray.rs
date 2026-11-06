@@ -50,6 +50,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .unwrap_or(true);
 
     let wardrobe = MenuItem::with_id(app, "wardrobe", "Kleerkast…", true, None::<&str>)?;
+    let atelier = MenuItem::with_id(app, "atelier", "Atelier…", true, None::<&str>)?;
     let notes = MenuItem::with_id(app, "notes", "Notities…", true, None::<&str>)?;
     let diary = MenuItem::with_id(app, "diary", "Dagboek…", true, None::<&str>)?;
     let character = choices(app, "Karakter", "character", &catalog.characters, &cfg.character)?;
@@ -85,6 +86,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         &[
             &toggle,
             &wardrobe,
+            &atelier,
             &notes,
             &diary,
             &PredefinedMenuItem::separator(app)?,
@@ -138,10 +140,11 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
-        "wardrobe" | "notes" | "diary" => {
+        "wardrobe" | "notes" | "diary" | "atelier" => {
             let label = match id {
                 "notes" => overlay::NOTES,
                 "diary" => overlay::DIARY,
+                "atelier" => overlay::ATELIER,
                 _ => overlay::WARDROBE,
             };
             if let Err(e) = overlay::open_page(app, label) {

@@ -218,6 +218,33 @@ fn set_diary(app: AppHandle, diary: serde_json::Value) -> Result<(), String> {
     std::fs::write(dir.join("diary.json"), text).map_err(|e| e.to_string())
 }
 
+/// Home-made accessories from the atelier, kept in creations.json.
+#[tauri::command]
+fn get_creations(app: AppHandle) -> serde_json::Value {
+    app.path()
+        .app_config_dir()
+        .ok()
+        .and_then(|dir| std::fs::read_to_string(dir.join("creations.json")).ok())
+        .and_then(|text| serde_json::from_str(&text).ok())
+        .unwrap_or_else(|| serde_json::json!([]))
+}
+
+/// Saves them and tells every window, so the buddy and the wardrobe pick them up right away.
+#[tauri::command]
+fn set_creations(app: AppHandle, list: serde_json::Value) -> Result<(), String> {
+    let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let text = serde_json::to_string_pretty(&list).map_err(|e| e.to_string())?;
+    std::fs::write(dir.join("creations.json"), text).map_err(|e| e.to_string())?;
+    let _ = app.emit("creations-changed", &list);
+    Ok(())
+}
+
+#[tauri::command]
+fn open_atelier(app: AppHandle) -> Result<(), String> {
+    overlay::open_page(&app, overlay::ATELIER).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn open_diary(app: AppHandle) -> Result<(), String> {
     overlay::open_page(&app, overlay::DIARY).map_err(|e| e.to_string())
@@ -311,6 +338,9 @@ pub fn run() {
             get_diary,
             set_diary,
             open_diary,
+            get_creations,
+            set_creations,
+            open_atelier,
             file_menu,
             get_autostart,
             set_autostart,

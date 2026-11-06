@@ -4,7 +4,7 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 
 ![Alle maatjes in een paar houdingen](docs/sprites.png)
 
-## Wat het nu kan (v0.6)
+## Wat het nu kan (v0.7)
 
 - Zes maatjes: Robotje, Spookje, Boontje, Kat, Konijn en Draakje
 - Zeven kleuren, vier accessoires (feesthoedje, kroontje, mijter, zonnebril) en drie groottes
@@ -20,6 +20,7 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 - **Bestanden voeren:** sleep een bestand op je maatje en hij eet het op ("Nom!"); kies dan: zip maken, omzetten naar PNG of JPG, pad kopiëren of tonen in Finder. Het resultaat komt naast het origineel
 - **Karakter:** lief, druk, rustig of brutaal (in de kleerkast of het menu). Het bepaalt wat hij zegt, hoe vaak hij uit zichzelf iets zegt, en hoe snel en graag hij rondloopt. Tekstballonnen in een pixel-lettertype
 - **Dagboek** (in het menu): hoe lang jullie al maatjes zijn, en elke dag één zinnetje over jullie dag, in zijn eigen karakter
+- **Atelier** (in het menu of via "Teken je eigen…" in de kleerkast): teken je eigen hoedje, iets voor op het gezicht of iets om vast te houden, met spiegelen en een automatische rand; je ziet het meteen op alle zes de maatjes. Bewaarde creaties staan tussen de gewone accessoires
 - **Kleerkast:** een venster met een levend voorbeeld waarin je soort, kleur, accessoire, grootte, focusduur en gewoontes kiest. Open het via het menu of met een dubbelklik op het maatje
 - **Tijd van de dag:** koffie 's ochtends, een slaapmuts 's nachts, een feesthoedje op vrijdagavond en oudejaarsavond, een mijter rond Sinterklaas. Hoedjes alleen als je zelf geen accessoire koos
 - Klikken gaan dwars door het venster heen, behalve op het maatje zelf
@@ -50,6 +51,7 @@ Nodig: Node.js 22 of nieuwer, Rust (via rustup) en de Xcode Command Line Tools.
 | `src/buddy/brain.ts` | Het gedrag: rondlopen, slapen, slepen, gooien, aaien en op vensters klimmen, los van het scherm zodat het testbaar is |
 | `src/buddy/backpack.ts` | De rugzak: focustimer, water- en pauzeherinnering, los van het scherm zodat het testbaar is |
 | `src/buddy/moments.ts` | Wat er bij welk uur of welke dag hoort (koffie, slaapmuts, feest, Sinterklaas) |
+| `src/atelier.ts`, `src/sprites/creations.ts` | De pixeleditor en hoe eigen creaties accessoires worden |
 | `src/wardrobe.ts`, `src/notes.ts` | Het kleerkast- en het notitievenster |
 | `src/buddy/voice.ts` | Wat hij zegt, per karakter en situatie |
 | `src/buddy/diary.ts`, `src/diary-page.ts` | Het dagboek: tellingen per dag en de zin die erbij hoort |

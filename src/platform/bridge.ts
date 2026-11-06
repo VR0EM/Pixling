@@ -191,6 +191,25 @@ export async function openDiary(): Promise<void> {
   if (inApp) await invoke('open_diary');
 }
 
+let browserCreations: unknown[] = [];
+
+export async function getCreations<T>(): Promise<T[]> {
+  return (inApp ? invoke('get_creations') : Promise.resolve([...browserCreations])) as Promise<T[]>;
+}
+
+export async function setCreations(list: unknown[]): Promise<void> {
+  if (inApp) await invoke('set_creations', { list });
+  else browserCreations = [...list];
+}
+
+export function onCreationsChanged<T>(callback: (list: T[]) => void): void {
+  if (inApp) void listen<T[]>('creations-changed', (event) => callback(event.payload));
+}
+
+export async function openAtelier(): Promise<void> {
+  if (inApp) await invoke('open_atelier');
+}
+
 export async function systemInfo(): Promise<SystemInfo | null> {
   return inApp ? invoke<SystemInfo>('system_info') : null;
 }

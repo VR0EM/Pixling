@@ -9,7 +9,7 @@ import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
 import { View } from './buddy/view.ts';
 import { PERSONALITIES, dagdeel, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
-import { catalog } from './sprites/index.ts';
+import { catalog, setCreations, type Creation } from './sprites/index.ts';
 
 const MIN = 60_000;
 const between = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
@@ -37,9 +37,17 @@ async function start(): Promise<void> {
     brain.walkiness = personality().walkiness;
   };
   applyLook();
-  await bridge.setCatalog({
-    ...catalog(),
-    characters: Object.entries(PERSONALITIES).map(([id, p]) => ({ id, name: p.name })),
+  // Home-made accessories from the atelier, and the menu that lists them.
+  setCreations(await bridge.getCreations<Creation>());
+  const sendCatalog = () =>
+    bridge.setCatalog({
+      ...catalog(),
+      characters: Object.entries(PERSONALITIES).map(([id, p]) => ({ id, name: p.name })),
+    });
+  await sendCatalog();
+  bridge.onCreationsChanged<Creation>((list) => {
+    setCreations(list);
+    void sendCatalog();
   });
   bridge.onConfigChanged((config) => {
     look = config;

@@ -1,4 +1,5 @@
 import { ACCESSORIES } from './accessories.ts';
+import { toAccessory, type Creation } from './creations.ts';
 import { grid, paint, stamp, H, W } from './grid.ts';
 import { ITEMS, itemAnchor } from './items.ts';
 import { FIXED, PALETTES } from './palettes.ts';
@@ -8,10 +9,25 @@ import { kat } from './species/kat.ts';
 import { konijn } from './species/konijn.ts';
 import { robotje } from './species/robotje.ts';
 import { spookje } from './species/spookje.ts';
-import type { RenderOptions, Species, Sprite } from './types.ts';
+import type { Accessory, RenderOptions, Species, Sprite } from './types.ts';
 
 export { ACCESSORIES, ITEMS, PALETTES };
+export type { Creation } from './creations.ts';
 export type { RenderOptions, Species, Sprite };
+
+/** Accessories made in the atelier, by id. */
+const CUSTOM: Record<string, Accessory> = {};
+
+/** Replaces the home-made accessories (after the atelier saved). */
+export function setCreations(list: Creation[]): void {
+  for (const id of Object.keys(CUSTOM)) delete CUSTOM[id];
+  for (const c of list) CUSTOM[c.id] = toAccessory(c);
+  cache.clear();
+}
+
+export function accessory(id: string | undefined): Accessory | null {
+  return ACCESSORIES[id ?? ''] ?? CUSTOM[id ?? ''] ?? null;
+}
 
 export const SPECIES: Species[] = [robotje, spookje, boontje, kat, konijn, draakje];
 
@@ -28,7 +44,7 @@ export function catalog() {
     palettes: [{ id: 'eigen', name: 'Eigen kleur' }, ...Object.entries(PALETTES).map(([id, p]) => ({ id, name: p.name }))],
     accessories: [
       { id: 'geen', name: 'Geen' },
-      ...Object.entries(ACCESSORIES)
+      ...Object.entries({ ...ACCESSORIES, ...CUSTOM })
         .filter(([, a]) => !a.hidden)
         .map(([id, a]) => ({ id, name: a.name })),
     ],
@@ -45,9 +61,9 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
 
   const sp = species(speciesId);
   const palette = { ...FIXED, ...(PALETTES[o.palette ?? ''] ?? PALETTES[sp.palette]) };
-  const accessory = ACCESSORIES[o.accessory ?? ''] ?? null;
+  const acc = accessory(o.accessory);
   const item = ITEMS[o.item ?? ''] ?? null;
-  const built = sp.build(o, accessory);
+  const built = sp.build(o, acc);
 
   const out = grid();
   for (const [layer, outline] of built.layers) paint(out, layer, outline);
@@ -60,13 +76,18 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
   };
   // Headphones go under a hat; glasses only when the buddy isn't already wearing something on its face.
   if (item?.slot === 'head') drawItem();
-  if (accessory) {
+  if (acc) {
     const layer = grid();
-    if (accessory.face) stamp(layer, built.glasses[0], built.glasses[1], accessory.rows);
-    else stamp(layer, built.hat[0], built.hat[1] - accessory.rows.length + 1, accessory.rows);
-    paint(out, layer, accessory.noOutline ? null : 'o');
+    if (acc.face) stamp(layer, built.glasses[0], built.glasses[1], acc.rows);
+    else if (acc.hand) stamp(layer, ...(built.hand ?? [23, 19]), acc.rows);
+    else {
+      const width = Math.max(...acc.rows.map((r) => r.length));
+      const x = acc.centered ? built.hat[0] + 3 - Math.round(width / 2) : built.hat[0];
+      stamp(layer, x, built.hat[1] - acc.rows.length + 1, acc.rows);
+    }
+    paint(out, layer, acc.noOutline ? null : 'o');
   }
-  if (item?.slot === 'face' && !accessory?.face) drawItem();
+  if (item?.slot === 'face' && !acc?.face) drawItem();
   if (item?.slot === 'hand') drawItem();
 
   const pixels: (string | null)[][] = [];

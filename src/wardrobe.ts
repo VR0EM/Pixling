@@ -1,7 +1,7 @@
 import './wardrobe.css';
 import { PERSONALITIES } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
-import { ACCESSORIES, PALETTES, SPECIES, catalog, render, species, type RenderOptions } from './sprites/index.ts';
+import { PALETTES, SPECIES, accessory, catalog, render, setCreations, species, type Creation, type RenderOptions } from './sprites/index.ts';
 
 type Config = bridge.Config;
 
@@ -33,6 +33,7 @@ function choice(parent: HTMLElement, label: string, className: string, onPick: (
 async function start(): Promise<void> {
   let config: Config = await bridge.getConfig();
   let autostart = await bridge.getAutostart();
+  setCreations(await bridge.getCreations<Creation>());
   const list = catalog();
 
   const change = async (patch: Partial<Config>) => {
@@ -65,11 +66,23 @@ async function start(): Promise<void> {
     return { id: p.id, button };
   });
 
+  // Accessories, including home-made ones; rebuilt when the atelier saves something.
   const accessoryBox = document.getElementById('accessories')!;
-  const accessoryButtons = list.accessories.map((a) => ({
-    id: a.id,
-    button: choice(accessoryBox, a.name, 'pill', () => void change({ accessory: a.id })),
-  }));
+  let accessoryButtons: { id: string; button: HTMLButtonElement }[] = [];
+  const buildAccessories = () => {
+    accessoryBox.replaceChildren();
+    accessoryButtons = catalog().accessories.map((a) => ({
+      id: a.id,
+      button: choice(accessoryBox, a.name, 'pill', () => void change({ accessory: a.id })),
+    }));
+    choice(accessoryBox, 'Teken je eigen…', 'pill', () => void bridge.openAtelier());
+  };
+  buildAccessories();
+  bridge.onCreationsChanged<Creation>((creations) => {
+    setCreations(creations);
+    buildAccessories();
+    refresh();
+  });
 
   const scaleBox = document.getElementById('scale')!;
   const scaleButtons = [2, 3, 4].map((s) => ({
@@ -124,7 +137,7 @@ async function start(): Promise<void> {
   function refresh(): void {
     const sp = species(config.species);
     const paletteName = PALETTES[config.palette]?.name ?? `eigen kleur (${PALETTES[sp.palette].name.toLowerCase()})`;
-    const accessoryName = ACCESSORIES[config.accessory]?.name.toLowerCase() ?? 'geen accessoire';
+    const accessoryName = accessory(config.accessory)?.name.toLowerCase() ?? 'geen accessoire';
     summary.textContent = `${sp.name} · ${paletteName.toLowerCase()} · ${accessoryName}`;
 
     for (const card of speciesCards) {

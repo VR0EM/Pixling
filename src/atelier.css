@@ -1,0 +1,133 @@
+.atelier {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 28px;
+  padding: 20px 24px;
+}
+
+.atelier h1 {
+  margin: 0 0 12px;
+  font: 500 24px/1.2 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+}
+
+.atelier h2 {
+  margin-top: 4px;
+}
+
+#board {
+  display: block;
+  margin: 14px 0 12px;
+  border: 2px solid var(--line);
+  box-shadow: 3px 3px 0 var(--pick);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.paints {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+  max-width: 400px;
+}
+
+.paint {
+  height: 30px;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.paint.eraser {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 14px 0;
+}
+
+.save {
+  display: flex;
+  gap: 8px;
+}
+
+.save input {
+  flex: 1;
+  padding: 7px 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 2px solid var(--soft);
+  border-radius: 10px;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.save input:focus {
+  border-color: var(--line);
+}
+
+.pill.primary {
+  border-color: var(--line);
+  font-weight: 600;
+}
+
+#message {
+  min-height: 20px;
+  margin-top: 8px;
+}
+
+.previews {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.previews canvas {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--soft);
+  border-radius: 10px;
+  image-rendering: pixelated;
+}
+
+#mine {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#mine li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--soft);
+}
+
+#mine li canvas {
+  width: 40px;
+  height: 40px;
+  background: var(--soft);
+  border-radius: 8px;
+  image-rendering: pixelated;
+}
+
+#mine li .label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#mine li .label small {
+  color: var(--muted);
+}
+
+#mine li button {
+  padding: 3px 10px;
+  font-size: 12px;
+}

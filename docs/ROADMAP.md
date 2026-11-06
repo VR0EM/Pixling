@@ -45,7 +45,8 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 ## Fase 4: Hij is van jou
 
 - [x] Kleerkast-venster met voorbeeld
-- [ ] Pixeleditor voor eigen accessoires, en eigen maatjes inladen
+- [x] Pixeleditor voor eigen accessoires (hoedje, gezicht, vasthouden)
+- [ ] Eigen maatjes tekenen of inladen
 - [x] Karakter: rustig, druk, brutaal of lief
 - [ ] Zelf zinnetjes schrijven
 - [ ] Regels: "als … dan …"

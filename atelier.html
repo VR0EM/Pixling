@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atelier</title>
+  </head>
+  <body>
+    <main class="atelier">
+      <section class="workbench">
+        <h1>Atelier</h1>
+        <div id="slots" class="pills"></div>
+        <canvas id="board" aria-label="Tekenvel"></canvas>
+        <div id="paints" class="paints"></div>
+        <div class="tools">
+          <label class="toggle"><input id="mirror" type="checkbox" checked /> <span>Spiegelen</span></label>
+          <label class="toggle"><input id="outline" type="checkbox" checked /> <span>Rand eromheen</span></label>
+          <button id="clear" type="button" class="pill">Leegmaken</button>
+        </div>
+        <form id="save" class="save">
+          <input id="name" type="text" placeholder="Naam" maxlength="24" autocomplete="off" />
+          <button type="submit" class="pill primary">Bewaar en draag</button>
+        </form>
+        <p id="message" class="hint" role="status"></p>
+      </section>
+      <section class="side">
+        <h2>Zo staat het</h2>
+        <div id="previews" class="previews"></div>
+        <h2>Jouw creaties</h2>
+        <ul id="mine"></ul>
+        <p id="none" class="hint">Nog niets bewaard. Teken links iets moois.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/atelier.ts"></script>
+  </body>
+</html>
