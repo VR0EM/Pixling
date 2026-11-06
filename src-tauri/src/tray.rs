@@ -13,8 +13,14 @@ const TRAY_ID: &str = "pixling";
 /// The menu bar icon. Its menu changes the buddy's look and habits; changes are saved and sent to the
 /// frontend.
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
+    // macOS recolours a black template icon for light and dark menu bars; elsewhere the coloured app icon
+    // stays readable on any taskbar.
+    #[cfg(target_os = "macos")]
+    let icon = Image::from_bytes(include_bytes!("../icons/tray.png"))?;
+    #[cfg(not(target_os = "macos"))]
+    let icon = Image::from_bytes(include_bytes!("../icons/32x32.png"))?;
     TrayIconBuilder::with_id(TRAY_ID)
-        .icon(Image::from_bytes(include_bytes!("../icons/tray.png"))?)
+        .icon(icon)
         .icon_as_template(true)
         .tooltip("Pixling")
         .menu(&build_menu(app)?)
@@ -24,10 +30,14 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Shows text next to the menu bar icon (the focus timer), or nothing.
+/// Shows text next to the menu bar icon (the focus timer), or nothing. Windows has no text next to tray
+/// icons, so there it goes in the tooltip.
 pub fn set_title(app: &AppHandle, title: Option<String>) -> tauri::Result<()> {
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        #[cfg(target_os = "macos")]
         tray.set_title(title)?;
+        #[cfg(not(target_os = "macos"))]
+        tray.set_tooltip(Some(title.map(|t| format!("Pixling · {t}")).unwrap_or_else(|| "Pixling".into())))?;
     }
     Ok(())
 }

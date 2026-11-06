@@ -24,6 +24,8 @@ pub fn create(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     fit_to_screen(&window)?;
     #[cfg(target_os = "macos")]
     crate::macos::make_nonactivating(window.ns_window()?);
+    #[cfg(target_os = "windows")]
+    crate::win::make_nonactivating(window.hwnd()?.0);
     window.set_ignore_cursor_events(true)?;
     window.show()?;
     Ok(window)

@@ -13,6 +13,18 @@ describe('contextFor', () => {
     expect(contextFor({ bundleId: 'com.valvesoftware.steam', name: 'Steam' })).toBe('game');
   });
 
+  it('recognises Windows programs by their file name', () => {
+    expect(contextFor({ bundleId: 'code.exe', name: 'Code' })).toBe('code');
+    expect(contextFor({ bundleId: 'windowsterminal.exe', name: 'WindowsTerminal' })).toBe('code');
+    expect(contextFor({ bundleId: 'idea64.exe', name: 'idea64' })).toBe('code');
+    expect(contextFor({ bundleId: 'spotify.exe', name: 'Spotify' })).toBe('music');
+    expect(contextFor({ bundleId: 'vlc.exe', name: 'vlc' })).toBe('video');
+    expect(contextFor({ bundleId: 'steam.exe', name: 'steam' })).toBe('game');
+    // Explorer and the browser aren't one of them.
+    expect(contextFor({ bundleId: 'explorer.exe', name: 'explorer' })).toBeNull();
+    expect(contextFor({ bundleId: 'msedge.exe', name: 'msedge' })).toBeNull();
+  });
+
   it('leaves other apps alone', () => {
     expect(contextFor({ bundleId: 'com.apple.Safari', name: 'Safari' })).toBeNull();
     expect(contextFor({ bundleId: 'md.obsidian', name: 'Obsidian' })).toBeNull();

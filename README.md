@@ -4,6 +4,19 @@ A little pixel buddy that lives on your desktop. It walks along the bottom of yo
 
 ![Every buddy in a few poses](docs/sprites.png)
 
+## Download
+
+| | |
+| --- | --- |
+| **macOS** 11 or newer, Apple Silicon and Intel | [Pixling-mac.dmg](https://github.com/VR0EM/Pixling/releases/latest/download/Pixling-mac.dmg) |
+| **Windows** 10 and 11, installer | [Pixling-windows-setup.exe](https://github.com/VR0EM/Pixling/releases/latest/download/Pixling-windows-setup.exe) |
+| **Windows** 10 and 11, without installing | [Pixling-windows-portable.exe](https://github.com/VR0EM/Pixling/releases/latest/download/Pixling-windows-portable.exe) |
+
+Older versions are on the [releases page](https://github.com/VR0EM/Pixling/releases). Pixling isn't signed by Apple or Microsoft yet, so the first start needs one extra step:
+
+- **macOS:** open the .dmg and drag Pixling to Applications. Open it once; when macOS refuses, go to System Settings → Privacy & Security and click **Open Anyway**.
+- **Windows:** when SmartScreen says "Windows protected your PC", click **More info** → **Run anyway**.
+
 ## What it does (v0.8)
 
 - Six buddies: Robot, Ghost, Sprout, Shroom, Mug and Dragon, plus any you draw or add yourself
@@ -25,7 +38,7 @@ A little pixel buddy that lives on your desktop. It walks along the bottom of yo
 - **Wardrobe:** a window with a living preview where you pick the buddy, colour, accessory, size, focus length and habits. Open it from the menu or by double-clicking your buddy
 - **Time of day:** coffee in the morning, a nightcap at night, a party hat on Friday evening and New Year's Eve, a beanie from December to February. Hats only when you didn't pick an accessory yourself
 - Clicks go straight through the window, except on the buddy itself
-- Lives in the menu bar, without a Dock icon; right-clicking the buddy opens the same menu. That's also where you switch watching, climbing and starting at login on or off
+- Lives in the menu bar (on Windows: the system tray), without a Dock icon; right-clicking the buddy opens the same menu. That's also where you switch watching, climbing and starting at login on or off
 
 The default buddy is the sky-blue Robot.
 
@@ -43,6 +56,14 @@ You need Node.js 22 or newer, Rust (through rustup) and the Xcode Command Line T
 | `npm run sprites` | Draw every buddy to `docs/sprites.png`, to check art |
 | `npm run icons` | Make the app icon and menu bar icon again |
 | `npm run dev` | Only the web pages in your browser, handy for art |
+
+## Making a release
+
+1. Raise the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, and commit.
+2. Push a tag with that version: `git tag v0.8.0` and `git push origin v0.8.0`. Or open **Actions → Release → Run workflow** on GitHub, which tags the version from `package.json`.
+3. GitHub builds the .dmg and both Windows .exe files (about 15 minutes) and publishes them as a release. The download links above always point at the newest one.
+
+Every push to `main` is also checked on macOS and Windows (`.github/workflows/ci.yml`).
 
 ## How it fits together
 
@@ -63,7 +84,8 @@ You need Node.js 22 or newer, Rust (through rustup) and the Xcode Command Line T
 | `src/buddy/view.ts` | Draws the buddy and its speech bubble on the canvas |
 | `src/main.ts` | Ties it all together: asks for the cursor and windows, lets clicks through, the draw loop |
 | `src/legacy.ts` | Translates settings saved while Pixling was in Dutch |
-| `src-tauri/` | The Rust side: the transparent window, the menu bar and the settings; `macos.rs` reads the window list and the app in front |
+| `src-tauri/` | The Rust side: the transparent window, the menu bar and the settings; `macos.rs` and `win.rs` read the window list and the app in front |
+| `.github/workflows/` | Checks on every push, and the release builds for macOS and Windows |
 | `scripts/` | Build helpers: sprite sheet and icons, drawn with the same engine |
 | `examples/` | Example Pixling files |
 | `docs/` | Vision, roadmap, decisions and the guide to creating buddies |
@@ -72,4 +94,8 @@ More: [vision](docs/VISION.md), [roadmap](docs/ROADMAP.md), [decisions](docs/DEC
 
 ## Platforms
 
-macOS first, then Windows, Linux last. Tauri runs on all three, but transparent windows and letting clicks through behave differently on each system, so Windows and Linux still need testing and tuning.
+macOS first, then Windows, Linux last.
+
+- **macOS:** everything works and is tested daily.
+- **Windows:** everything is built for it: climbing windows, watching your apps, feeding it files (zip and PNG/JPG through PowerShell), battery and load, start at login, a buddy that never steals the focus. GitHub checks and builds it on every push, but it hasn't been tried on a real Windows PC yet; tell us what's off.
+- **Linux:** the buddy runs and walks on the ground; windows, apps and file actions are still to come.

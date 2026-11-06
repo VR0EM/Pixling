@@ -75,3 +75,23 @@ Files dropped on the buddy are added when they're Pixling files; other files sti
 ## English everywhere
 
 Pixling started in Dutch. Everything is English now: the app, the docs, ids and code. Settings, creations and diaries saved with the old Dutch ids are translated once at startup (`src/legacy.ts`); buddies and hats that no longer exist fall back to the Robot and no accessory.
+
+## Windows through the Win32 API
+
+`src-tauri/src/win.rs` is the Windows counterpart of `macos.rs`, written against the same `windows` crate version Tauri uses, so nothing is compiled twice.
+
+- **Windows to stand on:** `EnumWindows` front to back, skipping hidden, minimised and cloaked windows (other virtual desktops), tool windows, dialogs, the desktop and the taskbar. The size is the visible frame (`DWMWA_EXTENDED_FRAME_BOUNDS`), without the invisible resize border. Windows reports physical pixels; `lib.rs` divides by the overlay's scale (`PHYSICAL_PIXELS`).
+- **The app in front:** the program behind `GetForegroundWindow`. Windows has no bundle ids, so the file name (`code.exe`) stands in, and `context.ts` has rules for Windows programs.
+- **Dragging a file:** there is no permission-free "a drag is going on" signal, so it counts as dragging when the left button is held and the mouse moved more than 8 pixels.
+- **Never taking the focus:** the overlay gets `WS_EX_NOACTIVATE` (and `WS_EX_TOOLWINDOW` to stay out of Alt+Tab), the Windows version of the non-activating panel.
+- **Files and clipboard:** PowerShell (`Compress-Archive`, .NET's image classes, `Set-Clipboard`) and Explorer, without a console window. Paths go in through environment variables, so a file name can never change what runs.
+- **Battery and load:** `GetSystemPowerStatus`, and the share of processor time that wasn't idle since the previous check (`GetSystemTimes`).
+- **Tray:** the coloured app icon (the black template icon only works on macOS), and the focus timer in the tooltip because Windows has no text next to tray icons.
+
+There's no Windows PC to test on yet, so the Windows side is checked by compiling it for Windows (`cargo check --target x86_64-pc-windows-msvc`) and by GitHub's Windows runners on every push.
+
+## Releases built by GitHub
+
+`.github/workflows/release.yml` builds a universal .dmg (Apple Silicon and Intel in one) on macOS, and an NSIS installer plus the plain program as a portable .exe on Windows, and publishes them as a GitHub release when a version tag is pushed or the workflow is started by hand. The files get fixed names (`Pixling-mac.dmg`, `Pixling-windows-setup.exe`, `Pixling-windows-portable.exe`), so `releases/latest/download/…` links in the README always point at the newest version.
+
+The Mac app is ad-hoc signed (`signingIdentity: "-"`), because macOS calls an unsigned downloaded app "damaged". Real signing and notarisation (Apple) and code signing (Microsoft) need paid certificates; until then the README explains the one extra click on first start. The Windows installer installs for the current user only, so it needs no administrator rights.

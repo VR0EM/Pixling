@@ -6,12 +6,16 @@ export interface FrontApp {
   name: string;
 }
 
-// Matched against "<bundle id> <app name>", so either one can identify the app.
+// Matched against "<bundle id> <app name>", so either one can identify the app. On Windows the "bundle
+// id" is the program's file name, like code.exe.
 const RULES: [RegExp, Context][] = [
-  [/vscode|vscodium|antigravity|xcode|com\.apple\.terminal|iterm|tabby|\bzed\b|cursor|jetbrains|sublime|nova|warp|ghostty|kitty|alacritty|wezterm/i, 'code'],
-  [/spotify|com\.apple\.music|tidal|deezer|soundcloud/i, 'music'],
-  [/com\.apple\.tv|quicktime|stremio|nuvio|videolan|vlc|iina|infuse|netflix|plex|\bmpv\b/i, 'video'],
-  [/steam|valvesoftware|epicgames|\bgog\b|minecraft|com\.apple\.games|battle\.net/i, 'game'],
+  [
+    /vscode|vscodium|antigravity|xcode|com\.apple\.terminal|iterm|tabby|\bzed\b|cursor|jetbrains|sublime|nova|warp|ghostty|kitty|alacritty|wezterm|\bcode\.exe|code - insiders|devenv\.exe|idea64|pycharm|webstorm|clion|rider|goland|rustrover|windowsterminal|\bwt\.exe|powershell|pwsh|\bcmd\.exe|notepad\+\+/i,
+    'code',
+  ],
+  [/spotify|com\.apple\.music|tidal|deezer|soundcloud|itunes|applemusic|foobar2000|musicbee/i, 'music'],
+  [/com\.apple\.tv|quicktime|stremio|nuvio|videolan|vlc|iina|infuse|netflix|plex|\bmpv\b|mpc-hc|potplayer|wmplayer|microsoft\.media\.player|video\.ui/i, 'video'],
+  [/steam|valvesoftware|epicgames|\bgog\b|galaxyclient|minecraft|com\.apple\.games|battle\.net|xboxpcapp/i, 'game'],
 ];
 
 export function contextFor(app: FrontApp | null): Context | null {

@@ -6,6 +6,8 @@ Pixling is a pixel-art desktop buddy: Tauri 2 (Rust) with a TypeScript web page 
 
 - Commits are fine; **never push** unless the user asks.
 - Platform order: macOS first, then Windows, then Linux.
+- The Rust side must also build for Windows (`src-tauri/src/win.rs` mirrors `macos.rs`). GitHub checks every push on macOS and Windows; locally `cargo check --target x86_64-pc-windows-msvc` needs `llvm-rc` on the PATH.
+- Releases: push a version tag (`v0.8.0`) or run the Release workflow; it publishes the .dmg and the Windows .exe files. Raise the version in `package.json`, `Cargo.toml` and `tauri.conf.json` together.
 - `npm run check` (typecheck and tests) must pass before every commit.
 - Whoever draws a buddy or accessory runs `npm run sprites` and checks `docs/sprites.png`.
 - Everything is in English: the app, the docs, code, ids and comments. Old Dutch ids in saved files are translated in `src/legacy.ts`.

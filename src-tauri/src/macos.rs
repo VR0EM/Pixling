@@ -14,6 +14,9 @@ use std::sync::atomic::{AtomicIsize, Ordering};
 
 use crate::{FrontApp, WindowRect};
 
+/// Window positions on macOS are in points, the same unit as CSS pixels.
+pub const PHYSICAL_PIXELS: bool = false;
+
 /// Makes the app the user was working in active again. Only works on the main thread.
 pub fn deactivate() {
     if let Some(mtm) = MainThreadMarker::new() {

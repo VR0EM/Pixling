@@ -26,7 +26,8 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Reacting to the app in front: laptop for code, headphones (or a boombox) for music, popcorn for video, controller for games
 - [x] Sitting still while you code
 - [ ] Recognising music playing in the background, not only when the music app is in front
-- [ ] Windows and the app in front on Windows and Linux
+- [x] Window list and the app in front on Windows
+- [ ] Window list and the app in front on Linux
 - [x] Time of day and special days: coffee, nightcap, Friday evening, New Year's Eve, winter
 - [ ] Your birthday (asks for a date in the wardrobe)
 - [ ] Typing tempo (only the tempo, never the keys)
@@ -62,5 +63,7 @@ Platform order: macOS first, then Windows, then Linux.
 
 ## Windows and Linux
 
-- [ ] Windows: test transparency, letting clicks through and the system tray; use the work area without the taskbar
+- [x] Windows: window list, app in front, dragging files, file actions, battery and load, tray icon, no focus stealing
+- [x] Downloads: a .dmg and Windows .exe files built by GitHub for every release
+- [ ] Windows: try it on a real PC (transparency, letting clicks through, the tray, DPI scaling, several screens)
 - [ ] Linux: test X11 and Wayland; letting clicks through doesn't work the same everywhere

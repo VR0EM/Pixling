@@ -1,0 +1,107 @@
+# Builds Pixling for macOS (one .dmg for Apple Silicon and Intel) and Windows (an installer and a portable
+# .exe) and publishes them as a GitHub release. Runs when a version tag like v0.8.0 is pushed, or by hand
+# from the Actions tab ("Run workflow"), which tags the version in package.json.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            targets: aarch64-apple-darwin,x86_64-apple-darwin
+            args: --target universal-apple-darwin --bundles dmg
+          - os: windows-latest
+            targets: ''
+            args: --bundles nsis
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.targets }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm run tauri build -- ${{ matrix.args }}
+
+      # Fixed file names, so the links in the README always point at the newest version.
+      - name: Collect the macOS download
+        if: runner.os == 'macOS'
+        run: |
+          mkdir dist-release
+          cp src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg dist-release/Pixling-mac.dmg
+
+      - name: Collect the Windows downloads
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir dist-release
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe dist-release/Pixling-windows-setup.exe
+          cp src-tauri/target/release/pixling.exe dist-release/Pixling-windows-portable.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pixling-${{ runner.os }}
+          path: dist-release/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out the version
+        id: version
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: downloads
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Pixling ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: downloads/*
+          body: |
+            A little pixel buddy that lives on your desktop.
+
+            | Download | For |
+            | --- | --- |
+            | **Pixling-mac.dmg** | macOS 11 or newer, Apple Silicon and Intel |
+            | **Pixling-windows-setup.exe** | Windows 10 and 11, installs Pixling and adds it to the Start menu |
+            | **Pixling-windows-portable.exe** | Windows 10 and 11, runs without installing |
+
+            Pixling isn't signed by Apple or Microsoft yet, so the first start needs one extra step:
+
+            - **macOS:** open the .dmg and drag Pixling to Applications. Open it once; when macOS refuses, go to System Settings → Privacy & Security and click **Open Anyway**.
+            - **Windows:** when SmartScreen says "Windows protected your PC", click **More info** → **Run anyway**.

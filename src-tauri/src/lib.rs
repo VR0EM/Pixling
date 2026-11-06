@@ -10,10 +10,17 @@ mod macos;
 #[cfg(target_os = "macos")]
 use macos as platform;
 
-/// Windows and Linux don't have these yet (macOS comes first); the buddy simply stays on the ground there.
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "windows")]
+mod win;
+#[cfg(target_os = "windows")]
+use win as platform;
+
+/// Linux doesn't have these yet (it comes last); the buddy simply stays on the ground there.
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 mod platform {
     use crate::{FrontApp, WindowRect};
+
+    pub const PHYSICAL_PIXELS: bool = false;
 
     pub fn deactivate() {}
 
@@ -129,9 +136,11 @@ fn windows(window: WebviewWindow) -> Vec<WindowRect> {
         return Vec::new();
     };
     let (ox, oy) = (origin.x as f64 / scale, origin.y as f64 / scale);
+    // macOS reports points (already CSS pixels); Windows reports physical pixels.
+    let k = if platform::PHYSICAL_PIXELS { scale } else { 1.0 };
     platform::windows(std::process::id() as i32)
         .into_iter()
-        .map(|r| WindowRect { x: r.x - ox, y: r.y - oy, ..r })
+        .map(|r| WindowRect { x: r.x / k - ox, y: r.y / k - oy, w: r.w / k, h: r.h / k, ..r })
         .collect()
 }
 
@@ -263,8 +272,7 @@ fn export_file(app: AppHandle, name: String, contents: String) -> Result<String,
     let stem = if stem.is_empty() { "pixling" } else { stem };
     let path = files::free_path(&dir, stem, ext);
     std::fs::write(&path, contents).map_err(|e| e.to_string())?;
-    #[cfg(target_os = "macos")]
-    let _ = std::process::Command::new("open").arg("-R").arg(&path).status();
+    files::reveal_path(&path);
     Ok(path.to_string_lossy().into_owned())
 }
 
