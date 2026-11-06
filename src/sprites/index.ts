@@ -62,17 +62,19 @@ interface Placed {
 }
 
 /** A species' own version; head and face things move along with the breathing. */
-function fromVariant(v: Variant, slot: Placed['slot'], outline: boolean, bob: number): Placed {
+function fromVariant(v: Variant, rows: string[], slot: Placed['slot'], outline: boolean, bob: number): Placed {
   const s = v.slot ?? slot;
-  return { rows: v.rows, x: v.at[0], y: v.at[1] + (s === 'hand' ? 0 : bob), outline: v.outline ?? outline, slot: s };
+  const y = v.at[1] + (s === 'hand' ? 0 : bob);
+  return { rows: v.rows ?? rows, x: v.at[0], y, outline: v.outline ?? outline, slot: s };
 }
 
-function placeItem(item: Item, id: string, built: Built, bob: number): Placed | null {
+function placeItem(item: Item, id: string, built: Built, bob: number, tick: number): Placed | null {
+  const rows = item.frames ? item.frames[tick % item.frames.length] : item.rows;
   const v = item.variants?.[id];
   if (v === null) return null;
-  if (v) return fromVariant(v, item.slot, item.outline, bob);
+  if (v) return fromVariant(v, rows, item.slot, item.outline, bob);
   const [x, y] = itemAnchor(item, built);
-  return { rows: item.rows, x, y, outline: item.outline, slot: item.slot };
+  return { rows, x, y, outline: item.outline, slot: item.slot };
 }
 
 function placeAccessory(acc: Accessory, id: string, built: Built, bob: number): Placed | null {
@@ -80,7 +82,7 @@ function placeAccessory(acc: Accessory, id: string, built: Built, bob: number): 
   const outline = !acc.noOutline;
   const v = acc.variants?.[id];
   if (v === null) return null;
-  if (v) return fromVariant(v, slot, outline, bob);
+  if (v) return fromVariant(v, acc.rows, slot, outline, bob);
   let x: number;
   let y: number;
   if (slot === 'face') [x, y] = built.glasses;
@@ -106,7 +108,10 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
   const palette = { ...FIXED, ...(PALETTES[o.palette ?? ''] ?? PALETTES[sp.palette]) };
   const acc = accessory(o.accessory);
   const item = ITEMS[o.item ?? ''] ?? null;
-  const built = sp.build(o, acc);
+  // Some things catch the buddy's eye, like the screen of its laptop.
+  const variant = item?.variants?.[sp.id];
+  const gaze = variant === null ? undefined : (variant?.gaze ?? item?.gaze);
+  const built = sp.build(gaze !== undefined && o.walk === undefined ? { ...o, faceDx: gaze } : o, acc);
 
   const out = grid();
   for (const [layer, outline] of built.layers) paint(out, layer, outline);
@@ -117,7 +122,7 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
     paint(out, layer, p.outline ? 'o' : null);
   };
   const bob = built.bob ?? 0;
-  const held = item ? placeItem(item, sp.id, built, bob) : null;
+  const held = item ? placeItem(item, sp.id, built, bob, o.tick ?? 0) : null;
   const worn = acc ? placeAccessory(acc, sp.id, built, bob) : null;
   // Headphones go under a hat; glasses only when the buddy isn't already wearing something on its face.
   if (held?.slot === 'head') draw(held);

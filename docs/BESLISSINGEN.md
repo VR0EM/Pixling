@@ -30,7 +30,7 @@ Een eerste versie had zijaanzicht en realistische dieren. Dat werd afgekeurd: he
 Een accessoire of voorwerp heeft één algemene tekening, en mag per soort een eigen versie hebben (`variants` in `accessories.ts` en `items.ts`). Een versie heeft een vaste plek in het grid en beweegt mee met het ademen als ze op het hoofd of gezicht zit; `null` laat het voorwerp bij die soort weg.
 
 - De koptelefoon is voor elk ingebouwd hoofd apart getekend: over de bouten van het Robotje, tussen de hoorns van het Draakje, onder de hoed van de Paddo. De algemene versie is een boombox naast het maatje, zodat ook maatjes zonder eigen tekening (later: zelfgetekende) muziek kunnen luisteren. Het Mokje krijgt ook de boombox.
-- Bij code houdt het maatje een laptop vast in plaats van een leesbril.
+- Bij code staat er een laptop naast het maatje in plaats van een leesbril. De code verschijnt regel per regel (een voorwerp mag per tik een andere tekening hebben, `frames`) en het maatje kijkt naar het scherm zolang het niet wandelt (`gaze`). Een laptop met de achterkant naar je toe, voor de buik, leek te veel op een bordje.
 - Het Robotje draagt een zonnebril die op zijn scherm oplicht, want een zwarte bril valt weg op het donkere scherm.
 - Een hoedje dat boven het grid zou uitsteken zakt zo ver in het hoofd als nodig, zodat ook hoge hoedjes op hoge maatjes (Paddo, Draakje) passen.
 

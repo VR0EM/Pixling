@@ -59,6 +59,17 @@ describe('sprites', () => {
     expect(low(render('boontje', { item: 'koptelefoon' }))).toBeGreaterThan(0);
   });
 
+  it('code appears on the laptop as time goes on', () => {
+    const at = (tick: number) => render('robotje', { item: 'laptop', tick }).pixels.flat().join();
+    expect(new Set([0, 1, 2, 3].map(at)).size).toBe(4);
+  });
+
+  it('the buddy looks at its laptop, except while walking', () => {
+    const look = (o: RenderOptions) => render('robotje', { item: 'laptop', ...o }).pixels.flat().join();
+    expect(look({ faceDx: -1 })).toBe(look({ faceDx: 1 }));
+    expect(look({ faceDx: -1, walk: 1 })).not.toBe(look({ faceDx: 1, walk: 1 }));
+  });
+
   it('a variant of null leaves the item off', () => {
     expect(render('mokje', { item: 'koffie' }).pixels.flat().join()).toBe(render('mokje').pixels.flat().join());
   });

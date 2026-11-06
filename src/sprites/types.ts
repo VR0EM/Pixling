@@ -27,9 +27,12 @@ export interface Palette {
  * its shape (headphones around a mushroom cap, shades on a robot's screen).
  */
 export interface Variant {
-  rows: string[];
+  /** Leave out to keep the general drawing and only move it. */
+  rows?: string[];
   /** Top-left corner in sprite pixels; head and face things move along when the species bobs. */
   at: [number, number];
+  /** Where the buddy looks while holding it (-1 left, 1 right), when it isn't walking. */
+  gaze?: number;
   slot?: 'head' | 'face' | 'hand';
   outline?: boolean;
 }

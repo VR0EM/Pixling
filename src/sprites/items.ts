@@ -16,6 +16,10 @@ export interface Item {
   fixed?: boolean;
   /** Species-specific versions, by species id; null leaves it off that species. */
   variants?: Record<string, Variant | null>;
+  /** Animation: one drawing per tick, used instead of `rows`. */
+  frames?: string[][];
+  /** Where the buddy looks while holding it (-1 left, 1 right), when it isn't walking. */
+  gaze?: number;
 }
 
 /** Headphones drawn around each built-in head; the generic version is a boombox. */
@@ -98,8 +102,19 @@ const HEADPHONES: Record<string, Variant> = /*HP*/ {
   },
 } /*/HP*/;
 
-/** A dark laptop seen from behind the lid, with a code sticker. */
-const LAPTOP = ['.NNNNNNNNNNNNN.', '.NNNqNNNqNqNNN.', '.NNqNNNqNNNqNN.', '.NNNqNqNNNqNNN.', '.NNNNNNNNNNNNN.', 'xXXXXXXXXXXXXXx'];
+/** Code that appears on the laptop line by line, in syntax colours ('p' is the dark screen). */
+const CODE = ['rrpyy', 'pqqqq', 'pptgg'];
+
+/** An open laptop next to the buddy. Frame n has typed n lines and half of the next one, with a cursor. */
+function laptopFrame(n: number): string[] {
+  const line = (i: number) => {
+    const text = i < n ? CODE[i] : i === n ? CODE[i].slice(0, 3) + 'w' : '';
+    return `.Np${text.padEnd(5, 'p')}N.`;
+  };
+  return ['.NNNNNNNN.', '.NppppppN.', ...[0, 1, 2].map(line), '.NNNNNNNN.', '.XxXxXxXx.', 'xxxxxxxxxx'];
+}
+
+const LAPTOP = [0, 1, 2, 3].map(laptopFrame);
 
 /** A little boombox that stands next to the buddy. */
 const BOOMBOX = ['...nnnnnn...', '...n....n...', 'NNNNNNNNNNNN', 'NXXXNqqNXXXN', 'NXnXNryNXnXN', 'NXXXNNNNXXXN', 'NNNNNNNNNNNN'];
@@ -113,10 +128,12 @@ export const ITEMS: Record<string, Item> = {
     slot: 'hand',
     outline: true,
     fixed: true,
-    at: [8, 23],
-    rows: LAPTOP,
-    // The bean plant's eyes and the mug's mouth sit low.
-    variants: { boontje: { at: [8, 24], rows: LAPTOP }, mokje: { at: [8, 24], rows: LAPTOP } },
+    at: [21, 21],
+    rows: LAPTOP[3],
+    frames: LAPTOP,
+    gaze: 1,
+    // The mug's handle is on the right, so its laptop stands on the left.
+    variants: { mokje: { at: [1, 21], gaze: -1 } },
   },
   koptelefoon: {
     name: 'Muziek',
