@@ -189,10 +189,14 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
 
   const pixels: (string | null)[][] = [];
   const box = { x0: W, y0: H, x1: -1, y1: -1 };
+  // Fading out leaves a growing share of the pixels out, in an even 2×2 pattern (at most 3 of every 4).
+  const fade = Math.min(3, Math.max(0, o.fade ?? 0));
+  const ORDER = [0, 2, 3, 1];
   for (let y = 0; y < H; y++) {
     const row: (string | null)[] = [];
     for (let x = 0; x < W; x++) {
-      const k = out[y][o.flip ? W - 1 - x : x];
+      const gone = fade > 0 && ORDER[(y % 2) * 2 + (x % 2)] < fade;
+      const k = gone ? null : out[y][o.flip ? W - 1 - x : x];
       const colour = k ? (palette as Record<string, string | undefined>)[k] ?? '#ff00ff' : null;
       row.push(colour);
       if (colour) {

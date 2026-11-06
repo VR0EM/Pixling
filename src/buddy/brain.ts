@@ -2,7 +2,10 @@ import type { Emote } from '../sprites/emotes.ts';
 import type { Context } from './context.ts';
 
 /** What the buddy is doing right now. */
-export type Mode = 'idle' | 'walk' | 'sleep' | 'drag' | 'fall' | 'land';
+export type Mode = 'idle' | 'walk' | 'sleep' | 'drag' | 'fall' | 'land' | 'fly' | 'phase';
+
+/** Things that happened that the buddy might want to say something about. */
+export type BrainEvent = 'takeoff' | 'landed' | 'vanish' | 'appear' | 'bounce';
 
 export interface Input {
   /** Cursor position in overlay pixels, or null when unknown. */
@@ -25,6 +28,10 @@ export interface Pose {
   emote: Emote | null;
   /** How far the emote has floated up, in sprite pixels. */
   emoteRise: number;
+  /** Flying: wings up (0) or down (1). */
+  flap?: number;
+  /** Fading away or back in, 0 to 3. */
+  fade?: number;
 }
 
 /** Another app's window in overlay pixels. Lists of these are ordered front to back. */
@@ -77,6 +84,13 @@ export class Brain {
   /** Walking speed in px per second and how keen it is to walk; set from its character. */
   speed = WALK_SPEED;
   walkiness = 0.65;
+  /** Species abilities: the dragon flies, the ghost vanishes and hovers, the shroom bounces. */
+  canFly = false;
+  canPhase = false;
+  hovers = false;
+  bouncy = false;
+  /** Things that happened since the app last looked; it empties the list. */
+  events: BrainEvent[] = [];
 
   private time = 0;
   private modeStart = 0;
@@ -103,6 +117,10 @@ export class Brain {
   private followAt: number | null = null;
   /** Where the window it stands on was last seen, to follow it when it moves. */
   private standAt = { x: 0, y: 0 };
+  /** The current flight: from, to, when it started, how long it takes, how high it arcs. */
+  private flight: { x0: number; y0: number; x1: number; y1: number; t0: number; dur: number; arc: number; id: number | null } | null = null;
+  /** Where the ghost reappears, and whether it already moved there. */
+  private phase: { x: number; y: number; id: number | null; moved: boolean } | null = null;
   private readonly random: () => number;
 
   constructor(width: number, height: number, random: () => number = Math.random) {
@@ -215,12 +233,20 @@ export class Brain {
         break;
       case 'drag':
         break;
+      case 'fly':
+        this.flyOn();
+        break;
+      case 'phase':
+        this.phaseOn();
+        break;
     }
   }
 
   /** Starts dragging; `t` is the event time in seconds. */
   grab(px: number, py: number, t: number): void {
     this.standingOn = null;
+    this.flight = null;
+    this.phase = null;
     this.setMode('drag');
     this.grabDx = this.x - px;
     this.grabDy = this.y - py;
@@ -296,6 +322,10 @@ export class Brain {
       case 'fall':
         frame = 'A';
         break;
+      case 'fly':
+        frame = 'A';
+        faceDx = this.dir;
+        break;
       case 'land':
         frame = 'B';
         break;
@@ -316,15 +346,28 @@ export class Brain {
       emoteRise = Math.floor(t / 0.5) % 4;
     }
 
+    // Flapping while flying, and while gliding down after a throw.
+    const gliding = this.canFly && this.mode === 'fall' && this.vy > 0;
+    const flap = this.mode === 'fly' || gliding ? Math.floor(t / 0.13) % 2 : undefined;
+    let fade: number | undefined;
+    if (this.mode === 'phase') {
+      const p = this.elapsed();
+      fade = p < 0.6 ? Math.min(3, Math.floor(p / 0.15)) : Math.max(0, 3 - Math.floor((p - 0.6) / 0.15));
+    }
+    // A hovering buddy floats gently up and down.
+    const hover = this.hovers && (this.mode === 'idle' || this.mode === 'walk' || this.mode === 'phase') ? Math.round(1 + Math.sin(t * 2.4)) : 0;
+
     return {
       frame,
       walk,
       blink: this.mode === 'sleep' || t < this.blinkUntil,
       faceDx,
       tick: Math.floor(t / 0.65) % 4,
-      lift: t < this.hopUntil ? 2 : 0,
+      lift: Math.max(t < this.hopUntil ? 2 : 0, hover),
       emote,
       emoteRise,
+      ...(flap === undefined ? {} : { flap }),
+      ...(fade === undefined ? {} : { fade }),
     };
   }
 
@@ -403,6 +446,9 @@ export class Brain {
       this.setMode('idle', this.between(3, 8)); // coding or watching along, or reading
       return;
     }
+    // Now and then the dragon takes to the air, and the ghost pops up somewhere else.
+    if (this.mode === 'idle' && this.canFly && !this.tired && this.random() < 0.22 && this.takeOff()) return;
+    if (this.mode === 'idle' && this.canPhase && this.random() < 0.15) return this.vanish();
     const roll = this.random();
     if (this.mode === 'idle' && roll < 0.3 && this.climb()) return;
     if (this.mode === 'idle' && this.standingOn !== null && roll < 0.25) {
@@ -479,6 +525,8 @@ export class Brain {
   private fall(dt: number): void {
     const prevY = this.y;
     this.vy += GRAVITY * dt;
+    // The dragon spreads its wings and glides down instead of dropping.
+    if (this.canFly) this.vy = Math.min(this.vy, 420);
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     if (this.x < this.margin) {
@@ -507,13 +555,111 @@ export class Brain {
     if (this.y >= this.height) this.touchDown(null);
   }
 
+  /** Starts a flight to a free window edge or another spot on the ground. False when there's nowhere to go. */
+  private takeOff(): boolean {
+    const spots: { x: number; y: number; id: number | null }[] = [];
+    this.rects.forEach((r, i) => {
+      if (r.id === this.standingOn || !this.fits(r, i)) return;
+      const x = this.freeSpot(r, i);
+      if (x !== null) spots.push({ x, y: r.y, id: r.id });
+    });
+    let to: { x: number; y: number; id: number | null };
+    if (spots.length && this.random() < 0.6) to = spots[Math.floor(this.random() * spots.length)];
+    else {
+      const x = this.margin + this.random() * Math.max(0, this.width - 2 * this.margin);
+      to = { x, y: this.height, id: null };
+    }
+    const dist = Math.hypot(to.x - this.x, to.y - this.y);
+    if (dist < 160) return false;
+    this.flight = {
+      x0: this.x,
+      y0: this.y,
+      x1: to.x,
+      y1: to.y,
+      t0: this.time,
+      dur: clamp(dist / 180, 1.4, 6),
+      arc: 70 + dist * 0.12,
+      id: to.id,
+    };
+    this.standingOn = null;
+    this.dir = to.x >= this.x ? 1 : -1;
+    this.setMode('fly');
+    this.events.push('takeoff');
+    return true;
+  }
+
+  /** One step of a flight: an arc with a little bob, easing out of the start and into the landing. */
+  private flyOn(): void {
+    const f = this.flight;
+    if (!f) return this.setMode('idle', 1);
+    // The window it's heading for may have moved.
+    const index = f.id === null ? -1 : this.rects.findIndex((r) => r.id === f.id);
+    const win = this.rects[index];
+    if (win) {
+      const edge = this.edge();
+      f.x1 = clamp(f.x1, win.x + edge, win.x + win.w - edge);
+      f.y1 = win.y;
+    }
+    const p = Math.min(1, (this.time - f.t0) / f.dur);
+    const e = p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
+    this.x = f.x0 + (f.x1 - f.x0) * e;
+    this.y = Math.max(this.tall, f.y0 + (f.y1 - f.y0) * e - f.arc * Math.sin(Math.PI * p) - 3 * Math.sin(this.time * 9) * Math.sin(Math.PI * p));
+    if (p < 1) return;
+    this.flight = null;
+    if (f.id !== null && !(win && this.uncovered(this.x, win.y, index))) return this.drop(0, 0);
+    this.y = f.y1;
+    this.standingOn = f.id;
+    if (win) this.standAt = { x: win.x, y: win.y };
+    this.setMode('land');
+    this.events.push('landed');
+  }
+
+  /** The ghost fades away and comes back somewhere else: on a free window edge or elsewhere on the floor. */
+  private vanish(): void {
+    const spots: { x: number; y: number; id: number | null }[] = [];
+    this.rects.forEach((r, i) => {
+      if (r.id === this.standingOn || !this.fits(r, i)) return;
+      const x = this.freeSpot(r, i);
+      if (x !== null) spots.push({ x, y: r.y, id: r.id });
+    });
+    const x = this.margin + this.random() * Math.max(0, this.width - 2 * this.margin);
+    const to = spots.length && this.random() < 0.4 ? spots[Math.floor(this.random() * spots.length)] : { x, y: this.height, id: null };
+    this.phase = { ...to, moved: false };
+    this.setMode('phase');
+    this.events.push('vanish');
+  }
+
+  private phaseOn(): void {
+    const ph = this.phase;
+    if (!ph) return this.setMode('idle', 1);
+    if (!ph.moved && this.elapsed() >= 0.6) {
+      const win = ph.id === null ? undefined : this.rects.find((r) => r.id === ph.id);
+      ph.moved = true;
+      if (ph.id !== null && !win) ph.id = null;
+      this.x = ph.x;
+      this.y = win ? win.y : this.height;
+      this.standingOn = ph.id;
+      if (win) this.standAt = { x: win.x, y: win.y };
+      this.events.push('appear');
+    }
+    if (this.elapsed() >= 1.2) {
+      this.phase = null;
+      this.setMode('idle', this.between(2, 4));
+    }
+  }
+
   /** Arrives on a window (or the ground when null): bounces if it came down hard, otherwise lands. */
   private touchDown(win: Rect | null): void {
     this.y = win ? win.y : this.height;
     this.impact = Math.max(this.impact, this.vy);
-    if (this.vy > 500) {
-      this.vy = -this.vy * 0.35;
+    // Spongy: the shroom bounces from lower drops, and higher.
+    if (this.vy > (this.bouncy ? 260 : 500)) {
+      this.vy = -this.vy * (this.bouncy ? 0.6 : 0.35);
       this.vx *= 0.7;
+      if (this.bouncy) {
+        this.say('spores', 0.9);
+        this.events.push('bounce');
+      }
       return;
     }
     this.vx = 0;

@@ -1,7 +1,7 @@
 import { FIXED } from './palettes.ts';
 
 /** Little icons that float above the buddy's head instead of text. */
-export type Emote = 'heart' | 'exclaim' | 'question' | 'zzz' | 'note' | 'sweat';
+export type Emote = 'heart' | 'exclaim' | 'question' | 'zzz' | 'note' | 'sweat' | 'spores' | 'bolt' | 'drop' | 'puff';
 
 const MAPS: Record<Emote, string[]> = {
   heart: ['.r.r.', 'rrrrr', 'rrrrr', '.rrr.', '..r..'],
@@ -10,6 +10,10 @@ const MAPS: Record<Emote, string[]> = {
   zzz: ['wwww', '..w.', '.w..', 'wwww'],
   note: ['..ww', '..ww', '..w.', 'www.', 'ww..'],
   sweat: ['.t..', '.tt.', 'tttt', 'tttt', '.tt.'],
+  spores: ['y...y', '..y..', 'y.y.y', '.y...'],
+  bolt: ['..yy', '.yy.', 'yyyy', '.yy.', 'yy..'],
+  drop: ['..t..', '.ttt.', 'ttttt', 'ttwtt', '.ttt.'],
+  puff: ['.XX.', 'XXXX', 'XXXX', '.XX.'],
 };
 
 const cache = new Map<Emote, (string | null)[][]>();

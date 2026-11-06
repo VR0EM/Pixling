@@ -1,3 +1,5 @@
+import { SPECIES_VOICES } from './species-voice.ts';
+
 /**
  * The buddy's voice: what it says in each situation, depending on its character. Placeholders in
  * {braces} are filled in by `line()`.
@@ -5,7 +7,8 @@
 
 export type Character = 'sweet' | 'hyper' | 'calm' | 'cheeky';
 
-export type Situation =
+/** Situations every buddy can be in. */
+export type BasicSituation =
   | 'greeting'
   | 'petted'
   | 'thrown'
@@ -33,6 +36,27 @@ export type Situation =
   | 'newFriend'
   | 'newThing';
 
+/** Situations only one species gets into; their lines are in species-voice.ts. */
+export type SpeciesSituation =
+  | 'mugCold'
+  | 'mugEmpty'
+  | 'mugRefilled'
+  | 'robotLow'
+  | 'robotCharging'
+  | 'robotCharged'
+  | 'sproutThirsty'
+  | 'sproutWatered'
+  | 'sproutGrew'
+  | 'sproutBloomed'
+  | 'shroomSpores'
+  | 'shroomBounce'
+  | 'dragonTakeoff'
+  | 'dragonLanded'
+  | 'ghostVanish'
+  | 'ghostAppear';
+
+export type Situation = BasicSituation | SpeciesSituation;
+
 /** Something to say: a situation plus the values for its placeholders. */
 export interface Line {
   key: Situation;
@@ -59,9 +83,9 @@ export const PERSONALITIES: Record<Character, Personality> = {
   cheeky: { name: 'Cheeky', description: 'Big mouth, soft heart', speed: 32, walkiness: 0.6, chatter: [6, 11], talksWhenPetted: 0.5 },
 };
 
-type Lines = Partial<Record<Situation, string[]>>;
+type Lines = Partial<Record<BasicSituation, string[]>>;
 
-const SWEET: Record<Situation, string[]> = {
+const SWEET: Record<BasicSituation, string[]> = {
   greeting: ['{greeting}! So glad you’re here.', '{greeting}! I missed you.', 'There you are! {greeting}.'],
   petted: ['Hehe, that tickles.', 'You’re sweet.', 'Again?'],
   thrown: ['Wheee!', 'Whoa, that was fast!'],
@@ -188,10 +212,20 @@ export function greetingFor(date: Date): string {
   return 'Good evening';
 }
 
-/** Picks something to say. Missing lines fall back to the sweet voice, which has them all. */
-export function line(character: Character, { key, vars = {} }: Line, random: () => number = Math.random): string {
-  const options = VOICES[character]?.[key] ?? SWEET[key];
-  const text = options[Math.floor(random() * options.length)] ?? SWEET[key][0];
+/** How often a built-in buddy speaks in its own voice rather than its character's. */
+export const SPECIES_SHARE = 0.5;
+
+/**
+ * Picks something to say. Built-in buddies use their own lines about half the time (always, for their own
+ * situations); otherwise the character speaks. Missing lines fall back to the sweet voice, which has them
+ * all. Returns '' when there's nothing to say.
+ */
+export function line(character: Character, { key, vars = {} }: Line, random: () => number = Math.random, species?: string): string {
+  const own = species ? SPECIES_VOICES[species]?.[key] : undefined;
+  const basic = key in SWEET ? (VOICES[character]?.[key as BasicSituation] ?? SWEET[key as BasicSituation]) : undefined;
+  const options = own?.length && (!basic || random() < SPECIES_SHARE) ? own : basic;
+  if (!options?.length) return '';
+  const text = options[Math.floor(random() * options.length)] ?? options[0];
   return text.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? ''));
 }
 

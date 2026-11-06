@@ -62,7 +62,7 @@ Every layer is a list of up to 32 strings of up to 32 characters: a 32×32 grid 
 | `top` | An antenna, a leaf, a tuft, steam | Breathes with the body; hidden when the buddy wears a hat |
 | `back` | Wings, a tail, ears | Breathes with the body; drawn behind everything |
 
-Pixling animates the buddy, so you only draw one still pose.
+Pixling animates the buddy, so you only draw one still pose. Home-made buddies speak with the character picked in the wardrobe; the voices and tricks of the built-in buddies (the robot charging, the dragon flying, …) are theirs alone.
 
 - **Breathing** moves the body, face, top and back one pixel down; the feet stay.
 - **Walking** lifts whatever is left of column 16 in the feet layer, then whatever is right of it.

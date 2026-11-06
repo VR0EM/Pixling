@@ -220,6 +220,90 @@ describe('Brain', () => {
     });
   });
 
+  describe('species abilities', () => {
+    it('the dragon flies off now and then, flapping, and lands on the ground or a window', () => {
+      const brain = new Brain(1200, 700, seeded(31));
+      brain.canFly = true;
+      const win = { id: 7, x: 300, y: 350, w: 500, h: 300 };
+      let flew = false;
+      let flapped = false;
+      let highest = 700;
+      for (let i = 0; i < 30 * 300 && !flew; i++) {
+        brain.setWindows([win]);
+        brain.update(1 / 30, awake);
+        if (brain.mode === 'fly') {
+          flapped ||= brain.pose(awake).flap !== undefined;
+          highest = Math.min(highest, brain.y);
+        }
+        if (brain.events.includes('landed')) flew = true;
+        brain.events.length = 0;
+      }
+      expect(flew).toBe(true);
+      expect(flapped).toBe(true);
+      expect(highest).toBeLessThan(640);
+      expect(brain.mode).toBe('land');
+      expect([700, 350]).toContain(brain.y);
+    });
+
+    it('the dragon glides down instead of falling hard', () => {
+      const brain = new Brain(800, 600, seeded(32));
+      brain.canFly = true;
+      brain.grab(400, 100, 0);
+      brain.release();
+      let fastest = 0;
+      for (let i = 0; i < 30 * 5; i++) {
+        brain.update(1 / 30, awake);
+        fastest = Math.max(fastest, brain.vy);
+      }
+      expect(fastest).toBeLessThanOrEqual(420);
+      expect(brain.y).toBe(600);
+    });
+
+    it('the ghost fades away and comes back somewhere else, hovering', () => {
+      const brain = new Brain(1200, 700, seeded(33));
+      brain.canPhase = true;
+      brain.hovers = true;
+      let faded = 0;
+      let moved = false;
+      for (let i = 0; i < 30 * 300 && !moved; i++) {
+        const before = brain.x;
+        brain.update(1 / 30, awake);
+        faded = Math.max(faded, brain.pose(awake).fade ?? 0);
+        if (brain.events.includes('appear')) moved = brain.x !== before;
+        brain.events.length = 0;
+      }
+      expect(moved).toBe(true);
+      expect(faded).toBe(3);
+      const lifts = new Set<number>();
+      for (let i = 0; i < 90; i++) {
+        brain.update(1 / 30, awake);
+        if (brain.mode === 'idle') lifts.add(brain.pose(awake).lift);
+      }
+      expect(lifts.size).toBeGreaterThan(1);
+    });
+
+    it('the shroom bounces from a drop that would not bounce anyone else', () => {
+      const bounces = (bouncy: boolean) => {
+        const brain = new Brain(800, 600, seeded(34));
+        brain.bouncy = bouncy;
+        // Held still 30 px up, then let go: too low for a normal bounce.
+        brain.grab(400, 600, 0);
+        brain.dragTo(400, 570, 0.2);
+        brain.dragTo(400, 570, 0.35);
+        brain.release();
+        let up = 0;
+        for (let i = 0; i < 30 * 3; i++) {
+          brain.update(1 / 30, awake);
+          if (brain.events.includes('bounce')) up++;
+          brain.events.length = 0;
+        }
+        return up;
+      };
+      expect(bounces(true)).toBeGreaterThan(0);
+      expect(bounces(false)).toBe(0);
+    });
+  });
+
   describe('watching along', () => {
     it('sits still and watches while a video app is in front', () => {
       const brain = new Brain(800, 600, seeded(14));

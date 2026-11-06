@@ -41,6 +41,24 @@ const buddies = [...SPECIES.map((s) => s.id), ...custom.filter((c) => c.slot ===
 
 const rows: [string, RenderOptions][][] = buddies.map((id) => poses.map((p) => [id, p] as [string, RenderOptions]));
 rows.push(Object.keys(PALETTES).map((p) => ['robot', { palette: p, accessory: 'crown' }]));
+// What makes each built-in buddy itself: low battery and charging, coffee running out, growing, glowing,
+// flying and fading.
+rows.push([
+  ['robot', { charge: 0.15 }],
+  ['robot', { charging: true, charge: 0.4, tick: 1 }],
+  ['mug', { fill: 2, tick: 1 }],
+  ['mug', { fill: 1 }],
+  ['mug', { fill: 0 }],
+  ['sprout', { wilt: true }],
+  ['sprout', { growth: 1 }],
+  ['sprout', { growth: 2 }],
+  ['sprout', { growth: 3 }],
+  ['shroom', { glow: true }],
+  ['dragon', { fly: 0 }],
+  ['dragon', { fly: 1 }],
+  ['ghost', { fade: 1 }],
+  ['ghost', { fade: 2 }],
+]);
 
 const cell = 34;
 const cols = Math.max(...rows.map((r) => r.length));

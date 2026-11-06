@@ -22,6 +22,13 @@ Older versions are on the [releases page](https://github.com/VR0EM/Pixling/relea
 - Six buddies: Robot, Ghost, Sprout, Shroom, Mug and Dragon, plus any you draw or add yourself
 - Eight colours, five accessories (party hat, crown, bow, beanie, sunglasses) and three sizes
 - Walks around, breathes, blinks and looks at your cursor
+- **Every buddy has its own personality:** its own way of talking on top of its character, and something only it does:
+  - **Robot:** its battery drains while you work; it slows down, plugs itself in (a cable, a bolt and a charge bar on its screen) and races around once it's full. Click it when it's low to charge early; plugging in your computer charges it too
+  - **Mug:** the coffee goes cold and runs out; click it for a refill. Fresh every morning
+  - **Dragon:** flies across the screen, sometimes onto a window, and glides down when you throw it
+  - **Ghost:** hovers, fades away and pops up somewhere else
+  - **Sprout:** gets thirsty and droops; water it with a click (or by drinking water together) and it grows a little every day you do, until it blooms
+  - **Shroom:** bounces like a sponge, sneezes spores and glows at night
 - Falls asleep after a minute without mouse movement and wakes up as soon as you move it
 - Pick it up and drag it; let go while moving and you throw it, with gravity and bouncing
 - A click is a pat on the head: it hops and a heart appears; your own app stays active
@@ -77,7 +84,8 @@ Every push to `main` is also checked on macOS and Windows (`.github/workflows/ci
 | `src/buddy/backpack.ts` | The backpack: focus timer, water and break reminders, apart from the screen so it can be tested |
 | `src/buddy/moments.ts` | What goes with which hour or day (coffee, nightcap, party, winter) |
 | `src/wardrobe.ts`, `src/notes.ts` | The wardrobe and notes windows |
-| `src/buddy/voice.ts` | What it says, per character and situation |
+| `src/buddy/voice.ts`, `src/buddy/species-voice.ts` | What it says, per character and situation, and each built-in buddy's own lines |
+| `src/buddy/traits.ts` | What each built-in buddy does on its own: coffee, battery, thirst and growth, glowing |
 | `src/buddy/diary.ts`, `src/diary-page.ts` | The diary: counts per day and the sentence that goes with them |
 | `src/buddy/system-watch.ts` | How it reacts to the battery and load |
 | `src/buddy/context.ts` | Which app belongs to which context (code, music, video, game) |

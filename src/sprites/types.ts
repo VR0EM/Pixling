@@ -72,6 +72,23 @@ export interface RenderOptions {
   flip?: boolean;
   /** Item id from items.ts, picked up because of the app in front. */
   item?: string;
+  /** Flying, with the wings up (0) or down (1). Species that can't fly ignore it. */
+  fly?: number;
+  /** 0 to 3: how much of the buddy has faded away, in a pixel pattern (the ghost vanishing). */
+  fade?: number;
+  // What a species is up to; each species reads only its own.
+  /** Mug: coffee left, 0 (empty) to 3 (full and steaming). */
+  fill?: number;
+  /** Robot: battery, 0 to 1. */
+  charge?: number;
+  /** Robot: plugged in and charging. */
+  charging?: boolean;
+  /** Sprout: 0 (a sprout) to 3 (in bloom). */
+  growth?: number;
+  /** Sprout: thirsty, its leaves hang. */
+  wilt?: boolean;
+  /** Shroom: its spots glow (at night). */
+  glow?: boolean;
 }
 
 /** What a species hands back to the renderer. */

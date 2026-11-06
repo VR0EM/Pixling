@@ -32,6 +32,34 @@ describe('voice', () => {
     expect(texts.size).toBe(characters.length);
   });
 
+  it('gives every built-in buddy its own voice, half of the time', () => {
+    for (const species of ['robot', 'ghost', 'sprout', 'shroom', 'mug', 'dragon']) {
+      const own = line('sweet', { key: 'chat' }, () => 0.1, species);
+      const character = line('sweet', { key: 'chat' }, () => 0.9, species);
+      expect(own).not.toBe(character);
+    }
+    // Home-made buddies just use their character.
+    expect(line('sweet', { key: 'chat' }, () => 0.1, 'buddy-1')).toBe(line('sweet', { key: 'chat' }, () => 0.1));
+  });
+
+  it('has lines for every species-only situation', () => {
+    const own: [string, Situation[]][] = [
+      ['mug', ['mugCold', 'mugEmpty', 'mugRefilled']],
+      ['robot', ['robotLow', 'robotCharging', 'robotCharged']],
+      ['sprout', ['sproutThirsty', 'sproutWatered', 'sproutGrew', 'sproutBloomed']],
+      ['shroom', ['shroomSpores', 'shroomBounce']],
+      ['dragon', ['dragonTakeoff', 'dragonLanded']],
+      ['ghost', ['ghostVanish', 'ghostAppear']],
+    ];
+    for (const [species, keys] of own) {
+      for (const key of keys) {
+        for (const c of characters) expect(line(c, { key }, () => 0.5, species)).not.toBe('');
+      }
+    }
+    // Someone else's situation has nothing to say.
+    expect(line('sweet', { key: 'mugEmpty' }, () => 0.5, 'robot')).toBe('');
+  });
+
   it('greets by time of day', () => {
     expect(greetingFor(new Date('2026-03-10T08:00:00'))).toBe('Good morning');
     expect(greetingFor(new Date('2026-03-10T14:00:00'))).toBe('Good afternoon');

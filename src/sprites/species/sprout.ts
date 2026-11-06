@@ -18,17 +18,28 @@ export const sprout: Species = {
   id: 'sprout',
   name: 'Sprout',
   palette: 'terracotta',
-  build(o) {
-    const droop = o.frame === 'B' ? 1 : 0;
+  build(o, accessory) {
+    // Thirsty, the leaves hang lower and the top bends over.
+    const wilt = o.wilt ? 2 : 0;
+    const droop = (o.frame === 'B' ? 1 : 0) + wilt;
     const fx = o.faceDx ?? 0;
+    const growth = o.growth ?? 0;
+    // Once it has grown, the stem is two pixels taller.
+    const up = growth >= 1 ? 2 : 0;
     const plant = grid();
     const feet = grid();
     const pot = grid();
 
-    stamp(plant, 15, 11, ['GG', 'GG', 'GG', 'GG', 'GG', 'GG', 'GG', 'GG']);
-    stamp(plant, 14, 8, ['.gg.', 'gggg', '.GG.']);
-    stamp(plant, 9, 12 + droop, ['.ggg..', 'gggggg', 'ggggGG', '.gggg.', '..gg..']);
-    stamp(plant, 17, 11 + droop, ['..ggg.', 'gggggg', 'GGgggg', '.gggg.', '..gg..']);
+    stamp(plant, 15, 11 - up, Array(8 + up).fill('GG'));
+    const top = 8 - up;
+    stamp(plant, 14 + (wilt ? 1 : 0), top + wilt, wilt ? ['..gg', '.ggg', 'GG..'] : ['.gg.', 'gggg', '.GG.']);
+    stamp(plant, 9, 12 - up + droop, ['.ggg..', 'gggggg', 'ggggGG', '.gggg.', '..gg..']);
+    stamp(plant, 17, 11 - up + droop, ['..ggg.', 'gggggg', 'GGgggg', '.gggg.', '..gg..']);
+    // A bud, and then a flower, on top (a hat takes its place).
+    if (!accessory?.hat && !wilt) {
+      if (growth === 2) stamp(plant, 15, top - 2, ['mm', 'GG']);
+      if (growth >= 3) stamp(plant, 13, top - 5, ['.m..m.', 'mmmmmm', 'mmyymm', '.myym.', '..GG..']);
+    }
 
     stamp(feet, 12, o.walk === 0 ? 26 : 27, ['ss', 'ss']);
     stamp(feet, 18, o.walk === 2 ? 26 : 27, ['ss', 'ss']);
@@ -45,7 +56,7 @@ export const sprout: Species = {
         [feet, 'o'],
         [pot, 'o'],
       ],
-      hat: [13, 7],
+      hat: [13, 7 - up],
       glasses: [10 + fx, 20],
       bob: 0,
     };

@@ -57,7 +57,8 @@ export const shroom: Species = {
     stamp(feet, 17, o.walk === 2 ? 26 : 27, ['VVVV', 'VVVV']);
     stamp(stem, 11, 16, STEM);
     stamp(cap, 3, 6 + d, CAP);
-    for (const [x, y, rows] of SPOTS) stamp(cap, x, y + d, rows);
+    // At night the spots glow.
+    for (const [x, y, rows] of SPOTS) stamp(cap, x, y + d, o.glow ? rows.map((r) => r.replace(/w/g, 'q')) : rows);
 
     // The face sits on the cream stem, so it stays dark in every palette (charcoal has yellow eyes).
     for (const x of [12 + fx, 18 + fx]) {

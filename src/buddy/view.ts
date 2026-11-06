@@ -49,9 +49,13 @@ export class View {
     return (GROUND_ROW - this.box.y0) * this.scale;
   }
 
-  /** `item` is something picked up because of the app in front, such as headphones. */
-  draw(look: Look, pose: Pose, x: number, y: number, now: number, item?: string): void {
+  /** `item` is something picked up because of the app in front, such as headphones; `extra` is what the
+   * buddy is up to (coffee left, battery, ...). */
+  draw(look: Look, pose: Pose, x: number, y: number, now: number, item?: string, extra: Partial<RenderOptions> = {}): void {
     const options: RenderOptions = {
+      ...extra,
+      fly: pose.flap,
+      fade: pose.fade,
       palette: look.palette === 'default' ? undefined : look.palette,
       accessory: look.accessory === 'none' ? undefined : look.accessory,
       frame: pose.frame,

@@ -52,6 +52,7 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Sharing and adding creations as `.pixling.json` files, also by dropping them on the buddy
 - [x] A prompt and a guide so AI assistants can make buddies
 - [x] Character: calm, hyper, cheeky or sweet
+- [x] Every built-in buddy its own voice and quirk: the robot charges, the mug gets refilled, the dragon flies, the ghost vanishes, the sprout grows, the shroom bounces and glows
 - [ ] Writing your own phrases
 - [ ] Rules: "if … then …"
 - [x] Diary and "buddies for … days"

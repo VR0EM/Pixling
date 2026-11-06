@@ -1,3 +1,4 @@
+import type { SproutSave } from './traits.ts';
 import type { Character } from './voice.ts';
 
 /** What happened on one day; the diary turns it into a sentence. */
@@ -16,9 +17,10 @@ export interface DiaryDay extends DayStats {
   sentence?: string;
 }
 
-/** Stored in diary.json: one entry per day, keyed by date (YYYY-MM-DD). */
+/** Stored in diary.json: one entry per day, keyed by date (YYYY-MM-DD), and how far the sprout has grown. */
 export interface Diary {
   days: Record<string, DiaryDay>;
+  sprout?: SproutSave;
 }
 
 export const emptyDay = (): DiaryDay => ({ pets: 0, throws: 0, focus: 0, water: 0, notes: 0, files: 0, climbs: 0 });

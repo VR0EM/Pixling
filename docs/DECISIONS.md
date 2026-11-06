@@ -95,3 +95,14 @@ There's no Windows PC to test on yet, so the Windows side is checked by compilin
 `.github/workflows/release.yml` builds a universal .dmg (Apple Silicon and Intel in one) on macOS, and an NSIS installer plus the plain program as a portable .exe on Windows, and publishes them as a GitHub release when a version tag is pushed or the workflow is started by hand. The files get fixed names (`Pixling-mac.dmg`, `Pixling-windows-setup.exe`, `Pixling-windows-portable.exe`), so `releases/latest/download/…` links in the README always point at the newest version.
 
 The Mac app is ad-hoc signed (`signingIdentity: "-"`), because macOS calls an unsigned downloaded app "damaged". Real signing and notarisation (Apple) and code signing (Microsoft) need paid certificates; until then the README explains the one extra click on first start. The Windows installer installs for the current user only, so it needs no administrator rights.
+
+## A personality per buddy
+
+The character (sweet, hyper, calm, cheeky) decides how a buddy talks and how lively it is. On top of that every built-in buddy is a someone of its own:
+
+- **Its own voice.** `src/buddy/species-voice.ts` has lines per species: the robot's beeps, the ghost's boos, the sprout's and shroom's puns, the mug's coffee jokes, the dragon's bravado. A built-in buddy uses them about half the time (`SPECIES_SHARE`), so its character still shows; situations only one species gets into (the mug running empty) only have its own lines.
+- **Its own needs.** `src/buddy/traits.ts` counts time at the computer, never the clock, so nothing happens while you're away: the mug cools down and runs out in an hour, the robot's battery lasts about 45 minutes, the sprout gets thirsty after 40. A click answers them (refill, charge, water); drinking water together waters the sprout, and plugging in the computer charges the robot. The sprout grows once per day it's watered and blooms on the third; that's kept in the diary, so it lasts.
+- **Its own moves.** The brain has abilities that only some buddies get: the dragon flies (an arc to a free window edge or another spot, and it glides when thrown), the ghost fades out and back in somewhere else and hovers, the shroom bounces from drops that wouldn't bounce anyone else. The brain reports these as events and the app says something about them now and then, not every time.
+- **Its own looks for it.** Each species draws its states from render options: `charging` and `charge` for the robot, `fill` for the mug, `growth` and `wilt` for the sprout, `glow` for the shroom, `fly` for the dragon. `fade` works for any buddy: it leaves out a growing share of the pixels in a 2×2 pattern.
+
+Home-made buddies stay simple on purpose: they speak with their character only, and can't fly or vanish. That keeps a Pixling file one still drawing.

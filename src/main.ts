@@ -1,11 +1,12 @@
 import '@fontsource/pixelify-sans/500.css';
 import './styles.css';
 import { Backpack } from './buddy/backpack.ts';
-import { Brain, type Input, type Mode } from './buddy/brain.ts';
+import { Brain, type BrainEvent, type Input, type Mode } from './buddy/brain.ts';
 import { ITEM_FOR, contextFor } from './buddy/context.ts';
 import { dayKey, emptyDay, sentence, type DayStats, type Diary } from './buddy/diary.ts';
 import { momentFor } from './buddy/moments.ts';
 import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
+import { Traits, type Reaction, type TraitLook } from './buddy/traits.ts';
 import { View } from './buddy/view.ts';
 import { PERSONALITIES, greetingFor, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
 import { migrateConfig, migrateCreations, migrateDiary } from './legacy.ts';
@@ -31,15 +32,22 @@ async function start(): Promise<void> {
 
   const character = (): Character => (isCharacter(look.character) ? look.character : 'sweet');
   const personality = () => PERSONALITIES[character()];
-  /** Says something in the buddy's own voice. */
-  const say = (what: Line | Situation, ms = 4500) =>
-    view.say(line(character(), typeof what === 'string' ? { key: what } : what), ms, performance.now());
+  /** Says something in the buddy's own voice: its character, and for a built-in buddy its species. */
+  const say = (what: Line | Situation, ms = 4500) => {
+    const text = line(character(), typeof what === 'string' ? { key: what } : what, Math.random, look.species);
+    if (text) view.say(text, ms, performance.now());
+  };
 
   let front = await bridge.activeApp();
   const applyLook = () => {
     brain.context = look.watchApps ? contextFor(front) : null;
     brain.speed = personality().speed;
     brain.walkiness = personality().walkiness;
+    // What only some buddies can do.
+    brain.canFly = look.species === 'dragon';
+    brain.canPhase = look.species === 'ghost';
+    brain.hovers = look.species === 'ghost';
+    brain.bouncy = look.species === 'shroom';
   };
   applyLook();
   // Home-made accessories and buddies from the studio, and the menu that lists them.
@@ -111,12 +119,31 @@ async function start(): Promise<void> {
   });
   let advice = backpack.update(Date.now(), 0, backpackSettings());
 
+  // What makes each built-in buddy itself: coffee, a battery, thirst, glowing spots. The sprout's growth
+  // is kept in the diary.
+  let traits = new Traits(look.species, diary.sprout);
+  let traitLook: TraitLook = traits.look(Date.now(), new Date().getHours());
+  const keepSprout = () => {
+    if (JSON.stringify(diary.sprout) === JSON.stringify(traits.sprout)) return;
+    diary.sprout = { ...traits.sprout };
+    saveDiary();
+  };
+  /** Shows what a trait wants to say or show. */
+  const react = (r: Reaction | undefined, ms = 4000) => {
+    if (!r) return;
+    if (r.emote) brain.notice(r.emote, 1.4);
+    if (r.say) say(r.say, ms);
+    keepSprout();
+  };
+
   // Battery and processor; the app reports changes every half minute.
   const systemWatch = new SystemWatch();
   let reaction: SystemReaction = systemWatch.react(await bridge.systemInfo(), look.watchSystem);
   bridge.onSystem((info) => {
     reaction = systemWatch.react(info, look.watchSystem);
     if (reaction.say) say(reaction.say, 6000);
+    // Plugging in the computer charges the robot too.
+    if (reaction.say?.key === 'charging') react(traits.powered());
   });
 
   // Now and then it says something by itself, fitting what you're doing.
@@ -142,7 +169,12 @@ async function start(): Promise<void> {
       closeOldDays();
     }
     advice = backpack.update(now.getTime(), performance.now() - lastMove, backpackSettings());
-    brain.stayPut = advice.stayPut;
+    if (traits.species !== look.species) traits = new Traits(look.species, diary.sprout);
+    const active = performance.now() - lastMove < 2 * MIN && brain.mode !== 'sleep';
+    react(traits.tick(now.getTime(), active, today, now.getHours()), 5000);
+    traitLook = traits.look(now.getTime(), now.getHours());
+    brain.stayPut = advice.stayPut || traitLook.stayPut;
+    brain.speed = personality().speed * traitLook.speed;
     if (!look.watchSystem) reaction = { tired: false, sweaty: false };
     brain.tired = advice.tired || reaction.tired;
     brain.sweaty = reaction.sweaty;
@@ -150,6 +182,8 @@ async function start(): Promise<void> {
       if (advice.say.key === 'breakStart') count('focus');
       if (advice.say.key === 'cheers') count('water');
       say(advice.say, 5000);
+      // Drinking water together waters the sprout.
+      if (advice.say.key === 'cheers') react(traits.watered(today));
     }
     if (advice.trayTitle !== trayTitle) {
       trayTitle = advice.trayTitle;
@@ -245,7 +279,12 @@ async function start(): Promise<void> {
       if (answered) checkBackpack();
       brain.pet();
       count('pets');
-      if (!answered && Math.random() < personality().talksWhenPetted) say('petted', 2500);
+      // Or it refills the mug, plugs in the robot, waters the sprout...
+      const wanted = answered ? undefined : traits.click(today);
+      if (wanted) {
+        react(wanted, 3500);
+        traitLook = traits.look(Date.now(), new Date().getHours());
+      } else if (!answered && Math.random() < personality().talksWhenPetted) say('petted', 2500);
     }
     pressed = null;
     dragging = false;
@@ -316,7 +355,7 @@ async function start(): Promise<void> {
   let lastStand: number | null = null;
   let lastMode: Mode = brain.mode;
   const frame = (now: number) => {
-    const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.standingOn !== null;
+    const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.mode === 'fly' || brain.mode === 'phase' || brain.standingOn !== null;
     if (busy || now - lastDraw >= 50) {
       const input: Input = { cursor, idleMs: now - lastMove, dragging: fileDrag };
       brain.update((now - last) / 1000, input);
@@ -326,7 +365,19 @@ async function start(): Promise<void> {
       const moment = momentFor(new Date());
       const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
       const shown = look.accessory === 'none' && moment.hat ? { ...look, accessory: moment.hat } : look;
-      view.draw(shown, brain.pose(input), brain.x, brain.y, now, item);
+      view.draw(shown, brain.pose(input), brain.x, brain.y, now, item, traitLook.render);
+      // The dragon announces its flights, the ghost its tricks, the shroom its bounces (not every time).
+      for (const event of brain.events.splice(0)) {
+        const said: Partial<Record<BrainEvent, [Situation, number]>> = {
+          takeoff: ['dragonTakeoff', 0.5],
+          landed: ['dragonLanded', 0.3],
+          vanish: ['ghostVanish', 0.35],
+          appear: ['ghostAppear', 0.5],
+          bounce: ['shroomBounce', 0.3],
+        };
+        const [key, chance] = said[event] ?? [];
+        if (key && bubble.hidden && Math.random() < chance!) say(key, 2200);
+      }
       if (brain.standingOn !== lastStand) {
         if (brain.standingOn !== null) {
           count('climbs');
