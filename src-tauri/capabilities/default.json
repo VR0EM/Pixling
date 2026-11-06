@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Wat het Pixling-venster mag doen",
+  "windows": ["buddy"],
+  "permissions": ["core:default"]
+}

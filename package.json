@@ -1,0 +1,26 @@
+{
+  "name": "pixling",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Pixling: een klein pixelmaatje dat op je bureaublad woont.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test",
+    "sprites": "node scripts/sprite-sheet.ts docs/sprites.png",
+    "icons": "node scripts/make-icons.ts && tauri icon build/app-icon.png"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
