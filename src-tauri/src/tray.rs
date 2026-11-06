@@ -4,12 +4,14 @@ use tauri::{
     tray::TrayIconBuilder,
     AppHandle, Emitter, Manager, Wry,
 };
+use tauri_plugin_autostart::ManagerExt;
 
-use crate::{config, overlay, AppState, Choice};
+use crate::{config, overlay, platform, AppState, Choice};
 
 const TRAY_ID: &str = "pixling";
 
-/// The menu bar icon. Its menu changes the buddy's look; changes are saved and sent to the frontend.
+/// The menu bar icon. Its menu changes the buddy's look and habits; changes are saved and sent to the
+/// frontend.
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
     TrayIconBuilder::with_id(TRAY_ID)
         .icon(Image::from_bytes(include_bytes!("../icons/tray.png"))?)
@@ -53,6 +55,16 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .map(|s| Choice { id: s.to_string(), name: format!("{s}×") })
         .collect();
     let size = choices(app, "Grootte", "scale", &sizes, &cfg.scale.to_string())?;
+    let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Kijkt mee met je apps", true, cfg.watch_apps, None::<&str>)?;
+    let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Klimt op vensters", true, cfg.climb_windows, None::<&str>)?;
+    let login = CheckMenuItem::with_id(
+        app,
+        "autostart",
+        "Start bij inloggen",
+        true,
+        app.autolaunch().is_enabled().unwrap_or(false),
+        None::<&str>,
+    )?;
     let quit = MenuItem::with_id(app, "quit", "Stop Pixling", true, None::<&str>)?;
 
     Menu::with_items(
@@ -64,6 +76,10 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &palettes,
             &accessories,
             &size,
+            &PredefinedMenuItem::separator(app)?,
+            &watch,
+            &climb,
+            &login,
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
@@ -88,20 +104,29 @@ fn handle(app: &AppHandle, id: &str) {
                 let _ = if window.is_visible().unwrap_or(true) { window.hide() } else { window.show() };
             }
         }
+        "autostart" => {
+            let autostart = app.autolaunch();
+            let result = if autostart.is_enabled().unwrap_or(false) { autostart.disable() } else { autostart.enable() };
+            if let Err(e) = result {
+                eprintln!("Pixling: kon 'start bij inloggen' niet aanpassen: {e}");
+            }
+        }
         _ => {
             let Some((group, value)) = id.split_once(':') else { return };
             let state = app.state::<AppState>();
             let cfg = {
                 let mut cfg = state.config.lock().unwrap();
-                match group {
-                    "species" => cfg.species = value.to_string(),
-                    "palette" => cfg.palette = value.to_string(),
-                    "accessory" => cfg.accessory = value.to_string(),
-                    "scale" => {
+                match (group, value) {
+                    ("species", _) => cfg.species = value.to_string(),
+                    ("palette", _) => cfg.palette = value.to_string(),
+                    ("accessory", _) => cfg.accessory = value.to_string(),
+                    ("scale", _) => {
                         if let Ok(scale) = value.parse() {
                             cfg.scale = scale;
                         }
                     }
+                    ("flag", "watchApps") => cfg.watch_apps = !cfg.watch_apps,
+                    ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
                     _ => return,
                 }
                 cfg.clone()
@@ -113,4 +138,6 @@ fn handle(app: &AppHandle, id: &str) {
         }
     }
     let _ = refresh(app);
+    // When the menu was opened by right-clicking the buddy, Pixling became the active app.
+    platform::deactivate();
 }

@@ -7,6 +7,24 @@ export interface Config {
   palette: string;
   accessory: string;
   scale: number;
+  watchApps: boolean;
+  climbWindows: boolean;
+}
+
+/** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
+export interface FrontApp {
+  bundleId: string;
+  name: string;
+  pid: number;
+}
+
+/** Another app's window in overlay pixels; mirrors `WindowRect`. */
+export interface WindowRect {
+  id: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export interface Catalog {
@@ -15,7 +33,14 @@ export interface Catalog {
   accessories: { id: string; name: string }[];
 }
 
-export const DEFAULT_CONFIG: Config = { species: 'robotje', palette: 'hemel', accessory: 'kroon', scale: 3 };
+export const DEFAULT_CONFIG: Config = {
+  species: 'robotje',
+  palette: 'hemel',
+  accessory: 'kroon',
+  scale: 3,
+  watchApps: true,
+  climbWindows: true,
+};
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
 export const inApp = isTauri();
@@ -48,6 +73,24 @@ export async function setClickThrough(on: boolean): Promise<void> {
 
 export function onConfigChanged(callback: (config: Config) => void): void {
   if (inApp) void listen<Config>('config-changed', (event) => callback(event.payload));
+}
+
+/** Other apps' windows, front to back (empty outside macOS for now). */
+export async function windows(): Promise<WindowRect[]> {
+  return inApp ? invoke<WindowRect[]>('windows') : [];
+}
+
+export async function activeApp(): Promise<FrontApp | null> {
+  return inApp ? invoke<FrontApp | null>('active_app') : null;
+}
+
+export function onActiveApp(callback: (app: FrontApp) => void): void {
+  if (inApp) void listen<FrontApp>('active-app', (event) => callback(event.payload));
+}
+
+/** Clicking the buddy makes Pixling active; this hands focus back to the app the user was in. */
+export async function giveBackFocus(): Promise<void> {
+  if (inApp) await invoke('give_back_focus');
 }
 
 /** Opens the menu bar menu at the cursor. */

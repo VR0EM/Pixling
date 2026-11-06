@@ -1,5 +1,6 @@
 import './styles.css';
 import { Brain, type Input } from './buddy/brain.ts';
+import { ITEM_FOR, contextFor } from './buddy/context.ts';
 import { View } from './buddy/view.ts';
 import * as bridge from './platform/bridge.ts';
 import { catalog } from './sprites/index.ts';
@@ -13,10 +14,20 @@ async function start(): Promise<void> {
   const brain = new Brain(window.innerWidth, window.innerHeight);
 
   let look = await bridge.getConfig();
+  let front = await bridge.activeApp();
+  const applyContext = () => {
+    brain.context = look.watchApps ? contextFor(front) : null;
+  };
+  applyContext();
   await bridge.setCatalog(catalog());
   bridge.onConfigChanged((config) => {
     look = config;
+    applyContext();
     brain.pet();
+  });
+  bridge.onActiveApp((app) => {
+    front = app;
+    applyContext();
   });
   window.addEventListener('resize', () => brain.resize(window.innerWidth, window.innerHeight));
 
@@ -28,7 +39,7 @@ async function start(): Promise<void> {
   let pressed: { x: number; y: number } | null = null;
   let dragging = false;
 
-  const poll = async () => {
+  const pollCursor = async () => {
     let near = false;
     try {
       const c = await bridge.cursor();
@@ -45,14 +56,29 @@ async function start(): Promise<void> {
     } catch (e) {
       bridge.log(`cursor opvragen mislukt: ${String(e)}`);
     } finally {
-      setTimeout(() => void poll(), near ? 33 : 120);
+      setTimeout(() => void pollCursor(), near ? 33 : 120);
     }
   };
-  void poll();
+  void pollCursor();
 
-  // Right-click opens the same menu as the menu bar icon; the browser's own menu never shows.
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-  canvas.addEventListener('contextmenu', () => void bridge.showMenu());
+  bridge.log(`gestart; app vooraan: ${front?.name ?? 'onbekend'}`);
+
+  // The windows of other apps, as places to stand. Often while riding one, rarely otherwise.
+  let firstLook = true;
+  const pollWindows = async () => {
+    try {
+      const list = look.climbWindows ? await bridge.windows() : [];
+      if (firstLook && look.climbWindows) bridge.log(`vensters gezien: ${list.length}`);
+      firstLook = false;
+      brain.setWindows(list);
+    } catch (e) {
+      bridge.log(`vensters opvragen mislukt: ${String(e)}`);
+    } finally {
+      const busy = brain.standingOn !== null || brain.mode === 'fall' || brain.mode === 'drag';
+      setTimeout(() => void pollWindows(), busy ? 33 : 400);
+    }
+  };
+  void pollWindows();
 
   canvas.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
@@ -76,21 +102,27 @@ async function start(): Promise<void> {
     pressed = null;
     dragging = false;
     canvas.classList.remove('dragging');
+    void bridge.giveBackFocus();
   };
   canvas.addEventListener('pointerup', letGo);
   canvas.addEventListener('pointercancel', letGo);
 
-  // The loop runs every frame while the buddy flies or is dragged, and at about 20 fps otherwise.
+  // Right-click opens the same menu as the menu bar icon; the browser's own menu never shows.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('contextmenu', () => void bridge.showMenu());
+
+  // Every frame while flying, being dragged or riding a window; about 20 fps otherwise.
   let last = performance.now();
   let lastDraw = 0;
   const frame = (now: number) => {
-    const busy = brain.mode === 'fall' || brain.mode === 'drag';
+    const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.standingOn !== null;
     if (busy || now - lastDraw >= 50) {
       const input: Input = { cursor, idleMs: now - lastMove };
       brain.update((now - last) / 1000, input);
       last = now;
       lastDraw = now;
-      view.draw(look, brain.pose(input), brain.x, brain.y, now);
+      const item = brain.context ? ITEM_FOR[brain.context] : undefined;
+      view.draw(look, brain.pose(input), brain.x, brain.y, now, item);
       brain.margin = view.halfWidth;
       brain.tall = view.height;
     }

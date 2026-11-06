@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emotePixels, type Emote } from './emotes.ts';
-import { ACCESSORIES, PALETTES, SPECIES, catalog, render, type RenderOptions } from './index.ts';
+import { ACCESSORIES, ITEMS, PALETTES, SPECIES, catalog, render, type RenderOptions } from './index.ts';
 
 const poses: RenderOptions[] = [
   {},
@@ -36,6 +36,23 @@ describe('sprites', () => {
       if (!sp.floats) expect(box.y1).toBe(29);
     });
   }
+
+  for (const sp of SPECIES) {
+    it(`${sp.id} can hold or wear every item, with or without accessories`, () => {
+      for (const item of Object.keys(ITEMS)) {
+        for (const accessory of [undefined, ...Object.keys(ACCESSORIES)]) {
+          const sprite = render(sp.id, { item, accessory, faceDx: 1 });
+          expect(sprite.pixels.flat()).not.toContain('#ff00ff');
+        }
+      }
+    });
+  }
+
+  it('reading glasses stay off when sunglasses are on', () => {
+    const shades = render('kat', { accessory: 'zonnebril' }).pixels.flat().join();
+    const both = render('kat', { accessory: 'zonnebril', item: 'leesbril' }).pixels.flat().join();
+    expect(both).toBe(shades);
+  });
 
   it("a hat replaces the robot's antenna", () => {
     const plain = render('robotje').pixels.slice(0, 8).flat().filter(Boolean).length;

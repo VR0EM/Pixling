@@ -13,15 +13,19 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 - [x] Menubalkicoon met keuzemenu, instellingen bewaard in een JSON-bestand
 - [x] Opnieuw passend maken als het Dock of het hoofdscherm verandert
 - [x] Rechtsklik op het maatje opent hetzelfde menu als de menubalk
-- [ ] Klikken op het maatje zonder dat de app waar je in werkt de focus verliest (macOS: niet-activerend paneel)
+- [x] Na een klik krijgt de app waar je in werkte de focus terug
+- [x] Starten bij het inloggen (optie in het menu)
+- [ ] Helemaal geen focuswissel bij een klik (macOS: niet-activerend paneel)
 - [ ] Meerdere schermen: meeverhuizen en tussen schermen gooien
 - [ ] Verstoppen bij fullscreen-apps en videocalls
-- [ ] Starten bij het inloggen (optie in het menu)
 
 ## Fase 2: Hij kijkt mee
 
-- [ ] Op de titelbalk van vensters zitten en meerijden als je het venster sleept (macOS: vensterlijst via CoreGraphics)
-- [ ] Reageren op de actieve app: brilletje bij code, koptelefoon bij muziek, popcorn bij video
+- [x] Op de bovenrand van vensters zitten, meerijden als je het venster sleept, eraf vallen als het sluit of je eraan rukt (macOS)
+- [x] Zelf op vensters springen, en eraf springen
+- [x] Reageren op de actieve app: leesbril bij code, koptelefoon bij muziek, popcorn bij video, controller bij games
+- [ ] Muziek herkennen die op de achtergrond speelt, niet alleen als de muziekapp vooraan staat
+- [ ] Vensters en actieve app op Windows en Linux
 - [ ] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagmiddag, verjaardag, Sinterklaas
 - [ ] Typtempo (alleen het tempo, nooit de toetsen)
 - [ ] Tekstballonnen met een eigen pixel-lettertype

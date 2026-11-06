@@ -14,6 +14,10 @@ pub struct Config {
     pub accessory: String,
     /// How many screen pixels one sprite pixel takes.
     pub scale: u32,
+    /// Dresses up for the app in front (glasses for code, headphones for music, ...).
+    pub watch_apps: bool,
+    /// Climbs onto windows and rides along when they move.
+    pub climb_windows: bool,
 }
 
 impl Default for Config {
@@ -24,6 +28,8 @@ impl Default for Config {
             palette: "hemel".into(),
             accessory: "kroon".into(),
             scale: 3,
+            watch_apps: true,
+            climb_windows: true,
         }
     }
 }

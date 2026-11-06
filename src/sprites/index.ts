@@ -1,5 +1,6 @@
 import { ACCESSORIES } from './accessories.ts';
 import { grid, paint, stamp, H, W } from './grid.ts';
+import { ITEMS, itemAnchor } from './items.ts';
 import { FIXED, PALETTES } from './palettes.ts';
 import { boontje } from './species/boontje.ts';
 import { draakje } from './species/draakje.ts';
@@ -9,7 +10,7 @@ import { robotje } from './species/robotje.ts';
 import { spookje } from './species/spookje.ts';
 import type { RenderOptions, Species, Sprite } from './types.ts';
 
-export { ACCESSORIES, PALETTES };
+export { ACCESSORIES, ITEMS, PALETTES };
 export type { RenderOptions, Species, Sprite };
 
 export const SPECIES: Species[] = [robotje, spookje, boontje, kat, konijn, draakje];
@@ -40,16 +41,28 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
   const sp = species(speciesId);
   const palette = { ...FIXED, ...(PALETTES[o.palette ?? ''] ?? PALETTES[sp.palette]) };
   const accessory = ACCESSORIES[o.accessory ?? ''] ?? null;
+  const item = ITEMS[o.item ?? ''] ?? null;
   const built = sp.build(o, accessory);
 
   const out = grid();
   for (const [layer, outline] of built.layers) paint(out, layer, outline);
+  const drawItem = () => {
+    if (!item) return;
+    const layer = grid();
+    const [x, y] = itemAnchor(item, built);
+    stamp(layer, x, y, item.rows);
+    paint(out, layer, item.outline ? 'o' : null);
+  };
+  // Headphones go under a hat; glasses only when the buddy isn't already wearing something on its face.
+  if (item?.slot === 'head') drawItem();
   if (accessory) {
     const layer = grid();
     if (accessory.face) stamp(layer, built.glasses[0], built.glasses[1], accessory.rows);
     else stamp(layer, built.hat[0], built.hat[1] - accessory.rows.length + 1, accessory.rows);
     paint(out, layer, accessory.noOutline ? null : 'o');
   }
+  if (item?.slot === 'face' && !accessory?.face) drawItem();
+  if (item?.slot === 'hand') drawItem();
 
   const pixels: (string | null)[][] = [];
   const box = { x0: W, y0: H, x1: -1, y1: -1 };

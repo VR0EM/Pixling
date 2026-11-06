@@ -49,7 +49,8 @@ export class View {
     return (GROUND_ROW - this.box.y0) * this.scale;
   }
 
-  draw(look: Look, pose: Pose, x: number, y: number, now: number): void {
+  /** `item` is something picked up because of the app in front, such as headphones. */
+  draw(look: Look, pose: Pose, x: number, y: number, now: number, item?: string): void {
     const options: RenderOptions = {
       palette: look.palette === 'eigen' ? undefined : look.palette,
       accessory: look.accessory === 'geen' ? undefined : look.accessory,
@@ -58,6 +59,7 @@ export class View {
       blink: pose.blink,
       faceDx: pose.faceDx,
       walk: pose.walk,
+      item,
     };
     const key = `${look.species}${JSON.stringify(options)}${pose.emote}${pose.emoteRise}`;
     if (key !== this.key) {

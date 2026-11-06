@@ -4,16 +4,18 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 
 ![Alle maatjes in een paar houdingen](docs/sprites.png)
 
-## Wat het nu kan (v0.1)
+## Wat het nu kan (v0.2)
 
 - Zes maatjes: Robotje, Spookje, Boontje, Kat, Konijn en Draakje
 - Zeven kleuren, vier accessoires (feesthoedje, kroontje, mijter, zonnebril) en drie groottes
 - Wandelt rond, ademt, knippert en kijkt naar je cursor
 - Valt na een minuut zonder muisbeweging in slaap en wordt wakker zodra je de muis beweegt
 - Laat zich oppakken en slepen; laat je los terwijl je beweegt, dan gooi je hem, met zwaartekracht en stuiteren
-- Een klik is een aai: hij springt op en er verschijnt een hartje
+- Een klik is een aai: hij springt op en er verschijnt een hartje; daarna krijgt je eigen app de focus terug
+- **Klimt op je vensters:** springt af en toe op de bovenrand van een venster, rijdt mee als je het venster sleept, en valt eraf als je het sluit of hard opzij rukt. Gooi je hem op een venster, dan landt hij erop
+- **Kijkt mee met je apps:** een leesbril bij je code-editor of terminal, een koptelefoon (en meewiebelen) bij Spotify of Muziek, popcorn bij video, een controller bij Steam. Hij kijkt alleen wélke app vooraan staat, nooit wat erin gebeurt
 - Klikken gaan dwars door het venster heen, behalve op het maatje zelf
-- Leeft in de menubalk, zonder Dock-icoon; je instellingen blijven bewaard
+- Leeft in de menubalk, zonder Dock-icoon; rechtsklik op het maatje opent hetzelfde menu. Daar zet je ook meekijken, klimmen en starten bij inloggen aan of uit
 
 Het standaardmaatje is het Robotje in hemelblauw met een kroontje.
 
@@ -36,10 +38,11 @@ Nodig: Node.js 22 of nieuwer, Rust (via rustup) en de Xcode Command Line Tools.
 | Map | Inhoud |
 | --- | --- |
 | `src/sprites/` | De maatjes, in code getekend: één bestand per soort, plus kleuren, accessoires en emotes |
-| `src/buddy/brain.ts` | Het gedrag: rondlopen, slapen, slepen, gooien en aaien, los van het scherm zodat het testbaar is |
+| `src/buddy/brain.ts` | Het gedrag: rondlopen, slapen, slepen, gooien, aaien en op vensters klimmen, los van het scherm zodat het testbaar is |
+| `src/buddy/context.ts` | Welke app bij welke context hoort (code, muziek, video, game) |
 | `src/buddy/view.ts` | Tekent het maatje en zijn tekstballon op het canvas |
-| `src/main.ts` | Verbindt alles: cursor opvragen, klikken doorlaten, de tekenlus |
-| `src-tauri/` | De Rust-kant: het doorzichtige venster, de menubalk en de instellingen |
+| `src/main.ts` | Verbindt alles: cursor en vensters opvragen, klikken doorlaten, de tekenlus |
+| `src-tauri/` | De Rust-kant: het doorzichtige venster, de menubalk en de instellingen; `macos.rs` haalt de vensterlijst en de app vooraan op |
 | `scripts/` | Bouwhulpjes: sprite-overzicht en iconen, getekend met dezelfde engine |
 | `docs/` | Visie, roadmap en beslissingen |
 

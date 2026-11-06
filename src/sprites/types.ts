@@ -47,6 +47,8 @@ export interface RenderOptions {
   /** Walking phase 0–3: 0 lifts the left foot, 2 the right one. */
   walk?: number;
   flip?: boolean;
+  /** Item id from items.ts, picked up because of the app in front. */
+  item?: string;
 }
 
 /** What a species hands back to the renderer. */
@@ -56,6 +58,8 @@ export interface Built {
   hat: [number, number];
   /** Glasses anchor: top-left of the 12-wide glasses. */
   glasses: [number, number];
+  /** Where a held item's top-left goes, if the default spot doesn't suit this species. */
+  hand?: [number, number];
 }
 
 export interface Species {
