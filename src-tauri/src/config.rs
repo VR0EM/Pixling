@@ -18,6 +18,8 @@ pub struct Config {
     pub watch_apps: bool,
     /// Climbs onto windows and rides along when they move.
     pub climb_windows: bool,
+    /// Backpack: reacts to the battery and to a busy processor.
+    pub watch_system: bool,
     /// Backpack: holds up a glass of water now and then.
     pub water: bool,
     /// Backpack: gets tired after an hour without a break.
@@ -37,6 +39,7 @@ impl Default for Config {
             scale: 3,
             watch_apps: true,
             climb_windows: true,
+            watch_system: true,
             water: true,
             breaks: true,
             focus_minutes: 25,

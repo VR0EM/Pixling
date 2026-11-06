@@ -87,6 +87,7 @@ async function start(): Promise<void> {
     ['climbWindows', 'Klimt op vensters'],
     ['water', 'Waterherinnering'],
     ['breaks', 'Pauzeherinnering'],
+    ['watchSystem', 'Let op batterij en drukte'],
     ['autostart', 'Start bij inloggen'],
   ];
   const habitBox = document.getElementById('habits')!;

@@ -70,6 +70,8 @@ export class Brain {
   stayPut = false;
   /** Worked too long without a break: yawns now and then and walks less. */
   tired = false;
+  /** The computer is working hard: wipes its brow now and then. */
+  sweaty = false;
 
   private time = 0;
   private modeStart = 0;
@@ -83,6 +85,7 @@ export class Brain {
   private hopUntil = 0;
   private nextNoteAt = 3;
   private nextYawnAt = 0;
+  private nextSweatAt = 0;
   private impact = 0;
   private grabDx = 0;
   private grabDy = 0;
@@ -161,6 +164,10 @@ export class Brain {
           this.say('noot', 1);
           this.nextNoteAt = this.time + this.between(3, 6);
         }
+        if (this.sweaty && this.time > this.nextSweatAt) {
+          this.say('zweet', 1.2);
+          this.nextSweatAt = this.time + this.between(6, 10);
+        }
         if (this.tired && this.time > this.nextYawnAt) {
           this.say('slaap', 1.2);
           this.nextYawnAt = this.time + this.between(8, 15);
@@ -235,6 +242,11 @@ export class Brain {
     if (this.mode === 'sleep') this.setMode('idle', 3);
     this.say('hart', 1.1);
     this.hop();
+  }
+
+  /** Shows an emote for a moment, e.g. surprise when a file is dragged over it. */
+  notice(emote: Emote, seconds = 0.8): void {
+    this.say(emote, seconds);
   }
 
   /** Leaps up to a higher spot, such as a window's top edge, and lands there on the way down. */

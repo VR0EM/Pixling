@@ -3,6 +3,7 @@ import { Backpack } from './buddy/backpack.ts';
 import { Brain, type Input } from './buddy/brain.ts';
 import { ITEM_FOR, contextFor } from './buddy/context.ts';
 import { momentFor } from './buddy/moments.ts';
+import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
 import { View } from './buddy/view.ts';
 import * as bridge from './platform/bridge.ts';
 import { catalog } from './sprites/index.ts';
@@ -42,11 +43,23 @@ async function start(): Promise<void> {
     breakMinutes: look.breakMinutes,
   });
   let advice = backpack.update(Date.now(), 0, backpackSettings());
+
+  // Battery and processor; the app reports changes every half minute.
+  const systemWatch = new SystemWatch();
+  let system = await bridge.systemInfo();
+  let reaction: SystemReaction = systemWatch.react(system, look.watchSystem);
+  bridge.onSystem((info) => {
+    system = info;
+    reaction = systemWatch.react(info, look.watchSystem);
+    if (reaction.say) view.say(reaction.say, 6000, performance.now());
+  });
   let trayTitle: string | null = null;
   const checkBackpack = () => {
     advice = backpack.update(Date.now(), performance.now() - lastMove, backpackSettings());
     brain.stayPut = advice.stayPut;
-    brain.tired = advice.tired;
+    if (!look.watchSystem) reaction = { tired: false, sweaty: false };
+    brain.tired = advice.tired || reaction.tired;
+    brain.sweaty = reaction.sweaty;
     if (advice.say) view.say(advice.say, 5000, performance.now());
     if (advice.trayTitle !== trayTitle) {
       trayTitle = advice.trayTitle;
@@ -144,6 +157,30 @@ async function start(): Promise<void> {
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('contextmenu', () => void bridge.showMenu());
   canvas.addEventListener('dblclick', () => void bridge.openWardrobe());
+
+  // Notes: say so when one is added.
+  let openNotes = (await bridge.getNotes()).filter((n) => !n.done).length;
+  bridge.onNotesChanged((open) => {
+    if (open > openNotes) {
+      view.say('Genoteerd!', 2500, performance.now());
+      brain.pet();
+    }
+    openNotes = open;
+  });
+
+  // Files dragged onto the buddy get eaten; then a menu asks what to do with them.
+  let tasting = false;
+  bridge.onFileDrop((kind, paths, x, y) => {
+    const onBuddy = view.hit(x, y, 24);
+    if (kind === 'over' && onBuddy && !tasting) brain.notice('uitroep');
+    tasting = kind === 'over' && onBuddy;
+    if (kind === 'drop' && onBuddy && paths.length > 0) {
+      brain.pet();
+      view.say('Nom!', 1500, performance.now());
+      void bridge.fileMenu(paths);
+    }
+  });
+  bridge.onFileDone((message) => view.say(message, 4000, performance.now()));
 
   // Every frame while flying, being dragged or riding a window; about 20 fps otherwise.
   let last = performance.now();

@@ -50,6 +50,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         .unwrap_or(true);
 
     let wardrobe = MenuItem::with_id(app, "wardrobe", "Kleerkast…", true, None::<&str>)?;
+    let notes = MenuItem::with_id(app, "notes", "Notities…", true, None::<&str>)?;
     let toggle = MenuItem::with_id(
         app,
         "toggle",
@@ -82,6 +83,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         &[
             &toggle,
             &wardrobe,
+            &notes,
             &PredefinedMenuItem::separator(app)?,
             &species,
             &palettes,
@@ -110,11 +112,12 @@ fn backpack_menu(app: &AppHandle, cfg: &config::Config) -> tauri::Result<Submenu
     let length = choices(app, "Focusduur", "focus", &lengths, &cfg.focus_minutes.to_string())?;
     let water = CheckMenuItem::with_id(app, "flag:water", "Waterherinnering", true, cfg.water, None::<&str>)?;
     let breaks = CheckMenuItem::with_id(app, "flag:breaks", "Pauzeherinnering", true, cfg.breaks, None::<&str>)?;
+    let system = CheckMenuItem::with_id(app, "flag:watchSystem", "Let op batterij en drukte", true, cfg.watch_system, None::<&str>)?;
     Submenu::with_items(
         app,
         "Rugzak",
         true,
-        &[&start, &stop, &length, &PredefinedMenuItem::separator(app)?, &water, &breaks],
+        &[&start, &stop, &length, &PredefinedMenuItem::separator(app)?, &water, &breaks, &system],
     )
 }
 
@@ -131,12 +134,14 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
-        "wardrobe" => {
-            if let Err(e) = overlay::open_wardrobe(app) {
-                eprintln!("Pixling: kon de kleerkast niet openen: {e}");
+        "wardrobe" | "notes" => {
+            let label = if id == "notes" { overlay::NOTES } else { overlay::WARDROBE };
+            if let Err(e) = overlay::open_page(app, label) {
+                eprintln!("Pixling: kon het venster niet openen: {e}");
             }
-            return; // the wardrobe should keep the focus
+            return; // the new window should keep the focus
         }
+        _ if id.starts_with("file:") => crate::files::run(app, &id["file:".len()..]),
         "toggle" => {
             if let Some(window) = app.get_webview_window(overlay::LABEL) {
                 let _ = if window.is_visible().unwrap_or(true) { window.hide() } else { window.show() };
@@ -170,6 +175,7 @@ fn handle(app: &AppHandle, id: &str) {
                     ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
                     ("flag", "water") => cfg.water = !cfg.water,
                     ("flag", "breaks") => cfg.breaks = !cfg.breaks,
+                    ("flag", "watchSystem") => cfg.watch_system = !cfg.watch_system,
                     ("focus", _) => {
                         if let Ok(minutes) = value.parse() {
                             cfg.focus_minutes = minutes;

@@ -37,9 +37,10 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 - [x] Focustimer: hij leest mee, de tijd staat naast het menubalkicoon, daarna een pauze
 - [x] Herinneringen: water, en moe worden na een uur zonder pauze
 - [ ] Herinnering voor je volgende afspraak (agenda)
-- [ ] Snelle notitie: klik, typ, klaar
-- [ ] Bestanden voeren: zippen, afbeelding omzetten, pad kopiëren
-- [ ] Systeem: lege batterij, zwoegende computer
+- [x] Snelle notitie: typ, Enter, klaar
+- [x] Bestanden voeren: zippen, afbeelding omzetten, pad kopiëren, tonen in Finder
+- [x] Systeem: bijna lege batterij, stekker erin, zwoegende computer
+- [ ] Notities als herinnering op een tijdstip
 
 ## Fase 4: Hij is van jou
 

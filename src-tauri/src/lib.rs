@@ -1,5 +1,8 @@
 mod config;
+mod files;
+mod notes;
 mod overlay;
+mod system;
 mod tray;
 
 #[cfg(target_os = "macos")]
@@ -69,6 +72,8 @@ pub struct AppState {
     pub config: Mutex<Config>,
     pub catalog: Mutex<Catalog>,
     pub front_app: Mutex<Option<FrontApp>>,
+    /// Files last dropped on the buddy, waiting for a choice in the file menu.
+    pub dropped: Mutex<Vec<String>>,
 }
 
 #[tauri::command]
@@ -151,7 +156,7 @@ fn update_config(app: AppHandle, state: State<'_, AppState>, patch: serde_json::
 
 #[tauri::command]
 fn open_wardrobe(app: AppHandle) -> Result<(), String> {
-    overlay::open_wardrobe(&app).map_err(|e| e.to_string())
+    overlay::open_page(&app, overlay::WARDROBE).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -168,6 +173,35 @@ fn set_autostart(app: AppHandle, on: bool) -> Result<(), String> {
     result.map_err(|e| e.to_string())?;
     let _ = tray::refresh(&app);
     Ok(())
+}
+
+#[tauri::command]
+fn get_notes(app: AppHandle) -> Vec<notes::Note> {
+    notes::load(&app)
+}
+
+/// Saves the notes and tells the buddy, so it can say it wrote them down.
+#[tauri::command]
+fn set_notes(app: AppHandle, list: Vec<notes::Note>) -> Result<(), String> {
+    notes::save(&app, &list).map_err(|e| e.to_string())?;
+    let _ = app.emit("notes-changed", list.iter().filter(|n| !n.done).count());
+    Ok(())
+}
+
+#[tauri::command]
+fn open_notes(app: AppHandle) -> Result<(), String> {
+    overlay::open_page(&app, overlay::NOTES).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn system_info() -> system::SystemInfo {
+    system::read()
+}
+
+/// Files were dropped on the buddy: show what it can do with them.
+#[tauri::command]
+fn file_menu(app: AppHandle, window: WebviewWindow, paths: Vec<String>) -> Result<(), String> {
+    files::show_menu(&app, &window, paths).map_err(|e| e.to_string())
 }
 
 /// Text next to the menu bar icon, used for the focus timer.
@@ -219,11 +253,13 @@ pub fn run() {
                 config: Mutex::new(config::load(&handle)),
                 catalog: Mutex::new(Catalog::default()),
                 front_app: Mutex::new(platform::frontmost_app()),
+                dropped: Mutex::new(Vec::new()),
             });
             overlay::create(&handle)?;
             tray::create(&handle)?;
             overlay::follow_screen_changes(&handle);
             watch_front_app(&handle);
+            system::watch(&handle);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -238,6 +274,11 @@ pub fn run() {
             set_tray_title,
             update_config,
             open_wardrobe,
+            get_notes,
+            set_notes,
+            open_notes,
+            system_info,
+            file_menu,
             get_autostart,
             set_autostart,
             log

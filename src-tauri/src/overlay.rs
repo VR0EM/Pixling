@@ -28,15 +28,21 @@ pub fn create(app: &AppHandle) -> tauri::Result<WebviewWindow> {
 }
 
 pub const WARDROBE: &str = "kleerkast";
+pub const NOTES: &str = "notities";
 
-/// Opens the wardrobe, a normal window for choosing the look and habits, or brings it forward.
-pub fn open_wardrobe(app: &AppHandle) -> tauri::Result<()> {
-    let window = match app.get_webview_window(WARDROBE) {
+/// Opens one of the normal windows (the wardrobe or the notes), or brings it forward.
+pub fn open_page(app: &AppHandle, label: &str) -> tauri::Result<()> {
+    let (title, width, height) = if label == NOTES {
+        ("Pixling · Notities", 420.0, 520.0)
+    } else {
+        ("Pixling · Kleerkast", 640.0, 760.0)
+    };
+    let window = match app.get_webview_window(label) {
         Some(window) => window,
-        None => WebviewWindowBuilder::new(app, WARDROBE, WebviewUrl::App("kleerkast.html".into()))
-            .title("Pixling · Kleerkast")
-            .inner_size(640.0, 760.0)
-            .resizable(false)
+        None => WebviewWindowBuilder::new(app, label, WebviewUrl::App(format!("{label}.html").into()))
+            .title(title)
+            .inner_size(width, height)
+            .resizable(label == NOTES)
             .center()
             .build()?,
     };

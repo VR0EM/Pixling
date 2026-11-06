@@ -1,5 +1,6 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWebview } from '@tauri-apps/api/webview';
 
 /** The saved look; mirrors `Config` in src-tauri/src/config.rs. */
 export interface Config {
@@ -9,6 +10,7 @@ export interface Config {
   scale: number;
   watchApps: boolean;
   climbWindows: boolean;
+  watchSystem: boolean;
   water: boolean;
   breaks: boolean;
   focusMinutes: number;
@@ -44,6 +46,7 @@ export const DEFAULT_CONFIG: Config = {
   scale: 3,
   watchApps: true,
   climbWindows: true,
+  watchSystem: true,
   water: true,
   breaks: true,
   focusMinutes: 25,
@@ -131,6 +134,66 @@ export async function getAutostart(): Promise<boolean> {
 
 export async function setAutostart(on: boolean): Promise<void> {
   if (inApp) await invoke('set_autostart', { on });
+}
+
+export interface Note {
+  id: number;
+  text: string;
+  done: boolean;
+}
+
+export interface SystemInfo {
+  battery: number | null;
+  charging: boolean;
+  busy: boolean;
+}
+
+let browserNotes: Note[] = [];
+
+export async function getNotes(): Promise<Note[]> {
+  return inApp ? invoke<Note[]>('get_notes') : [...browserNotes];
+}
+
+export async function setNotes(list: Note[]): Promise<void> {
+  if (inApp) await invoke('set_notes', { list });
+  else browserNotes = [...list];
+}
+
+export async function openNotes(): Promise<void> {
+  if (inApp) await invoke('open_notes');
+}
+
+/** Fires with the number of open notes after they were saved. */
+export function onNotesChanged(callback: (open: number) => void): void {
+  if (inApp) void listen<number>('notes-changed', (event) => callback(event.payload));
+}
+
+export async function systemInfo(): Promise<SystemInfo | null> {
+  return inApp ? invoke<SystemInfo>('system_info') : null;
+}
+
+export function onSystem(callback: (info: SystemInfo) => void): void {
+  if (inApp) void listen<SystemInfo>('system', (event) => callback(event.payload));
+}
+
+/** Files are dragged over the overlay ('over') or dropped ('drop'); x and y are in overlay pixels. */
+export function onFileDrop(callback: (kind: 'over' | 'drop' | 'leave', paths: string[], x: number, y: number) => void): void {
+  if (!inApp) return;
+  void getCurrentWebview().onDragDropEvent((event) => {
+    const p = event.payload;
+    const ratio = window.devicePixelRatio || 1;
+    if (p.type === 'leave') callback('leave', [], 0, 0);
+    else if (p.type === 'over') callback('over', [], p.position.x / ratio, p.position.y / ratio);
+    else if (p.type === 'drop') callback('drop', p.paths, p.position.x / ratio, p.position.y / ratio);
+  });
+}
+
+export async function fileMenu(paths: string[]): Promise<void> {
+  if (inApp) await invoke('file_menu', { paths });
+}
+
+export function onFileDone(callback: (message: string) => void): void {
+  if (inApp) void listen<string>('file-done', (event) => callback(event.payload));
 }
 
 /** Opens the menu bar menu at the cursor. */

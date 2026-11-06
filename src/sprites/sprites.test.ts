@@ -69,7 +69,7 @@ describe('sprites', () => {
   });
 
   it('emotes get an outline', () => {
-    for (const e of ['hart', 'uitroep', 'vraag', 'slaap', 'noot'] as Emote[]) {
+    for (const e of ['hart', 'uitroep', 'vraag', 'slaap', 'noot', 'zweet'] as Emote[]) {
       const px = emotePixels(e);
       expect(px[0].some(Boolean)).toBe(true);
       expect(px.flat().filter(Boolean).length).toBeGreaterThan(4);
