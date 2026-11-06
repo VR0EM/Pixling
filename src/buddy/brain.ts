@@ -83,6 +83,10 @@ export class Brain {
   private grabDy = 0;
   private trail: { x: number; y: number; t: number }[] = [];
   private rects: Rect[] = [];
+  /** The window in front, to notice when the user switches windows. */
+  private frontId: number | null = null;
+  /** When to try jumping onto the window that just came to the front (null: no plan). */
+  private followAt: number | null = null;
   /** Where the window it stands on was last seen, to follow it when it moves. */
   private standAt = { x: 0, y: 0 };
   private readonly random: () => number;
@@ -110,6 +114,12 @@ export class Brain {
    */
   setWindows(rects: Rect[]): void {
     this.rects = rects;
+    // A different window came to the front: go and sit on it in a moment, if it has a free top edge.
+    const front = rects[0]?.id ?? null;
+    if (front !== this.frontId) {
+      this.frontId = front;
+      this.followAt = front !== null && front !== this.standingOn ? this.time + 0.7 : null;
+    }
     if (this.standingOn === null) return;
     const index = rects.findIndex((r) => r.id === this.standingOn);
     const win = rects[index];
@@ -145,6 +155,10 @@ export class Brain {
         if (this.context === 'muziek' && this.time > this.nextNoteAt) {
           this.say('noot', 1);
           this.nextNoteAt = this.time + this.between(3, 6);
+        }
+        if (this.followAt !== null && this.time >= this.followAt) {
+          this.followAt = null;
+          if (this.climb(true)) break;
         }
         if (this.mode === 'walk' && this.walk(dt)) break;
         if (this.elapsed() > this.modeLength) this.decide();
@@ -194,10 +208,17 @@ export class Brain {
     const first = this.trail[0];
     const last = this.trail[this.trail.length - 1];
     const span = last.t - first.t;
-    this.drop(
-      span > 0.01 ? clamp((last.x - first.x) / span, -2500, 2500) : 0,
-      span > 0.01 ? clamp((last.y - first.y) / span, -2500, 2500) : 0,
-    );
+    const vx = span > 0.01 ? clamp((last.x - first.x) / span, -2500, 2500) : 0;
+    const vy = span > 0.01 ? clamp((last.y - first.y) / span, -2500, 2500) : 0;
+    // Let go gently in front of a window: hop up onto its top edge instead of dropping past it.
+    const index = Math.hypot(vx, vy) < 400 ? this.windowAt(this.x, this.y - 4) : -1;
+    const win = this.rects[index];
+    if (win && this.fits(win, index)) {
+      const edge = this.edge();
+      this.jumpTo(clamp(this.x, win.x + edge, win.x + win.w - edge), win.y);
+      return;
+    }
+    this.drop(vx, vy);
   }
 
   /** A click without dragging. */
@@ -332,7 +353,7 @@ export class Brain {
       return;
     }
     const roll = this.random();
-    if (this.mode === 'idle' && roll < 0.15 && this.climb()) return;
+    if (this.mode === 'idle' && roll < 0.3 && this.climb()) return;
     if (this.mode === 'idle' && this.standingOn !== null && roll < 0.25) {
       this.drop(this.dir * 80, -300);
       return;
@@ -347,20 +368,45 @@ export class Brain {
     this.setMode('walk', this.between(2, 7));
   }
 
-  /** Jumps onto the frontmost window edge that is above it, within reach and not hidden. */
-  private climb(): boolean {
-    const edge = this.edge() + 20;
-    for (let i = 0; i < this.rects.length; i++) {
+  /**
+   * Jumps onto the frontmost window edge that is higher up and has a free spot, preferring the spot
+   * closest to where it stands. With `frontOnly` it only tries the window in front.
+   */
+  private climb(frontOnly = false): boolean {
+    for (let i = 0; i < (frontOnly ? Math.min(1, this.rects.length) : this.rects.length); i++) {
       const r = this.rects[i];
-      if (r.id === this.standingOn || r.w < 2 * edge) continue;
-      // Keep the whole leap on screen, and only go up.
-      if (r.y < this.tall + JUMP_CLEARANCE + 20 || r.y > this.y - 60) continue;
-      const x = clamp(clamp(this.x, r.x + edge, r.x + r.w - edge), this.margin, this.width - this.margin);
-      if (Math.abs(x - this.x) > 450 || !this.uncovered(x, r.y, i)) continue;
+      if (r.id === this.standingOn || !this.fits(r, i) || r.y > this.y - 60) continue;
+      const x = this.freeSpot(r, i);
+      if (x === null) continue;
       this.jumpTo(x, r.y);
       return true;
     }
     return false;
+  }
+
+  /** Can the buddy stand on this window's top edge at all? Maximised windows leave no room above them. */
+  private fits(r: Rect, index: number): boolean {
+    return r.w >= 2 * (this.edge() + 20) && r.y >= this.tall + JUMP_CLEARANCE + 20 && this.freeSpot(r, index) !== null;
+  }
+
+  /** The visible spot on a window's top edge closest to the buddy, or null when all of it is hidden. */
+  private freeSpot(r: Rect, index: number): number | null {
+    const edge = this.edge() + 20;
+    const lo = Math.max(r.x + edge, this.margin);
+    const hi = Math.min(r.x + r.w - edge, this.width - this.margin);
+    if (lo > hi) return null;
+    const start = clamp(this.x, lo, hi);
+    for (let d = 0; d <= hi - lo; d += 16) {
+      for (const x of [start - d, start + d]) {
+        if (x >= lo && x <= hi && this.uncovered(x, r.y, index)) return x;
+      }
+    }
+    return null;
+  }
+
+  /** Index of the frontmost window under this point, or -1. */
+  private windowAt(x: number, y: number): number {
+    return this.rects.findIndex((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h);
   }
 
   /** Moves along; returns true when it hopped off the edge of a window. */

@@ -6,7 +6,7 @@ import { Canvas } from './png.ts';
 
 mkdirSync('build', { recursive: true });
 
-// App icon: the robot with its crown on a warm rounded square, following the macOS icon grid
+// App icon: the default robot on a warm rounded square, following the macOS icon grid
 // (an 824 px square with rounded corners inside a 1024 px canvas).
 const SIZE = 1024;
 const icon = new Canvas(SIZE, SIZE);
@@ -18,7 +18,7 @@ for (let y = inset; y < SIZE - inset; y++) {
   const x0 = Math.ceil(inset + dx);
   icon.fill(x0, y, SIZE - 2 * x0, 1, '#fdf0d5');
 }
-const robot = render('robotje', { palette: 'hemel', accessory: 'kroon' });
+const robot = render('robotje', { palette: 'hemel' });
 const scale = 24;
 const { x0, y0, x1, y1 } = robot.box;
 const left = Math.round(SIZE / 2 - ((x0 + x1 + 1) / 2) * scale);

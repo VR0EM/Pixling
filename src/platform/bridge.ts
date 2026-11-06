@@ -36,7 +36,7 @@ export interface Catalog {
 export const DEFAULT_CONFIG: Config = {
   species: 'robotje',
   palette: 'hemel',
-  accessory: 'kroon',
+  accessory: 'geen',
   scale: 3,
   watchApps: true,
   climbWindows: true,

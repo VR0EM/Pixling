@@ -154,6 +154,33 @@ describe('Brain', () => {
       expect(Math.abs(brain.x - 450)).toBeLessThan(30);
     });
 
+    it('follows a window that comes to the front', () => {
+      const brain = new Brain(800, 600, seeded(16));
+      run(brain, 0.5);
+      brain.setWindows([win]);
+      run(brain, 2);
+      expect(brain.standingOn).toBe(1);
+    });
+
+    it('does not try to climb a maximised window', () => {
+      const brain = new Brain(800, 600, seeded(17));
+      for (let i = 0; i < 30 * 60; i++) {
+        brain.setWindows([{ id: 3, x: 0, y: 0, w: 800, h: 600 }]);
+        brain.update(1 / 30, awake);
+        expect(brain.standingOn).toBeNull();
+      }
+    });
+
+    it('hops onto a window when let go in front of it', () => {
+      const brain = new Brain(800, 600, seeded(18));
+      brain.setWindows([win]);
+      run(brain, 0.1);
+      dropAt(brain, 400, 450);
+      run(brain, 2);
+      expect(brain.standingOn).toBe(1);
+      expect(brain.y).toBe(300);
+    });
+
     it('climbs onto windows by itself now and then', () => {
       const brain = new Brain(800, 600, seeded(13));
       let climbed = false;

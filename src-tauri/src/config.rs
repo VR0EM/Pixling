@@ -22,11 +22,11 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        // The look picked while sketching: a sky-blue robot with a little crown.
+        // The look picked while sketching: the sky-blue robot.
         Self {
             species: "robotje".into(),
             palette: "hemel".into(),
-            accessory: "kroon".into(),
+            accessory: "geen".into(),
             scale: 3,
             watch_apps: true,
             climb_windows: true,

@@ -12,12 +12,12 @@ Een klein pixelmaatje dat op je bureaublad woont. Het wandelt over de onderkant 
 - Valt na een minuut zonder muisbeweging in slaap en wordt wakker zodra je de muis beweegt
 - Laat zich oppakken en slepen; laat je los terwijl je beweegt, dan gooi je hem, met zwaartekracht en stuiteren
 - Een klik is een aai: hij springt op en er verschijnt een hartje; daarna krijgt je eigen app de focus terug
-- **Klimt op je vensters:** springt af en toe op de bovenrand van een venster, rijdt mee als je het venster sleept, en valt eraf als je het sluit of hard opzij rukt. Gooi je hem op een venster, dan landt hij erop
+- **Klimt op je vensters:** zet je een venster vooraan, dan springt hij op de bovenrand; laat je hem los voor een venster, dan springt hij erop. Hij rijdt mee als je het venster sleept en valt eraf als je het sluit of hard opzij rukt. Gemaximaliseerde vensters laten boven zich geen ruimte, daar blijft hij af
 - **Kijkt mee met je apps:** een leesbril bij je code-editor of terminal, een koptelefoon (en meewiebelen) bij Spotify of Muziek, popcorn bij video, een controller bij Steam. Hij kijkt alleen wélke app vooraan staat, nooit wat erin gebeurt
 - Klikken gaan dwars door het venster heen, behalve op het maatje zelf
 - Leeft in de menubalk, zonder Dock-icoon; rechtsklik op het maatje opent hetzelfde menu. Daar zet je ook meekijken, klimmen en starten bij inloggen aan of uit
 
-Het standaardmaatje is het Robotje in hemelblauw met een kroontje.
+Het standaardmaatje is het Robotje in hemelblauw.
 
 ## Starten
 

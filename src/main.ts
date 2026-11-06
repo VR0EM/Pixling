@@ -114,6 +114,7 @@ async function start(): Promise<void> {
   // Every frame while flying, being dragged or riding a window; about 20 fps otherwise.
   let last = performance.now();
   let lastDraw = 0;
+  let lastStand: number | null = null;
   const frame = (now: number) => {
     const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.standingOn !== null;
     if (busy || now - lastDraw >= 50) {
@@ -123,6 +124,10 @@ async function start(): Promise<void> {
       lastDraw = now;
       const item = brain.context ? ITEM_FOR[brain.context] : undefined;
       view.draw(look, brain.pose(input), brain.x, brain.y, now, item);
+      if (brain.standingOn !== lastStand) {
+        bridge.log(brain.standingOn === null ? 'van het venster af' : `op venster ${brain.standingOn}`);
+        lastStand = brain.standingOn;
+      }
       brain.margin = view.halfWidth;
       brain.tall = view.height;
     }
