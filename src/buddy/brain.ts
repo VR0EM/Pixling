@@ -2,10 +2,10 @@ import type { Emote } from '../sprites/emotes.ts';
 import type { Context } from './context.ts';
 
 /** What the buddy is doing right now. */
-export type Mode = 'idle' | 'walk' | 'sleep' | 'drag' | 'fall' | 'land' | 'fly' | 'phase';
+export type Mode = 'idle' | 'walk' | 'sleep' | 'drag' | 'fall' | 'land' | 'fly' | 'phase' | 'hide';
 
 /** Things that happened that the buddy might want to say something about. */
-export type BrainEvent = 'takeoff' | 'landed' | 'vanish' | 'appear' | 'bounce';
+export type BrainEvent = 'takeoff' | 'landed' | 'vanish' | 'appear' | 'bounce' | 'arrived';
 
 export interface Input {
   /** Cursor position in overlay pixels, or null when unknown. */
@@ -95,6 +95,10 @@ export class Brain {
   bouncy = false;
   /** Things that happened since the app last looked; it empties the list. */
   events: BrainEvent[] = [];
+  /** Runs to this x on the floor when set (fetching a ball); cleared on arrival. */
+  target: number | null = null;
+  /** Which way it looks while hiding. */
+  private hideFace = 0;
 
   private time = 0;
   private modeStart = 0;
@@ -188,6 +192,11 @@ export class Brain {
           this.setMode('sleep');
           break;
         }
+        // Running after something (a ball) comes before anything else.
+        if (this.target !== null) {
+          this.chase(dt);
+          break;
+        }
         // Someone is coming to it, maybe with a file: stop and wait.
         const waiting = !!input.dragging || this.near(input);
         if (input.dragging && !this.wasDragging && this.near(input, 260)) this.say('exclaim', 0.8);
@@ -243,7 +252,29 @@ export class Brain {
       case 'phase':
         this.phaseOn();
         break;
+      case 'hide':
+        break;
     }
+  }
+
+  /** Hides at this spot (partly off screen or behind a window edge) until found. */
+  hide(x: number, y: number, faceDx: number): void {
+    this.standingOn = null;
+    this.flight = null;
+    this.phase = null;
+    this.target = null;
+    this.x = x;
+    this.y = y;
+    this.hideFace = faceDx;
+    this.setMode('hide');
+  }
+
+  /** Comes out of hiding with a happy jump. */
+  unhide(): void {
+    if (this.mode !== 'hide') return;
+    this.x = clamp(this.x, this.margin, this.width - this.margin);
+    this.y = Math.min(this.y, this.height);
+    this.drop(0, -450);
   }
 
   /** Starts dragging; `t` is the event time in seconds. */
@@ -251,6 +282,7 @@ export class Brain {
     this.standingOn = null;
     this.flight = null;
     this.phase = null;
+    this.target = null;
     this.setMode('drag');
     this.grabDx = this.x - px;
     this.grabDy = this.y - py;
@@ -329,6 +361,9 @@ export class Brain {
       case 'fly':
         frame = 'A';
         faceDx = this.dir;
+        break;
+      case 'hide':
+        faceDx = this.hideFace;
         break;
       case 'land':
         frame = 'B';
@@ -558,6 +593,25 @@ export class Brain {
       if (hit) return this.touchDown(hit);
     }
     if (this.y >= this.height) this.touchDown(null);
+  }
+
+  /** Runs towards `target`: hops down from a window first, and says so when it gets there. */
+  private chase(dt: number): void {
+    const to = clamp(this.target!, this.margin, this.width - this.margin);
+    if (this.standingOn !== null) return this.drop(Math.sign(to - this.x) * 150 || 100, -300);
+    const dx = to - this.x;
+    if (Math.abs(dx) < 4) {
+      this.x = to;
+      this.target = null;
+      this.setMode('idle', 1.5);
+      this.events.push('arrived');
+      return;
+    }
+    this.dir = dx > 0 ? 1 : -1;
+    if (this.mode !== 'walk') this.setMode('walk', 60);
+    const step = Math.min(Math.abs(dx), this.speed * 2.4 * dt);
+    this.x += this.dir * step;
+    this.walked += step;
   }
 
   /** Starts a flight to a free window edge or another spot on the ground. False when there's nowhere to go. */

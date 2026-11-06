@@ -46,6 +46,8 @@ export interface Accessory {
   noOutline?: boolean;
   /** Not offered in the menu; the buddy puts it on by itself (a nightcap at night). */
   hidden?: boolean;
+  /** Earned with this sticker before it shows up in the menu (unless everything is unlocked). */
+  reward?: string;
   /** Held at the side, like the items from the backpack. */
   hand?: boolean;
   /** Centred on the head instead of starting at the 6-wide hat anchor (for home-made hats). */

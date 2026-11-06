@@ -30,7 +30,9 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Window list and the app in front on Windows
 - [ ] Window list and the app in front on Linux
 - [x] Time of day and special days: coffee, nightcap, Friday evening, New Year's Eve, winter
-- [ ] Your birthday (asks for a date in the wardrobe)
+- [x] Your birthday, the day you met and every hundred days: cake and confetti
+- [x] Weather: umbrella, beanie, sunglasses, rain and snow
+- [x] Holidays: Halloween, Christmas, snow on the windows, an Easter egg hunt
 - [ ] Typing tempo (only the tempo, never the keys)
 - [x] Speech bubbles in a pixel font (Pixelify Sans)
 
@@ -58,6 +60,10 @@ Platform order: macOS first, then Windows, then Linux.
 - [ ] Writing your own phrases
 - [ ] Rules: "if … then …"
 - [x] Diary and "buddies for … days"
+- [x] Games: fetch, hide and seek, basket
+- [x] Sticker book with accessories to earn (or unlock everything)
+- [ ] Two buddies at once, waving and playing tag
+- [ ] Music in the background, not only when the music app is in front
 
 ## Later
 

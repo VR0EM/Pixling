@@ -150,6 +150,28 @@ button[aria-pressed='true'] {
   border-color: var(--line);
 }
 
+.birthday {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.birthday input {
+  padding: 5px 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 2px solid var(--soft);
+  border-radius: 10px;
+}
+
+.pill.locked {
+  opacity: 0.5;
+  border-style: dashed;
+  cursor: help;
+}
+
 .howto {
   margin-top: 10px;
   font-size: 13px;

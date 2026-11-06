@@ -1,8 +1,25 @@
 import './wardrobe.css';
 import { occurrences, parseIcs } from './buddy/calendar.ts';
+import type { Diary } from './buddy/diary.ts';
+import { STICKERS, earned, totals } from './buddy/stickers.ts';
+import { parsePlaces, parseWeather } from './buddy/weather.ts';
 import { PERSONALITIES } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
-import { PALETTES, accessory, allSpecies, catalog, ownPalette, render, setCreations, species, type Creation, type RenderOptions } from './sprites/index.ts';
+import {
+  ACCESSORIES,
+  PALETTES,
+  accessory,
+  allSpecies,
+  available,
+  catalog,
+  ownPalette,
+  render,
+  setCreations,
+  setUnlocked,
+  species,
+  type Creation,
+  type RenderOptions,
+} from './sprites/index.ts';
 
 type Config = bridge.Config;
 
@@ -35,6 +52,15 @@ async function start(): Promise<void> {
   let config: Config = await bridge.getConfig();
   let autostart = await bridge.getAutostart();
   setCreations(await bridge.getCreations<Creation>());
+  /** Everything below is built; until then refresh() leaves the fun section alone. */
+  let ready = false;
+  // Accessories you earn with stickers, unless everything is unlocked.
+  const unlock = async () => {
+    const diary = await bridge.getDiary<Diary>();
+    const today = new Date().toISOString().slice(0, 10);
+    setUnlocked(config.unlockAll ? 'all' : earned(totals(diary, config.metOn, today)));
+  };
+  await unlock();
   const list = catalog();
 
   const change = async (patch: Partial<Config>) => {
@@ -95,6 +121,14 @@ async function start(): Promise<void> {
       id: a.id,
       button: choice(accessoryBox, a.name, 'pill', () => void change({ accessory: a.id })),
     }));
+    // Still to earn: shown with how.
+    for (const a of Object.values(ACCESSORIES)) {
+      if (a.hidden || available(a)) continue;
+      const hint = STICKERS.find((st) => st.id === a.reward)?.hint ?? 'Earn it with a sticker';
+      const button = choice(accessoryBox, `🔒 ${a.name}`, 'pill locked', () => {});
+      button.title = hint;
+      button.setAttribute('aria-disabled', 'true');
+    }
     choice(accessoryBox, 'Draw your own…', 'pill', () => openStudio('hat'));
   };
   buildAccessories();
@@ -261,6 +295,7 @@ async function start(): Promise<void> {
     for (const { key, input } of habitInputs) input.checked = key === 'autostart' ? autostart : Boolean(config[key]);
     for (const { key, input } of calendarInputs) input.checked = Boolean(config[key]);
     drawCalendars();
+    if (ready) refreshFun();
   }
 
   // A living preview: breathing, blinking and looking around.
@@ -280,10 +315,82 @@ async function start(): Promise<void> {
     );
   }, 60);
 
+  // Fun: games, holidays, stickers, and your birthday.
+  const funToggles: [keyof Config, string][] = [
+    ['games', 'Asks to play now and then'],
+    ['seasons', 'Holidays and birthdays: a pumpkin, a Santa hat, snow, Easter eggs, cake'],
+    ['stickers', 'Celebrates new stickers'],
+    ['unlockAll', 'Every accessory right away, without earning it'],
+    ['weather', 'Dresses for the weather'],
+  ];
+  const funBox = document.getElementById('fun')!;
+  const funInputs = funToggles.map(([key, label]) => {
+    const input = el('input', { type: 'checkbox' });
+    input.addEventListener('change', () => void change({ [key]: input.checked } as Partial<Config>));
+    const row = el('label', { className: 'toggle' });
+    row.append(input, el('span', { textContent: label }));
+    funBox.append(row);
+    return { key, input };
+  });
+  const birthday = document.getElementById('birthday') as HTMLInputElement;
+  birthday.addEventListener('change', () => void change({ birthday: birthday.value ? birthday.value.slice(5) : null }));
+  document.getElementById('birthday-clear')!.addEventListener('click', () => void change({ birthday: null }));
+
+  // Weather: find your town by name, then pick it.
+  const placeStatus = document.getElementById('place-status')!;
+  const placeResults = document.getElementById('place-results')!;
+  const showPlace = async () => {
+    if (!config.place) {
+      placeStatus.textContent = 'No town picked yet.';
+      return;
+    }
+    placeStatus.textContent = config.place.name;
+    try {
+      const w = parseWeather(await bridge.fetchWeather(config.place.lat, config.place.lon));
+      if (w) placeStatus.textContent = `${config.place.name} · ${Math.round(w.temp)}°, ${w.sky === 'clear' ? 'clear' : w.sky}`;
+    } catch {
+      // The name alone will do.
+    }
+  };
+  document.getElementById('place-form')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('place-name') as HTMLInputElement).value.trim();
+    if (!name) return;
+    placeResults.replaceChildren();
+    placeStatus.textContent = 'Looking…';
+    try {
+      const places = parsePlaces(await bridge.findPlace(name));
+      placeStatus.textContent = places.length ? 'Which one?' : 'No town with that name found.';
+      for (const p of places) {
+        choice(placeResults, p.name, 'pill', async () => {
+          placeResults.replaceChildren();
+          await change({ place: p, weather: true });
+          void showPlace();
+        });
+      }
+    } catch (err) {
+      placeStatus.textContent = String(err).replace(/^Error: /, '');
+    }
+  });
+  void showPlace();
+
+  let lastUnlock = config.unlockAll;
   bridge.onConfigChanged((c) => {
     config = c;
+    if (c.unlockAll !== lastUnlock) {
+      lastUnlock = c.unlockAll;
+      void unlock().then(() => {
+        buildAccessories();
+        refresh();
+      });
+    }
     refresh();
   });
+  function refreshFun(): void {
+    for (const { key, input } of funInputs) input.checked = Boolean(config[key]);
+    birthday.value = config.birthday ? `2000-${config.birthday}` : '';
+  }
+  ready = true;
   refresh();
 }
 

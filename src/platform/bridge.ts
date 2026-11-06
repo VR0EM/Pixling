@@ -23,6 +23,16 @@ export interface Config {
   calendars: string[];
   meetingAlerts: boolean;
   hideInCalls: boolean;
+  /** Asks to play now and then; the Play menu always works. */
+  games: boolean;
+  weather: boolean;
+  place: { name: string; lat: number; lon: number } | null;
+  /** Holidays and birthdays. */
+  seasons: boolean;
+  /** Your birthday, MM-DD. */
+  birthday: string | null;
+  stickers: boolean;
+  unlockAll: boolean;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -66,6 +76,13 @@ export const DEFAULT_CONFIG: Config = {
   calendars: [],
   meetingAlerts: true,
   hideInCalls: true,
+  games: true,
+  weather: true,
+  place: null,
+  seasons: true,
+  birthday: null,
+  stickers: true,
+  unlockAll: false,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -248,6 +265,23 @@ export async function fetchCalendar(url: string): Promise<string> {
 /** The next thing in the calendar, shown at the top of the menu (null for nothing). */
 export async function setNextEvent(text: string | null): Promise<void> {
   if (inApp) await invoke('set_next_event', { text });
+}
+
+/** A game picked in the menu's Play submenu: fetch, hide, basket or stop. */
+export function onPlay(callback: (game: string) => void): void {
+  if (inApp) void listen<string>('play', (event) => callback(event.payload));
+}
+
+/** Open-Meteo's place search, as JSON. */
+export async function findPlace(name: string): Promise<string> {
+  if (!inApp) throw new Error('Places can only be looked up in the app.');
+  return invoke<string>('find_place', { name });
+}
+
+/** Open-Meteo's current weather at a place, as JSON. */
+export async function fetchWeather(lat: number, lon: number): Promise<string> {
+  if (!inApp) throw new Error('The weather can only be read in the app.');
+  return invoke<string>('fetch_weather', { lat, lon });
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

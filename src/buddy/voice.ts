@@ -40,7 +40,33 @@ export type BasicSituation =
   | 'meetingDone'
   | 'agenda'
   | 'birthday'
-  | 'dayFree';
+  | 'dayFree'
+  | 'weatherRain'
+  | 'weatherSnow'
+  | 'weatherStorm'
+  | 'weatherCold'
+  | 'weatherHot'
+  | 'weatherSun'
+  | 'birthdayYou'
+  | 'anniversary'
+  | 'daysTogether'
+  | 'halloween'
+  | 'christmas'
+  | 'newYear'
+  | 'valentine'
+  | 'easter'
+  | 'eggFound'
+  | 'eggsAll'
+  | 'fetchStart'
+  | 'fetchAgain'
+  | 'fetchBored'
+  | 'hideStart'
+  | 'hideHint'
+  | 'hideFound'
+  | 'hideGiveUp'
+  | 'basketStart'
+  | 'basketScore'
+  | 'newSticker';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
 export type SpeciesSituation =
@@ -124,6 +150,32 @@ const SWEET: Record<BasicSituation, string[]> = {
   agenda: ['{things} on the calendar today. First up: {title} at {time}.'],
   birthday: ['{title} today! 🎉', 'It’s a birthday! {title}!'],
   dayFree: ['That was the last meeting of the day!', 'No more meetings today. Phew!'],
+  weatherRain: ['It’s raining! Good thing I brought my umbrella.', 'Rain! Stay dry, okay?'],
+  weatherSnow: ['It’s snowing! Look!', 'Snow! Everything is so pretty.'],
+  weatherStorm: ['Thunder! I’ll hold my umbrella tight.'],
+  weatherCold: ['Brr, it’s {temp}° out there. Beanie on!'],
+  weatherHot: ['Phew, {temp}°! Drink some water, okay?'],
+  weatherSun: ['The sun is out! Sunglasses on.'],
+  birthdayYou: ['Happy birthday!! 🎂 I baked you a cake!', 'It’s your birthday! Happy birthday!'],
+  anniversary: ['We’ve been buddies for {years} today! 🎂', 'Happy buddy-versary! {years} together!'],
+  daysTogether: ['{days} days of being buddies! I brought cake.'],
+  halloween: ['Happy Halloween! Boo!', 'Trick or treat!'],
+  christmas: ['Merry Christmas! 🎄', 'Happy holidays! I got you a hug.'],
+  newYear: ['Happy New Year! Let’s make it a good one.'],
+  valentine: ['Happy Valentine’s Day! You’re my favourite.'],
+  easter: ['Happy Easter! I hid some eggs on your windows...'],
+  eggFound: ['You found an egg! {left} to go.', 'An egg! {left} more somewhere...'],
+  eggsAll: ['You found all the eggs! Hooray!'],
+  fetchStart: ['Throw the ball! Throw it!', 'Wanna play fetch? Throw the ball!'],
+  fetchAgain: ['Again! Again!', 'Got it! One more?'],
+  fetchBored: ['Okay, no more fetch. That was fun!'],
+  hideStart: ['Let’s play hide and seek! Count to ten...', 'Close your eyes! I’m hiding!'],
+  hideHint: ['Hehe...', 'Psst... I’m not far.'],
+  hideFound: ['You found me!', 'Aww, found me! Again?'],
+  hideGiveUp: ['Here I am! I was right here.', 'Okay, okay, I’ll come out!'],
+  basketStart: ['Throw me in the hoop!', 'Basket time! Aim well.'],
+  basketScore: ['SCORE!', 'Swish! Nothing but net!', 'Two points!'],
+  newSticker: ['New sticker: {name}!', 'We earned a sticker: {name}!'],
 };
 
 const HYPER: Lines = {
@@ -159,6 +211,18 @@ const HYPER: Lines = {
   agenda: ['{things} today!! First: {title} at {time}! Busy busy!'],
   birthday: ['{title}!!! PARTY!!!'],
   dayFree: ['NO MORE MEETINGS! Dance break!'],
+  weatherRain: ['RAIN! Puddles! Can we jump in puddles?!'],
+  weatherSnow: ['SNOW!!! SNOWBALL FIGHT!'],
+  weatherHot: ['{temp}°! I’m melting! Is it ice cream time?'],
+  birthdayYou: ['HAPPY BIRTHDAY!!! CAKE!!! PARTY!!!'],
+  halloween: ['BOO! Haha! Happy Halloween!'],
+  fetchStart: ['BALL! BALL! THROW THE BALL!'],
+  fetchAgain: ['AGAIN!! AGAIN!!', 'Faster! Higher!'],
+  hideStart: ['Hide and seek! Don’t peek!'],
+  hideFound: ['NOOO you found me! Again!'],
+  basketStart: ['THROW ME! I’m ready!'],
+  basketScore: ['SLAM DUNK!!!', 'WOOO! Did you see that?!'],
+  newSticker: ['STICKER!! {name}!!'],
 };
 
 const CALM: Lines = {
@@ -194,6 +258,18 @@ const CALM: Lines = {
   agenda: ['{things} today. First, {title} at {time}.'],
   birthday: ['{title}. How nice.'],
   dayFree: ['Meetings are over. Good.'],
+  weatherRain: ['Rain. Nice sound.'],
+  weatherSnow: ['Snow. Quiet and pretty.'],
+  weatherCold: ['{temp}°. Cold.'],
+  weatherHot: ['{temp}°. Warm.'],
+  birthdayYou: ['Happy birthday.'],
+  fetchStart: ['Fetch? Alright.'],
+  fetchAgain: ['Again.'],
+  hideStart: ['I’ll hide. Take your time.'],
+  hideFound: ['Found me.'],
+  basketStart: ['A hoop. Go on.'],
+  basketScore: ['In.'],
+  newSticker: ['A sticker. {name}.'],
 };
 
 const CHEEKY: Lines = {
@@ -229,6 +305,21 @@ const CHEEKY: Lines = {
   agenda: ['{things} today. Starting with {title} at {time}. Good luck.'],
   birthday: ['{title}. Is there cake? There should be cake.'],
   dayFree: ['Meetings over. Finally some peace.'],
+  weatherRain: ['Rain again. You didn’t bring an umbrella, did you?'],
+  weatherSnow: ['Snow. You’re not going out in that, are you?'],
+  weatherCold: ['{temp}°. Wear a coat. I mean it.'],
+  weatherHot: ['{temp}°. Don’t forget sunscreen.'],
+  birthdayYou: ['Happy birthday. You don’t look a day older. Well. Maybe a day.'],
+  halloween: ['Nice costume. Oh wait, that’s just you.'],
+  fetchStart: ['Fine, throw the ball. I’ll pretend I’m not excited.'],
+  fetchAgain: ['Is that all you’ve got?'],
+  fetchBored: ['That’s enough fetch. I have dignity.'],
+  hideStart: ['Hide and seek. You’ll never find me.'],
+  hideFound: ['Lucky guess.', 'Okay, you’re good at this.'],
+  hideGiveUp: ['Too hard? I’ll come out. Pathetic.'],
+  basketStart: ['Throw me in that hoop. If you can aim.'],
+  basketScore: ['Obviously. I’m a natural.'],
+  newSticker: ['A sticker: {name}. I earned that one.'],
 };
 
 const VOICES: Record<Character, Lines> = { sweet: SWEET, hyper: HYPER, calm: CALM, cheeky: CHEEKY };

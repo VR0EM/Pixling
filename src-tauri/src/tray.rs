@@ -80,7 +80,6 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let size = choices(app, "Size", "scale", &sizes, &cfg.scale.to_string())?;
     let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Watches your apps", true, cfg.watch_apps, None::<&str>)?;
     let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Climbs windows", true, cfg.climb_windows, None::<&str>)?;
-    let quirks = CheckMenuItem::with_id(app, "flag:quirks", "Buddy quirks", true, cfg.quirks, None::<&str>)?;
     let login = CheckMenuItem::with_id(
         app,
         "autostart",
@@ -90,6 +89,30 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         None::<&str>,
     )?;
     let backpack = backpack_menu(app, &cfg)?;
+    let play = Submenu::with_items(
+        app,
+        "Play",
+        true,
+        &[
+            &MenuItem::with_id(app, "play:fetch", "Fetch", true, None::<&str>)?,
+            &MenuItem::with_id(app, "play:hide", "Hide and seek", true, None::<&str>)?,
+            &MenuItem::with_id(app, "play:basket", "Basket", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "play:stop", "Stop playing", true, None::<&str>)?,
+        ],
+    )?;
+    let fun = Submenu::with_items(
+        app,
+        "Fun",
+        true,
+        &[
+            &CheckMenuItem::with_id(app, "flag:quirks", "Buddy quirks", true, cfg.quirks, None::<&str>)?,
+            &CheckMenuItem::with_id(app, "flag:games", "Asks to play", true, cfg.games, None::<&str>)?,
+            &CheckMenuItem::with_id(app, "flag:weather", "Dresses for the weather", true, cfg.weather, None::<&str>)?,
+            &CheckMenuItem::with_id(app, "flag:seasons", "Holidays and birthdays", true, cfg.seasons, None::<&str>)?,
+            &CheckMenuItem::with_id(app, "flag:stickers", "Stickers", true, cfg.stickers, None::<&str>)?,
+        ],
+    )?;
     let quit = MenuItem::with_id(app, "quit", "Quit Pixling", true, None::<&str>)?;
     let next = state.next_event.lock().unwrap().clone();
     let next = next.map(|text| MenuItem::with_id(app, "next", text, false, None::<&str>)).transpose()?;
@@ -115,11 +138,12 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &size,
             &character,
             &PredefinedMenuItem::separator(app)?,
+            &play,
             &backpack,
             &PredefinedMenuItem::separator(app)?,
             &watch,
             &climb,
-            &quirks,
+            &fun,
             &login,
             &PredefinedMenuItem::separator(app)?,
             &quit,
@@ -186,6 +210,9 @@ fn handle(app: &AppHandle, id: &str) {
                 eprintln!("Pixling: could not change 'start at login': {e}");
             }
         }
+        _ if id.starts_with("play:") => {
+            let _ = app.emit("play", &id["play:".len()..]);
+        }
         "backpack:start" | "backpack:stop" => {
             let _ = app.emit("backpack", &id["backpack:".len()..]);
         }
@@ -207,6 +234,10 @@ fn handle(app: &AppHandle, id: &str) {
                     ("flag", "watchApps") => cfg.watch_apps = !cfg.watch_apps,
                     ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
                     ("flag", "quirks") => cfg.quirks = !cfg.quirks,
+                    ("flag", "games") => cfg.games = !cfg.games,
+                    ("flag", "weather") => cfg.weather = !cfg.weather,
+                    ("flag", "seasons") => cfg.seasons = !cfg.seasons,
+                    ("flag", "stickers") => cfg.stickers = !cfg.stickers,
                     ("flag", "meetingAlerts") => cfg.meeting_alerts = !cfg.meeting_alerts,
                     ("flag", "hideInCalls") => cfg.hide_in_calls = !cfg.hide_in_calls,
                     ("flag", "water") => cfg.water = !cfg.water,

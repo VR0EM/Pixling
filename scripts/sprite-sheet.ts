@@ -59,6 +59,18 @@ rows.push([
   ['ghost', { fade: 1 }],
   ['ghost', { fade: 2 }],
 ]);
+// Holidays, weather and rewards.
+rows.push([
+  ['robot', { accessory: 'pumpkin' }],
+  ['ghost', { accessory: 'santahat' }],
+  ['mug', { item: 'umbrella' }],
+  ['dragon', { item: 'cake', accessory: 'partyhat' }],
+  ['sprout', { item: 'calendar' }],
+  ['robot', { accessory: 'wizardhat' }],
+  ['sprout', { accessory: 'flowercrown' }],
+  ['shroom', { accessory: 'cap' }],
+  ['ghost', { accessory: 'halo' }],
+]);
 
 const cell = 34;
 const cols = Math.max(...rows.map((r) => r.length));

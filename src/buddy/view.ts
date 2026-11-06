@@ -25,6 +25,8 @@ export class View {
   private scale = 3;
   private box = { x0: 0, y0: 0, x1: SPRITE - 1, y1: SPRITE - 1 };
   private bubbleUntil = 0;
+  /** Nothing of the buddy shows below this overlay y (hiding behind a window's edge), or null. */
+  clipY: number | null = null;
 
   private readonly canvas: HTMLCanvasElement;
   private readonly bubble: HTMLElement;
@@ -86,6 +88,8 @@ export class View {
     this.left = Math.round(x - (SPRITE / 2) * s);
     this.top = Math.round(y - (HEADROOM + GROUND_ROW + pose.lift) * s);
     this.canvas.style.transform = `translate(${this.left}px, ${this.top}px)`;
+    const below = this.clipY === null ? 0 : Math.max(0, this.top + (SPRITE + HEADROOM) * s - this.clipY);
+    this.canvas.style.clipPath = below > 0 ? `inset(0 0 ${below}px 0)` : '';
 
     if (!this.bubble.hidden) {
       if (now > this.bubbleUntil) this.bubble.hidden = true;

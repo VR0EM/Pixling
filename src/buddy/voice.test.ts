@@ -7,7 +7,10 @@ const situations: Situation[] = [
   'greeting', 'petted', 'thrown', 'woke', 'onWindow', 'noted', 'nom', 'water', 'cheers', 'focusStart',
   'focusStop', 'breakStart', 'breakOver', 'tired', 'snooze', 'battery20', 'battery10', 'charging', 'chat',
   'chatCode', 'chatMusic', 'chatVideo', 'chatGame', 'chatNight', 'newFriend', 'newThing', 'meetingSoon', 'meetingNow',
-  'meetingDone', 'agenda', 'birthday', 'dayFree',
+  'meetingDone', 'agenda', 'birthday', 'dayFree', 'weatherRain', 'weatherSnow', 'weatherStorm', 'weatherCold',
+  'weatherHot', 'weatherSun', 'birthdayYou', 'anniversary', 'daysTogether', 'halloween', 'christmas', 'newYear',
+  'valentine', 'easter', 'eggFound', 'eggsAll', 'fetchStart', 'fetchAgain', 'fetchBored', 'hideStart', 'hideHint',
+  'hideFound', 'hideGiveUp', 'basketStart', 'basketScore', 'newSticker',
 ];
 
 describe('voice', () => {
@@ -15,7 +18,7 @@ describe('voice', () => {
     for (const c of characters) {
       for (const key of situations) {
         for (const r of [0, 0.5, 0.99]) {
-          const text = line(c, { key, vars: { pct: 15, min: 25, greeting: 'Good morning', name: 'Cactus', title: 'Standup', things: '2 things', time: '09:30', count: 3 } }, () => r);
+          const text = line(c, { key, vars: { pct: 15, min: 25, greeting: 'Good morning', name: 'Cactus', title: 'Standup', things: '2 things', time: '09:30', count: 3, temp: 4, years: 'one year', days: 100, left: 2 } }, () => r);
           expect(text.length).toBeGreaterThan(0);
           expect(text).not.toMatch(/[{}]/);
         }

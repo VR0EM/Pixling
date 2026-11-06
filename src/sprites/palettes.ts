@@ -38,4 +38,6 @@ export const FIXED: Record<string, string> = {
   M: '#c2407e',
   j: '#d4cfe2',
   u: '#4b4fb0',
+  O: '#f08a24',
+  P: '#b85a14',
 };

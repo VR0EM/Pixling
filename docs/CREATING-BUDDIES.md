@@ -87,6 +87,7 @@ Pixling animates the buddy, so you only draw one still pose. Home-made buddies s
 | `k` `g` `G` | brown, green, dark green | no |
 | `t` `u` `q` | light blue, indigo, cyan | no |
 | `X` `N` | light grey, dark grey | no |
+| `O` `P` | orange, dark orange | no |
 
 `colors` sets the buddy's own colours for `b`, `s`, `h`, `a`, `c`, `o` and `e`: that's how it looks with **Own colours** in the wardrobe. Picking another colour in the wardrobe recolours exactly those keys, so use them for the parts that should change.
 

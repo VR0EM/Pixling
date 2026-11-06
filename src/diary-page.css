@@ -41,3 +41,52 @@
 #days span {
   font: 500 15px/1.4 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
 }
+
+.stickers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stickers li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  text-align: center;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 2px 2px 0 var(--pick);
+}
+
+.stickers li.locked {
+  border-style: dashed;
+  border-color: var(--soft);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.stickers canvas {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.stickers li.locked canvas {
+  filter: grayscale(1);
+}
+
+.stickers strong {
+  font: 500 14px/1.2 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+}
+
+.stickers small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.3;
+}

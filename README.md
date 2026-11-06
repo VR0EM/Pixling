@@ -17,7 +17,7 @@ Older versions are on the [releases page](https://github.com/VR0EM/Pixling/relea
 - **macOS:** open the .dmg and drag Pixling to Applications. Open it once; when macOS refuses, go to System Settings → Privacy & Security and click **Open Anyway**.
 - **Windows:** when SmartScreen says "Windows protected your PC", click **More info** → **Run anyway**.
 
-## What it does (v0.8)
+## What it does (v0.9)
 
 - Six buddies: Robot, Ghost, Sprout, Shroom, Mug and Dragon, plus any you draw or add yourself
 - Eight colours, five accessories (party hat, crown, bow, beanie, sunglasses) and three sizes
@@ -31,6 +31,11 @@ Older versions are on the [releases page](https://github.com/VR0EM/Pixling/relea
   - **Shroom:** bounces like a sponge, sneezes spores and glows at night
 
   Don't want the quirks? Switch off **Buddy quirks** in the wardrobe or the menu; the voices stay.
+- **Plays with you** (menu → Play): *fetch* (throw the ball with your mouse; it runs after it and brings it back), *hide and seek* (it hides partly off screen or behind a window's edge; click it when you find it) and *basket* (a hoop appears; throw your buddy through it). It asks to play now and then too
+- **Dresses for the weather** in your town (Open-Meteo, free, no account): an umbrella and raindrops in the rain, a beanie and snowflakes in the snow or the cold, sunglasses in the sun, and a remark when the weather turns
+- **Holidays and birthdays:** a pumpkin around Halloween, a Santa hat in December, snow lying on your windows in winter, Easter eggs hidden on your windows to find, and cake and confetti on your birthday, on the day you met and every hundred days
+- **Sticker book** in the diary: little achievements like petting it 100 times, a focus round or a basket. Some unlock new accessories (a wizard hat, a flower crown, a cap, a halo); or unlock everything right away in the wardrobe
+- **Everything can be switched off:** quirks, games, weather, holidays and stickers each have their own switch in the wardrobe and the menu (Fun)
 - **Follows your calendar** (Google Calendar, iCloud, Outlook): paste the calendar's secret iCal address in the wardrobe. In the morning it tells you what's on, ten minutes before a meeting it holds up a little calendar and gives you a heads-up, during meetings it sits still and keeps quiet, during video calls (Meet, Zoom, Teams) it fades into the background, afterwards it asks how it went, it cheers when the last meeting of a busy day is over, and it wears a party hat on birthdays. The next event is at the top of the menu. It only reads the calendar, on your computer, and counts meetings in the diary
 - Falls asleep after a minute without mouse movement and wakes up as soon as you move it
 - Pick it up and drag it; let go while moving and you throw it, with gravity and bouncing
@@ -90,6 +95,8 @@ Every push to `main` is also checked on macOS and Windows (`.github/workflows/ci
 | `src/buddy/voice.ts`, `src/buddy/species-voice.ts` | What it says, per character and situation, and each built-in buddy's own lines |
 | `src/buddy/traits.ts` | What each built-in buddy does on its own: coffee, battery, thirst and growth, glowing |
 | `src/buddy/calendar.ts`, `src/buddy/agenda.ts` | Reading calendars (iCalendar, repeats, time zones) and what the buddy does with them |
+| `src/buddy/games.ts`, `src/buddy/world.ts` | Fetch, hide and seek and basket; the layer with the ball, hoop, eggs, snow, rain and confetti |
+| `src/buddy/weather.ts`, `src/buddy/seasons.ts`, `src/buddy/stickers.ts` | Weather, holidays and birthdays, and the sticker book |
 | `src/buddy/diary.ts`, `src/diary-page.ts` | The diary: counts per day and the sentence that goes with them |
 | `src/buddy/system-watch.ts` | How it reacts to the battery and load |
 | `src/buddy/context.ts` | Which app belongs to which context (code, music, video, game) |

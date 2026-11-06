@@ -282,7 +282,7 @@ ACCESSORY FILE
 COLOURS
 - b, s, h, a, c, o, e follow the buddy's colours (the user can recolour the buddy in Pixling).
 - Built-in fixed colours: w white, n black, r red, R dark red, m pink, y gold, Y dark gold, k brown, g green,
-  G dark green, t light blue, u indigo, q cyan, X light grey, N dark grey.
+  G dark green, t light blue, u indigo, q cyan, X light grey, N dark grey, O orange, P dark orange.
 - Any other single character (digits 0-9 work well) can be a custom colour: define it in "colors" as "#rrggbb".
 
 EXAMPLE BUDDY

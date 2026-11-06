@@ -1,5 +1,6 @@
 mod calendar;
 mod config;
+mod net;
 mod files;
 mod notes;
 mod overlay;
@@ -294,6 +295,18 @@ async fn fetch_calendar(url: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || calendar::fetch(&url)).await.map_err(|e| e.to_string())?
 }
 
+/// Places matching a name, for the weather: Open-Meteo's answer as JSON.
+#[tauri::command]
+async fn find_place(name: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || calendar::find_place(&name)).await.map_err(|e| e.to_string())?
+}
+
+/// The weather right now at a place: Open-Meteo's answer as JSON.
+#[tauri::command]
+async fn fetch_weather(lat: f64, lon: f64) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || calendar::weather(lat, lon)).await.map_err(|e| e.to_string())?
+}
+
 /// The next thing in the calendar, for the menu; None hides it.
 #[tauri::command]
 fn set_next_event(app: AppHandle, state: State<'_, AppState>, text: Option<String>) -> Result<(), String> {
@@ -404,6 +417,8 @@ pub fn run() {
             set_creations,
             open_studio,
             fetch_calendar,
+            find_place,
+            fetch_weather,
             set_next_event,
             read_text_file,
             export_file,

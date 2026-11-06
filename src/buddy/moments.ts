@@ -8,7 +8,8 @@ export interface Moment {
   item?: string;
 }
 
-export function momentFor(date: Date): Moment {
+/** With `seasons` off there's no New Year's party hat and no winter beanie (seasons.ts does the rest). */
+export function momentFor(date: Date, seasons = true): Moment {
   const hour = date.getHours() + date.getMinutes() / 60;
   const day = date.getDay(); // 0 = Sunday
   const month = date.getMonth() + 1;
@@ -18,8 +19,8 @@ export function momentFor(date: Date): Moment {
   const newYear = (month === 12 && dayOfMonth === 31 && hour >= 18) || (month === 1 && dayOfMonth === 1);
   const fridayEvening = day === 5 && hour >= 17;
   const moment: Moment = {};
-  if (newYear || fridayEvening) moment.hat = 'partyhat';
-  else if (month === 12 || month <= 2) moment.hat = 'beanie';
+  if ((newYear && seasons) || fridayEvening) moment.hat = 'partyhat';
+  else if (seasons && (month === 12 || month <= 2)) moment.hat = 'beanie';
   if (hour >= 7 && hour < 10) moment.item = 'coffee';
   return moment;
 }

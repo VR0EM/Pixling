@@ -10,11 +10,17 @@ import { Traits, type Reaction, type TraitLook } from './buddy/traits.ts';
 import { Agenda, type AgendaAdvice } from './buddy/agenda.ts';
 import { occurrences, parseIcs, type CalEvent, type Occurrence } from './buddy/calendar.ts';
 import { View } from './buddy/view.ts';
+import { Games, type GameEvent, type GameKind } from './buddy/games.ts';
+import { seasonFor, type Season } from './buddy/seasons.ts';
+import { STICKERS, earned, totals } from './buddy/stickers.ts';
+import { WeatherWatch, dress, parseWeather, type Weather } from './buddy/weather.ts';
+import { World, type Egg } from './buddy/world.ts';
 import { PERSONALITIES, greetingFor, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
 import { migrateConfig, migrateCreations, migrateDiary } from './legacy.ts';
 import * as bridge from './platform/bridge.ts';
 import { parsePixling } from './sprites/format.ts';
-import { catalog, setCreations, type Creation } from './sprites/index.ts';
+import { catalog, setCreations, setUnlocked, type Creation } from './sprites/index.ts';
+import { FIXED } from './sprites/palettes.ts';
 
 const MIN = 60_000;
 const between = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
@@ -23,6 +29,7 @@ async function start(): Promise<void> {
   const canvas = document.getElementById('buddy') as HTMLCanvasElement;
   const bubble = document.getElementById('bubble') as HTMLElement;
   const view = new View(canvas, bubble);
+  const world = new World(document.getElementById('world') as HTMLCanvasElement);
   const brain = new Brain(window.innerWidth, window.innerHeight);
 
   let look = await bridge.getConfig();
@@ -82,7 +89,10 @@ async function start(): Promise<void> {
     front = app;
     applyLook();
   });
-  window.addEventListener('resize', () => brain.resize(window.innerWidth, window.innerHeight));
+  window.addEventListener('resize', () => {
+    brain.resize(window.innerWidth, window.innerHeight);
+    world.resize();
+  });
 
   // The diary: today's counts, saved a few seconds after something happened. Finished days get their
   // sentence once, in the character the buddy had that evening.
@@ -140,6 +150,97 @@ async function start(): Promise<void> {
   void readCalendars();
   setInterval(() => void readCalendars(), 10 * MIN);
   setInterval(plan, MIN);
+
+  // The weather where you live (if you picked a place), read every half hour.
+  let weather: Weather | null = null;
+  const weatherWatch = new WeatherWatch();
+  let weatherFor = '';
+  const readWeather = async () => {
+    const place = look.weather ? look.place : null;
+    weatherFor = JSON.stringify(place);
+    if (!place) {
+      weather = null;
+      return;
+    }
+    try {
+      weather = parseWeather(await bridge.fetchWeather(place.lat, place.lon));
+    } catch (e) {
+      bridge.log(`weather: ${String(e)}`);
+    }
+  };
+  void readWeather();
+  setInterval(() => void readWeather(), 30 * MIN);
+
+  // Holidays and birthdays, and Easter eggs hidden on the windows.
+  let season: Season = { snow: false, eggHunt: false };
+  const seasonSaid = new Set<string>();
+  let eggs: Egg[] = [];
+  let eggsFor = '';
+  let rects: import('./buddy/brain.ts').Rect[] = [];
+  const EGG_COLOURS: [string, string][] = [
+    [FIXED.m, FIXED.w],
+    [FIXED.t, FIXED.y],
+    [FIXED.y, FIXED.m],
+    [FIXED.g, FIXED.w],
+    [FIXED.q, FIXED.m],
+  ];
+  /** Hides today's eggs: on visible window edges where it can, otherwise on the floor. */
+  const hideEggs = () => {
+    eggsFor = today;
+    const left = Math.max(0, 5 - (diary.days[today]?.eggs ?? 0));
+    eggs = Array.from({ length: left }, (_, i) => {
+      const spots = rects.filter((r) => r.w > 160 && r.y > 120);
+      const r = spots.length && Math.random() < 0.75 ? spots[Math.floor(Math.random() * spots.length)] : null;
+      const dx = r ? 30 + Math.random() * (r.w - 60) : 40 + Math.random() * (window.innerWidth - 80);
+      return { window: r?.id ?? null, dx, colours: EGG_COLOURS[i % EGG_COLOURS.length], found: false };
+    });
+  };
+
+  // Stickers: earned from the diary's counts; rewards unlock accessories.
+  diary.stickers ??= [];
+  let unlockedFor = '';
+  const checkStickers = (announce: boolean) => {
+    const ids = earned(totals(diary, look.metOn, today));
+    const unlock = look.unlockAll ? 'all' : ids.join(',');
+    if (unlock !== unlockedFor) {
+      unlockedFor = unlock;
+      setUnlocked(look.unlockAll ? 'all' : ids);
+      void sendCatalog();
+    }
+    const fresh = ids.filter((id) => !diary.stickers!.includes(id));
+    if (!fresh.length) return;
+    diary.stickers = [...diary.stickers!, ...fresh];
+    saveDiary();
+    if (!announce || !look.stickers) return;
+    const sticker = STICKERS.find((st) => st.id === fresh[fresh.length - 1]);
+    if (sticker) {
+      say({ key: 'newSticker', vars: { name: sticker.name } }, 5000);
+      world.confetti(brain.x, brain.y - brain.tall);
+    }
+  };
+  // Stickers earned before this version count without a fuss.
+  checkStickers(false);
+
+  // Games: from the Play menu, or the buddy asks now and then.
+  const games = new Games();
+  const screen = () => ({ width: window.innerWidth, height: window.innerHeight, scale: look.scale });
+  let nextOffer = performance.now() + between(30, 60) * MIN;
+  const played = (e: GameEvent | undefined) => {
+    if (!e) return;
+    if (e.say) say(e.say, 3500);
+    if (e.emote) brain.notice(e.emote, 1.2);
+    if (e.count) count(e.count);
+    if (e.confetti) world.confetti(e.confetti.x, e.confetti.y);
+  };
+  const play = (kind: GameKind | 'stop') => {
+    if (kind === 'stop') return games.stop(brain);
+    if (brain.mode === 'sleep') brain.pet();
+    played(games.start(kind, performance.now(), brain, screen()));
+    brain.stayPut = true;
+  };
+  bridge.onPlay((game) => play(game as GameKind | 'stop'));
+  // In a plain browser (npm run dev) there's no menu: play from the console with pixling.play('fetch').
+  if (!bridge.inApp) Object.assign(window, { pixling: { play, games, brain } });
 
   // The backpack: focus timer and reminders, checked once a second.
   const backpack = new Backpack(Date.now());
@@ -213,8 +314,28 @@ async function start(): Promise<void> {
       nextEvent = agendaAdvice.next;
       void bridge.setNextEvent(nextEvent);
     }
-    // In a meeting it sits still and doesn't chat.
-    brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet;
+    // In a meeting it sits still and doesn't chat; while playing it stays for the game.
+    brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet || games.active;
+    if (weatherFor !== JSON.stringify(look.weather ? look.place : null)) void readWeather();
+    if (active && look.weather) {
+      const remark = weatherWatch.update(weather);
+      if (remark) say(remark, 5000);
+    }
+    season = look.seasons ? seasonFor(now, { birthday: look.birthday, metOn: look.metOn }) : { snow: false, eggHunt: false };
+    if (season.say && active && !seasonSaid.has(`${today}:${season.say.key}`)) {
+      seasonSaid.add(`${today}:${season.say.key}`);
+      say(season.say, 6000);
+      if (season.item === 'cake') world.confetti(brain.x, brain.y - brain.tall);
+    }
+    if (season.eggHunt && eggsFor !== today) hideEggs();
+    if (!season.eggHunt) eggs = [];
+    if (now.getSeconds() === 0) checkStickers(true);
+    // Now and then it asks to play.
+    const free = active && !games.active && !brain.stayPut && brain.mode === 'idle' && bubble.hidden;
+    if (look.games && free && performance.now() > nextOffer) {
+      nextOffer = performance.now() + between(40, 80) * MIN;
+      play((['fetch', 'basket', 'hide'] as const)[Math.floor(Math.random() * 3)]);
+    }
     brain.speed = personality().speed * traitLook.speed;
     if (!look.watchSystem) reaction = { tired: false, sweaty: false };
     brain.tired = advice.tired || reaction.tired;
@@ -246,6 +367,38 @@ async function start(): Promise<void> {
   let clickThrough = true;
   let pressed: { x: number; y: number } | null = null;
   let dragging = false;
+  let ballHeld = false;
+
+  // The ball and the eggs live on the world layer; clicks there reach the page when the cursor is on them.
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target === canvas || e.button !== 0) return;
+    if (games.ballHit(e.clientX, e.clientY, screen())) {
+      ballHeld = true;
+      games.grabBall(e.clientX, e.clientY, performance.now(), brain);
+      return;
+    }
+    const egg = world.eggAt(e.clientX, e.clientY, eggs, rects, window.innerHeight, look.scale);
+    if (egg >= 0) {
+      eggs[egg].found = true;
+      count('eggs');
+      const left = eggs.filter((x) => !x.found).length;
+      say(left ? { key: 'eggFound', vars: { left } } : 'eggsAll', 3000);
+      brain.notice('heart', 1.2);
+      if (!left) world.confetti(e.clientX, e.clientY);
+      void bridge.giveBackFocus();
+    }
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (ballHeld) games.dragBall(e.clientX, e.clientY, performance.now());
+  });
+  const letGoOfBall = () => {
+    if (!ballHeld) return;
+    ballHeld = false;
+    games.releaseBall(performance.now());
+    void bridge.giveBackFocus();
+  };
+  document.addEventListener('pointerup', letGoOfBall);
+  document.addEventListener('pointercancel', letGoOfBall);
 
   const pollCursor = async () => {
     let near = false;
@@ -257,7 +410,9 @@ async function start(): Promise<void> {
       fileDrag = c?.dragging ?? false;
       // While a file is dragged, catch it on a wide area around the buddy so the drop lands here.
       const over = c !== null && view.hit(c.x, c.y, fileDrag ? 60 : 6);
-      const through = !(over || pressed || brain.mode === 'drag');
+      // The ball and eggs can be picked up too.
+      const toy = c !== null && (games.ballHit(c.x, c.y, screen()) || world.eggAt(c.x, c.y, eggs, rects, window.innerHeight, look.scale) >= 0);
+      const through = !(over || toy || pressed || ballHeld || brain.mode === 'drag');
       if (through !== clickThrough) {
         await bridge.setClickThrough(through);
         clickThrough = through;
@@ -282,6 +437,7 @@ async function start(): Promise<void> {
       if (firstLook && look.climbWindows) bridge.log(`windows seen: ${list.length}`);
       firstLook = false;
       brain.setWindows(list);
+      rects = list;
     } catch (e) {
       bridge.log(`reading the windows failed: ${String(e)}`);
     } finally {
@@ -314,6 +470,10 @@ async function start(): Promise<void> {
         count('throws');
         say('thrown', 2000);
       }
+    } else if (games.kind === 'hide' && brain.mode === 'hide') {
+      // Found it!
+      played(games.buddyClicked(brain));
+      brain.pet();
     } else {
       // A click answers a reminder (water, a break) as well as being a pat on the head.
       const answered = backpack.answer(Date.now());
@@ -396,20 +556,45 @@ async function start(): Promise<void> {
   let lastStand: number | null = null;
   let lastMode: Mode = brain.mode;
   const frame = (now: number) => {
-    const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.mode === 'fly' || brain.mode === 'phase' || brain.standingOn !== null;
+    const busy =
+      brain.mode === 'fall' || brain.mode === 'drag' || brain.mode === 'fly' || brain.mode === 'phase' || brain.standingOn !== null || games.active;
     if (busy || now - lastDraw >= 50) {
       const input: Input = { cursor, idleMs: now - lastMove, dragging: fileDrag };
-      brain.update((now - last) / 1000, input);
+      const dt = Math.min(0.1, (now - last) / 1000);
+      const before = brain.y;
+      brain.update(dt, input);
       last = now;
       lastDraw = now;
-      // Priority: the backpack, then the app in front, then the time of day.
-      const moment = momentFor(new Date());
-      const item = advice.item ?? agendaAdvice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
-      const hat = agendaAdvice.hat ?? moment.hat;
+      if (games.active) {
+        played(games.update(now, dt, brain, screen(), rects, cursor?.x ?? null));
+        played(games.checkBasket(before, brain, now));
+      }
+      // Priority for what it holds: the backpack, the calendar, a celebration, the app in front, the
+      // weather, the time of day. Hats only when you didn't pick an accessory.
+      const moment = momentFor(new Date(), look.seasons);
+      const outfit = look.weather ? dress(weather) : { particles: null };
+      const item =
+        advice.item ?? agendaAdvice.item ?? season.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? outfit.item ?? moment.item;
+      const night = moment.hat === 'nightcap' ? 'nightcap' : undefined;
+      const hat = agendaAdvice.hat ?? (season.item === 'cake' ? season.hat : undefined) ?? night ?? season.hat ?? outfit.hat ?? moment.hat;
       const shown = look.accessory === 'none' && hat ? { ...look, accessory: hat } : look;
       // During a video call it fades into the background.
       const extra = agendaAdvice.away ? { ...traitLook.render, fade: 3 } : traitLook.render;
+      view.clipY = games.clipY;
       view.draw(shown, brain.pose(input), brain.x, brain.y, now, item, extra);
+      world.draw(
+        {
+          scale: look.scale,
+          ball: games.ball,
+          hoop: games.hoop,
+          eggs,
+          snow: season.snow || outfit.particles === 'snow' ? rects : null,
+          weather: agendaAdvice.away ? null : outfit.particles,
+          buddy: { x: brain.x, y: brain.y, tall: brain.tall },
+        },
+        rects,
+        dt,
+      );
       // The dragon announces its flights, the ghost its tricks, the shroom its bounces (not every time).
       for (const event of brain.events.splice(0)) {
         const said: Partial<Record<BrainEvent, [Situation, number]>> = {

@@ -34,6 +34,10 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     meetingSoon: ['Calendar alert: {title} in T-minus {min} minutes.'],
     meetingDone: ['{title}: complete. Saving results...'],
     birthday: ['Happy birthday protocol activated: {title}!'],
+    weatherRain: ['Rain detected. Waterproofing: umbrella.'],
+    fetchAgain: ['Ball retrieved. Awaiting next throw.'],
+    basketScore: ['Trajectory: perfect.'],
+    hideFound: ['Cloaking device failed.'],
   },
 
   ghost: {
@@ -59,6 +63,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     ghostAppear: ['Boo!', 'Over here!', 'Did you miss me?'],
     meetingSoon: ['Psst... {title} in {min} minutes.'],
     meetingDone: ['{title} is over. I was very quiet, did you notice?'],
+    hideStart: ['Hide and seek? I’m a natural. I’m see-through!'],
+    halloween: ['Happy Halloween! My favourite day of the year!'],
   },
 
   sprout: {
@@ -82,6 +88,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     sproutBloomed: ['I’m blooming! Thank you for looking after me.'],
     meetingDone: ['{title} is done. Time for some sunlight?'],
     dayFree: ['No more meetings. Let’s photosynthesise.'],
+    weatherRain: ['Rain! Free water!'],
+    weatherSun: ['Sunshine! Photosynthesis time!'],
   },
 
   shroom: {
@@ -106,6 +114,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     shroomSpores: ['Achoo!', 'Oops, spores everywhere.', 'Sorry, allergic to cuteness.'],
     shroomBounce: ['Boing!', 'Wheee, bouncy!'],
     meetingSoon: ['{title} in {min} minutes. Don’t let it mush-room into a long one.'],
+    weatherRain: ['Rain! Mushroom weather!'],
+    basketScore: ['Boing! In!'],
   },
 
   mug: {
@@ -128,6 +138,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     meetingSoon: ['{title} in {min} minutes. Coffee first?'],
     meetingDone: ['{title} done. You’ve earned a refill.'],
     agenda: ['{things} today. First, {title} at {time}. I’ll keep the coffee hot.'],
+    weatherCold: ['{temp}°? Good thing I’m a hot drink.'],
+    christmas: ['Merry Christmas! Hot cocoa, anyone?'],
   },
 
   dragon: {
@@ -154,5 +166,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     meetingSoon: ['{title} in {min} minutes. Into battle!'],
     meetingDone: ['You slew {title}! Victory!'],
     birthday: ['{title}! Dragons give the best birthday hugs.'],
+    fetchAgain: ['I’m adding this ball to my hoard. Just kidding, throw it again!'],
+    basketScore: ['I flew it in!'],
+    weatherStorm: ['A storm! Finally, dragon weather.'],
   },
 };

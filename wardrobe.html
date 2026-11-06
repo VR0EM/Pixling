@@ -53,6 +53,28 @@
       </section>
 
       <section>
+        <h2>Weather</h2>
+        <p class="hint">An umbrella in the rain, a beanie when it’s cold, sunglasses in the sun. Only your town is sent to Open-Meteo, a free weather service.</p>
+        <form id="place-form" class="field">
+          <input id="place-name" type="text" placeholder="Your town, like Ghent or New York" autocomplete="off" spellcheck="false" />
+          <button type="submit" class="pill">Find</button>
+        </form>
+        <p id="place-status" class="hint" role="status"></p>
+        <div id="place-results" class="pills"></div>
+      </section>
+
+      <section>
+        <h2>Fun</h2>
+        <div id="fun" class="toggles"></div>
+        <div class="birthday">
+          <label for="birthday">Your birthday</label>
+          <input id="birthday" type="date" />
+          <button id="birthday-clear" type="button" class="pill">Clear</button>
+        </div>
+        <p class="hint">Play with your buddy from the menu: Play → Fetch, Hide and seek or Basket.</p>
+      </section>
+
+      <section>
         <h2>Calendar</h2>
         <p class="hint">
           Your buddy can follow your calendar: what's on today, a heads-up before meetings, quiet during them, and a party

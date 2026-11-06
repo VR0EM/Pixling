@@ -10,8 +10,13 @@ export interface DayStats {
   notes: number;
   files: number;
   climbs: number;
-  /** Meetings from the calendar that ended. Older days may not have it. */
+  /** Meetings from the calendar that ended. Older days may not have the counts below. */
   meetings?: number;
+  /** Games: balls fetched, baskets scored, times found in hide and seek, Easter eggs found. */
+  fetches?: number;
+  baskets?: number;
+  finds?: number;
+  eggs?: number;
 }
 
 export interface DiaryDay extends DayStats {
@@ -23,6 +28,8 @@ export interface DiaryDay extends DayStats {
 export interface Diary {
   days: Record<string, DiaryDay>;
   sprout?: SproutSave;
+  /** Stickers already announced, so each is celebrated once. */
+  stickers?: string[];
 }
 
 export const emptyDay = (): DiaryDay => ({ pets: 0, throws: 0, focus: 0, water: 0, notes: 0, files: 0, climbs: 0 });
@@ -47,6 +54,10 @@ function facts(s: DayStats): string[] {
   const all: [number, string][] = [
     [s.focus * 3, plural(s.focus, 'focus round', 'focus rounds')],
     [(s.meetings ?? 0) * 2, `${plural(s.meetings ?? 0, 'meeting', 'meetings')} survived`],
+    [(s.baskets ?? 0) * 2, `scored ${plural(s.baskets ?? 0, 'basket', 'baskets')}`],
+    [(s.fetches ?? 0) * 1.5, `played fetch ${times(s.fetches ?? 0)}`],
+    [(s.finds ?? 0) * 2, `found me ${times(s.finds ?? 0)} in hide and seek`],
+    [(s.eggs ?? 0) * 2, `found ${plural(s.eggs ?? 0, 'Easter egg', 'Easter eggs')}`],
     [s.files * 2, `${plural(s.files, 'file', 'files')} eaten`],
     [s.notes * 2, plural(s.notes, 'note', 'notes')],
     [s.water * 2, `water ${times(s.water)}`],

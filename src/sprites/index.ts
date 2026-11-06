@@ -60,6 +60,18 @@ export function setCreations(list: Creation[]): void {
   cache.clear();
 }
 
+/** Stickers earned (or 'all'): accessories that are a reward only show up in the menu once earned. */
+let unlocked: Set<string> | 'all' = new Set();
+
+export function setUnlocked(stickers: string[] | 'all'): void {
+  unlocked = stickers === 'all' ? 'all' : new Set(stickers);
+}
+
+/** Can this accessory be picked yet? */
+export function available(a: Accessory): boolean {
+  return !a.reward || unlocked === 'all' || unlocked.has(a.reward);
+}
+
 export function accessory(id: string | undefined): Accessory | null {
   return ACCESSORIES[id ?? ''] ?? CUSTOM[id ?? ''] ?? null;
 }
@@ -98,7 +110,7 @@ export function catalog() {
     accessories: [
       { id: 'none', name: 'None' },
       ...Object.entries({ ...ACCESSORIES, ...CUSTOM })
-        .filter(([, a]) => !a.hidden)
+        .filter(([, a]) => !a.hidden && available(a))
         .map(([id, a]) => ({ id, name: a.name })),
     ],
   };

@@ -4,7 +4,9 @@ import './diary-page.css';
 import { dayKey, daysTogether, emptyDay, sentence, type Diary } from './buddy/diary.ts';
 import { isCharacter } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
-import { render } from './sprites/index.ts';
+import { emotePixels } from './sprites/emotes.ts';
+import { ACCESSORIES, ITEMS, colours, render } from './sprites/index.ts';
+import { STICKERS, earned, totals, type Sticker } from './buddy/stickers.ts';
 
 const longDate = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 const fullDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -55,7 +57,54 @@ async function draw(): Promise<void> {
   );
 }
 
+/** A sticker's picture: an emote, an item, an accessory or a buddy, drawn 32×32 and centred. */
+function paintIcon(canvas: HTMLCanvasElement, icon: Sticker['icon']): void {
+  const ctx = canvas.getContext('2d')!;
+  ctx.clearRect(0, 0, 32, 32);
+  let pixels: (string | null)[][] = [];
+  if (icon.species) pixels = render(icon.species).pixels;
+  else if (icon.emote) pixels = emotePixels(icon.emote);
+  else {
+    const rows = icon.item ? ITEMS[icon.item]?.rows : ACCESSORIES[icon.accessory ?? '']?.rows;
+    const pal = colours('robot');
+    pixels = (rows ?? []).map((r) => [...r].map((k) => (k === '.' ? null : (pal[k] ?? null))));
+  }
+  const h = pixels.length;
+  const w = Math.max(0, ...pixels.map((r) => r.length));
+  const k = icon.species ? 1 : Math.max(1, Math.floor(26 / Math.max(w, h)));
+  const ox = Math.floor((32 - w * k) / 2);
+  const oy = Math.floor((32 - h * k) / 2);
+  pixels.forEach((row, y) =>
+    row.forEach((colour, x) => {
+      if (!colour) return;
+      ctx.fillStyle = colour;
+      ctx.fillRect(ox + x * k, oy + y * k, k, k);
+    }),
+  );
+}
+
+async function drawStickers(): Promise<void> {
+  const config = await bridge.getConfig();
+  const diary = await bridge.getDiary<Diary>();
+  const have = new Set(earned(totals(diary, config.metOn, dayKey(new Date()))));
+  document.getElementById('stickers-title')!.textContent = `Stickers · ${have.size} of ${STICKERS.length}`;
+  const list = document.getElementById('stickers')!;
+  list.replaceChildren();
+  for (const sticker of STICKERS) {
+    const li = document.createElement('li');
+    li.classList.toggle('locked', !have.has(sticker.id));
+    const canvas = Object.assign(document.createElement('canvas'), { width: 32, height: 32 });
+    paintIcon(canvas, sticker.icon);
+    const name = Object.assign(document.createElement('strong'), { textContent: sticker.name });
+    const hint = Object.assign(document.createElement('small'), { textContent: sticker.hint });
+    li.append(canvas, name, hint);
+    list.append(li);
+  }
+}
+
 draw().catch((e) => bridge.log(`diary: ${String(e)}`));
+drawStickers().catch((e) => bridge.log(`stickers: ${String(e)}`));
+setInterval(() => void drawStickers(), 15_000);
 // The buddy saves a few seconds after something happens; keep the page fresh while it's open.
 setInterval(() => void draw(), 5000);
 bridge.onConfigChanged(() => void draw());
