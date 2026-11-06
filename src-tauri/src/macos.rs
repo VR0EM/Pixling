@@ -7,8 +7,9 @@ use core_foundation::string::CFString;
 use core_graphics::window::{
     copy_window_info, kCGNullWindowID, kCGWindowListExcludeDesktopElements, kCGWindowListOptionOnScreenOnly,
 };
-use objc2::MainThreadMarker;
-use objc2_app_kit::{NSApplication, NSEvent, NSPasteboard, NSPasteboardNameDrag, NSWorkspace};
+use objc2::runtime::{AnyClass, AnyObject};
+use objc2::{msg_send, sel, ClassType, MainThreadMarker};
+use objc2_app_kit::{NSApplication, NSEvent, NSPanel, NSPasteboard, NSPasteboardNameDrag, NSWindow, NSWindowStyleMask, NSWorkspace};
 use std::sync::atomic::{AtomicIsize, Ordering};
 
 use crate::{FrontApp, WindowRect};
@@ -17,6 +18,29 @@ use crate::{FrontApp, WindowRect};
 pub fn deactivate() {
     if let Some(mtm) = MainThreadMarker::new() {
         NSApplication::sharedApplication(mtm).deactivate();
+    }
+}
+
+/// Turns the overlay into a non-activating panel, the kind of window Spotlight uses: clicking or dragging
+/// the buddy then never makes Pixling the active app, so the app you work in keeps its focus. Must run on
+/// the main thread, right after the window is made.
+pub fn make_nonactivating(ns_window: *mut std::ffi::c_void) {
+    if ns_window.is_null() || MainThreadMarker::new().is_none() {
+        return;
+    }
+    unsafe {
+        // Same window, now treated as a panel; the web view and its events stay as they are.
+        objc2::ffi::object_setClass(ns_window.cast::<AnyObject>(), NSPanel::class() as *const AnyClass);
+        let window = &*ns_window.cast::<NSWindow>();
+        window.setStyleMask(window.styleMask() | NSWindowStyleMask::NonactivatingPanel);
+        // Panels hide when their app isn't active, and Pixling never is.
+        window.setHidesOnDeactivate(false);
+        // The style mask alone isn't always honoured after creation; this private switch makes it stick.
+        let prevent = sel!(_setPreventsActivation:);
+        let responds: bool = msg_send![window, respondsToSelector: prevent];
+        if responds {
+            let _: () = msg_send![window, _setPreventsActivation: true];
+        }
     }
 }
 

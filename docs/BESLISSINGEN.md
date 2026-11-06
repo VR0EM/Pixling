@@ -39,9 +39,11 @@ Op macOS vraagt Rust de vensterlijst op met `CGWindowListCopyWindowInfo`: alleen
 
 Het maatje landt alleen op een bovenrand die zichtbaar is: als een venster ervoor die plek bedekt, valt het erdoor. Verdwijnt het venster, of schuift het in één keer meer dan 80 pixels opzij, dan valt het eraf.
 
-## Focus teruggeven in plaats van een niet-activerend paneel
+## Een niet-activerend paneel
 
-Op een venster van een andere app klikken maakt die app actief; dus ook bij een klik op het maatje verliest je eigen app de focus. De nette oplossing is een niet-activerend `NSPanel`, maar dat vraagt het venster om te bouwen tot een ander soort venster. Voorlopig roept Pixling na elke klik, sleep of menukeuze `NSApplication.deactivate()` aan, waardoor macOS de vorige app weer actief maakt. Je ziet de titelbalk van je app heel even grijs worden; verder merk je er niets van.
+Op een venster van een andere app klikken maakt die app normaal actief, dus ook een klik op het maatje haalde de focus weg uit je eigen app. Daarom wordt het overlayvenster op macOS meteen na het maken omgezet tot een niet-activerend `NSPanel` (zoals Spotlight): de klasse van het venster wordt `NSPanel`, het krijgt de stijl `NonactivatingPanel`, het verbergt zich niet als Pixling niet actief is, en de private schakelaar `_setPreventsActivation:` zorgt dat macOS die stijl ook na het maken respecteert. Klikken, slepen en rechtsklikken laten je eigen app dan gewoon actief.
+
+Als vangnet roept Pixling na een klik nog steeds `NSApplication.deactivate()` aan; als de app niet actief werd, doet dat niets.
 
 ## Meekijken op basis van de app, niet de inhoud
 

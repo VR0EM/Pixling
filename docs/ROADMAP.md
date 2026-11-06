@@ -15,7 +15,7 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 - [x] Rechtsklik op het maatje opent hetzelfde menu als de menubalk
 - [x] Na een klik krijgt de app waar je in werkte de focus terug
 - [x] Starten bij het inloggen (optie in het menu)
-- [ ] Helemaal geen focuswissel bij een klik (macOS: niet-activerend paneel)
+- [x] Helemaal geen focuswissel bij een klik (macOS: niet-activerend paneel)
 - [ ] Meerdere schermen: meeverhuizen en tussen schermen gooien
 - [ ] Verstoppen bij fullscreen-apps en videocalls
 
