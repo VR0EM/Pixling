@@ -191,6 +191,8 @@ export class Brain {
           this.followAt = null;
           if (!this.stayPut && this.climb(true)) break;
         }
+        // Coding or watching a video along with you: no wandering off with the laptop or the popcorn.
+        if (this.mode === 'walk' && this.settled) this.setMode('idle', 1);
         if (this.mode === 'walk' && this.walk(dt)) break;
         if (this.elapsed() > this.modeLength) this.decide();
         break;
@@ -390,10 +392,15 @@ export class Brain {
     this.setMode('fall');
   }
 
+  /** Stays where it is: coding or watching a video with you, or reading during a focus round. */
+  private get settled(): boolean {
+    return this.context === 'code' || this.context === 'video' || this.stayPut;
+  }
+
   /** Picks what to do next: rest, walk, now and then climb a window, or hop down from one. */
   private decide(): void {
-    if (this.context === 'video' || this.stayPut) {
-      this.setMode('idle', this.between(3, 8)); // watching along, or reading
+    if (this.settled) {
+      this.setMode('idle', this.between(3, 8)); // coding or watching along, or reading
       return;
     }
     const roll = this.random();
@@ -402,7 +409,7 @@ export class Brain {
       this.drop(this.dir * 80, -300);
       return;
     }
-    const walkChance = this.tired ? 0.2 : this.context === 'code' ? this.walkiness * 0.55 : this.walkiness;
+    const walkChance = this.tired ? 0.2 : this.walkiness;
     if (this.mode === 'walk' || this.random() > walkChance) {
       this.setMode('idle', this.between(2, 6));
       return;

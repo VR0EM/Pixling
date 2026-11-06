@@ -230,6 +230,21 @@ describe('Brain', () => {
       }
     });
 
+    it('stops walking and stays put while you code', () => {
+      const brain = new Brain(800, 600, seeded(15));
+      for (let i = 0; i < 30 * 60 && brain.mode !== 'walk'; i++) brain.update(1 / 30, awake);
+      expect(brain.mode).toBe('walk');
+      brain.context = 'code';
+      run(brain, 0.1);
+      expect(brain.mode).toBe('idle');
+      const x = brain.x;
+      for (let i = 0; i < 30 * 120; i++) {
+        brain.update(1 / 30, awake);
+        expect(brain.mode).not.toBe('walk');
+      }
+      expect(brain.x).toBe(x);
+    });
+
     it('sits still and does not climb while reading during a focus round', () => {
       const brain = new Brain(800, 600, seeded(19));
       brain.stayPut = true;

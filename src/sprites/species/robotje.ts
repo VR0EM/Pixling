@@ -31,7 +31,9 @@ export const robotje: Species = {
     if (!accessory?.hat) {
       const light = Math.floor(tick / 2) % 2 ? 'Q' : 'q';
       const antenna = grid();
-      stamp(antenna, 14, 4 + d, [`.${light}${light}.`, light.repeat(4), `.${light}${light}.`, '.ss.', '.ss.', '.ss.', '.ss.']);
+      // A round lamp with a glint, on a short stem.
+      const l = light;
+      stamp(antenna, 14, 6 + d, [`.${l}${l}.`, `${l}w${l}${l}`, l.repeat(4), '.ss.', '.ss.']);
       layers.push([antenna, 'o']);
     }
 

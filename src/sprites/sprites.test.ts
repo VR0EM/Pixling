@@ -90,9 +90,9 @@ describe('sprites', () => {
   });
 
   it("a hat replaces the robot's antenna", () => {
-    const plain = render('robotje').pixels.slice(0, 8).flat().filter(Boolean).length;
-    const hat = render('robotje', { accessory: 'kroon' }).pixels.slice(0, 8).flat().filter(Boolean).length;
-    expect(hat).toBeLessThan(plain);
+    const lamp = (accessory?: string) => render('robotje', { accessory }).pixels.slice(0, 10).flat().includes('#7cf8ff');
+    expect(lamp()).toBe(true);
+    expect(lamp('kroon')).toBe(false);
   });
 
   it('the catalog lists every species, palette and accessory', () => {
