@@ -47,6 +47,6 @@ export const robotje: Species = {
     stamp(face, 14 + fx, 20 + d, ['q..q', '.qq.']);
     layers.push([face, null]);
 
-    return { layers, hat: [13, 10 + d], glasses: [10 + fx, 17 + d] };
+    return { layers, hat: [13, 10 + d], glasses: [10 + fx, 17 + d], bob: d };
   },
 };

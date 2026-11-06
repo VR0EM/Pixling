@@ -23,7 +23,16 @@ Elk maatje is een paar tekstkaartjes van pixels, met lagen die elk automatisch e
 
 ## Vooraanzicht en gestileerd
 
-Een eerste versie had zijaanzicht en realistische dieren. Dat werd afgekeurd: het Robotje, het Spookje en het Boontje (vooraanzicht, gestileerd, elk een eigen silhouet) zijn de referentie. De Kat, het Konijn en het Draakje zijn in die stijl hertekend.
+Een eerste versie had zijaanzicht en realistische dieren. Dat werd afgekeurd: het Robotje, het Spookje en het Boontje (vooraanzicht, gestileerd, elk een eigen silhouet) zijn de referentie. De Kat en het Konijn bleven ook daarna te veel dier; ze maakten plaats voor de Paddo (een paddenstoel met het gezicht op de steel) en het Mokje (een mok met koffie en stoom). Het Draakje kreeg een grote ronde kop met kleine hoorns, gevouwen vleugels en een krulstaart.
+
+## Spullen op maat per maatje
+
+Een accessoire of voorwerp heeft één algemene tekening, en mag per soort een eigen versie hebben (`variants` in `accessories.ts` en `items.ts`). Een versie heeft een vaste plek in het grid en beweegt mee met het ademen als ze op het hoofd of gezicht zit; `null` laat het voorwerp bij die soort weg.
+
+- De koptelefoon is voor elk ingebouwd hoofd apart getekend: over de bouten van het Robotje, tussen de hoorns van het Draakje, onder de hoed van de Paddo. De algemene versie is een boombox naast het maatje, zodat ook maatjes zonder eigen tekening (later: zelfgetekende) muziek kunnen luisteren. Het Mokje krijgt ook de boombox.
+- Bij code houdt het maatje een laptop vast in plaats van een leesbril.
+- Het Robotje draagt een zonnebril die op zijn scherm oplicht, want een zwarte bril valt weg op het donkere scherm.
+- Een hoedje dat boven het grid zou uitsteken zakt zo ver in het hoofd als nodig, zodat ook hoge hoedjes op hoge maatjes (Paddo, Draakje) passen.
 
 ## De webpagina is de baas over het uiterlijk
 

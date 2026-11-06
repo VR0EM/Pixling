@@ -1,6 +1,7 @@
 import type { Palette } from './types.ts';
 
 export const PALETTES: Record<string, Palette> = {
+  rood: { name: 'Rood', o: '#5a1a22', b: '#e8524f', s: '#b83a3e', h: '#ff8f80', a: '#fbe9d0', c: '#ff9fb0' },
   terracotta: { name: 'Terracotta', o: '#4a2416', b: '#cd7a52', s: '#a75a38', h: '#e7a07c', a: '#f2c9a8', c: '#e5858a' },
   gember: { name: 'Gember', o: '#4a2414', b: '#e8964a', s: '#bf6a2e', h: '#f6c48c', a: '#fbe6cc', c: '#e5858a' },
   zand: { name: 'Zand', o: '#3b2e25', b: '#b8a084', s: '#8f7860', h: '#d9c7b2', a: '#f4ede4', c: '#d98b8b' },
@@ -29,5 +30,12 @@ export const FIXED: Record<string, string> = {
   n: '#26242e',
   z: '#2b2a40',
   k: '#6b4226',
+  v: '#f6ead2',
+  V: '#d9c6a3',
+  X: '#cdd1dc',
+  x: '#9a9fb0',
+  N: '#4f5363',
+  M: '#c2407e',
+  j: '#d4cfe2',
   u: '#4b4fb0',
 };

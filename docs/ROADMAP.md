@@ -6,7 +6,7 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 
 - [x] Doorzichtig venster boven alles, over het werkgebied van het hoofdscherm
 - [x] Klikken gaan door het venster, behalve op het maatje
-- [x] Zes maatjes, zeven kleuren, vier accessoires, drie groottes
+- [x] Zes maatjes, acht kleuren, vijf accessoires, drie groottes
 - [x] Rondlopen, ademen, knipperen, naar de cursor kijken
 - [x] Slapen na een minuut zonder muisbeweging, wakker worden bij beweging
 - [x] Slepen, gooien met zwaartekracht en stuiteren, aaien met een klik
@@ -23,10 +23,10 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 
 - [x] Op de bovenrand van vensters zitten, meerijden als je het venster sleept, eraf vallen als het sluit of je eraan rukt (macOS)
 - [x] Zelf op vensters springen, en eraf springen
-- [x] Reageren op de actieve app: leesbril bij code, koptelefoon bij muziek, popcorn bij video, controller bij games
+- [x] Reageren op de actieve app: laptop bij code, koptelefoon (of boombox) bij muziek, popcorn bij video, controller bij games
 - [ ] Muziek herkennen die op de achtergrond speelt, niet alleen als de muziekapp vooraan staat
 - [ ] Vensters en actieve app op Windows en Linux
-- [x] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagavond, oudejaarsavond, Sinterklaas
+- [x] Tijd van de dag en speciale dagen: koffie, slaapmuts, vrijdagavond, oudejaarsavond, winter
 - [ ] Je verjaardag (vraagt een datum in de kleerkast)
 - [ ] Typtempo (alleen het tempo, nooit de toetsen)
 - [x] Tekstballonnen met een eigen pixel-lettertype (Pixelify Sans)

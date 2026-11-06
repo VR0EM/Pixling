@@ -35,8 +35,8 @@ export const boontje: Species = {
 
     stamp(pot, 8, 18, POT);
     for (const x of [13 + fx, 18 + fx]) {
-      if (!o.blink) set(pot, x, 22, 'e');
-      set(pot, x, 23, 'e');
+      if (!o.blink) set(pot, x, 21, 'e');
+      set(pot, x, 22, 'e');
     }
 
     return {
@@ -46,7 +46,8 @@ export const boontje: Species = {
         [pot, 'o'],
       ],
       hat: [13, 7],
-      glasses: [10 + fx, 21],
+      glasses: [10 + fx, 20],
+      bob: 0,
     };
   },
 };

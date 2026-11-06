@@ -20,11 +20,13 @@ describe('momentFor', () => {
     expect(momentFor(at('2026-12-31T20:00:00')).hat).toBe('feesthoed');
   });
 
-  it('wears a mitre in the Sinterklaas season, but sleeps in a nightcap', () => {
-    expect(momentFor(at('2026-11-20T14:00:00')).hat).toBe('mijter');
-    expect(momentFor(at('2026-12-05T14:00:00')).hat).toBe('mijter');
-    expect(momentFor(at('2026-12-10T14:00:00')).hat).toBeUndefined();
-    expect(momentFor(at('2026-11-20T23:30:00')).hat).toBe('slaapmuts');
+  it('wears a beanie in winter, but sleeps in a nightcap and parties on New Year', () => {
+    expect(momentFor(at('2026-12-10T14:00:00')).hat).toBe('wintermuts');
+    expect(momentFor(at('2027-02-02T14:00:00')).hat).toBe('wintermuts');
+    expect(momentFor(at('2026-11-20T14:00:00')).hat).toBeUndefined();
+    expect(momentFor(at('2027-03-02T14:00:00')).hat).toBeUndefined();
+    expect(momentFor(at('2026-12-10T23:30:00')).hat).toBe('slaapmuts');
+    expect(momentFor(at('2027-01-01T14:00:00')).hat).toBe('feesthoed');
   });
 
   it('is plain on an ordinary afternoon', () => {

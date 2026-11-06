@@ -28,6 +28,7 @@ export const spookje: Species = {
       ],
       hat: [13, 10 + d],
       glasses: [10 + fx, 17 + d],
+      bob: d,
     };
   },
 };

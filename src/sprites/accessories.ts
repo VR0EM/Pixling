@@ -11,10 +11,26 @@ export const ACCESSORIES: Record<string, Accessory> = {
     hat: true,
     rows: ['y.yy.y', 'yyyyyy', 'yyrryy', 'YYYYYY'],
   },
-  mijter: {
-    name: 'Mijter',
+  strikje: {
+    name: 'Strikje',
     hat: true,
-    rows: ['..rr..', '.rrrr.', 'rryyrr', 'ryyyyr', 'rryyrr', 'rryyrr', 'rrrrrr', 'yyyyyy', 'yyyyyy'],
+    centered: true,
+    rows: ['mm...mm', 'mmm.mmm', 'mmmMmmm', 'mmm.mmm', 'mm...mm'],
+  },
+  wintermuts: {
+    name: 'Wintermuts',
+    hat: true,
+    centered: true,
+    rows: [
+      '......ww......',
+      '.....wwwX.....',
+      '....rrrrrr....',
+      '..rrrrrrrrrr..',
+      '.rrrrrrrrrrrr.',
+      '.rrrrrrrrrrrr.',
+      'RrRrRrRrRrRrRr',
+      'RrRrRrRrRrRrRr',
+    ],
   },
   slaapmuts: {
     name: 'Slaapmuts',
@@ -27,5 +43,7 @@ export const ACCESSORIES: Record<string, Accessory> = {
     face: true,
     noOutline: true,
     rows: ['nnnnnnnnnnnn', 'nwnnn..nwnnn', '.nnn....nnn.'],
+    // The robot's face is a screen, so its shades light up on it instead.
+    variants: { robotje: { at: [10, 17], rows: ['qqqqqqqqqqqq', 'qwnnq..qwnnq', '.qqq....qqq.'] } },
   },
 };

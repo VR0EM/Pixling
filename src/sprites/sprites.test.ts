@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emotePixels, type Emote } from './emotes.ts';
-import { ACCESSORIES, ITEMS, PALETTES, SPECIES, catalog, render, type RenderOptions } from './index.ts';
+import { ACCESSORIES, ITEMS, PALETTES, SPECIES, catalog, render, setCreations, type RenderOptions } from './index.ts';
 
 const poses: RenderOptions[] = [
   {},
@@ -48,10 +48,34 @@ describe('sprites', () => {
     });
   }
 
-  it('reading glasses stay off when sunglasses are on', () => {
-    const shades = render('kat', { accessory: 'zonnebril' }).pixels.flat().join();
-    const both = render('kat', { accessory: 'zonnebril', item: 'leesbril' }).pixels.flat().join();
-    expect(both).toBe(shades);
+  it('uses a species-specific version when there is one', () => {
+    const generic = render('spookje', { item: 'koptelefoon' });
+    const own = render('robotje', { item: 'koptelefoon' });
+    // The ghost wears headphones on its head; the boombox isn't there.
+    const low = (s: typeof generic) => s.pixels.slice(22).flat().filter((c) => c === '#4f5363').length;
+    expect(low(generic)).toBe(0);
+    expect(own.pixels.flat()).toContain('#e8454f');
+    // A buddy without its own version gets the boombox at its feet.
+    expect(low(render('boontje', { item: 'koptelefoon' }))).toBeGreaterThan(0);
+  });
+
+  it('a variant of null leaves the item off', () => {
+    expect(render('mokje', { item: 'koffie' }).pixels.flat().join()).toBe(render('mokje').pixels.flat().join());
+  });
+
+  it('head things breathe along with the head', () => {
+    const top = (frame: 'A' | 'B') =>
+      render('robotje', { item: 'koptelefoon', frame }).pixels.findIndex((row) => row.includes('#26242e'));
+    expect(top('B')).toBe(top('A') + 1);
+  });
+
+  it('a tall hat never sticks out above the sprite', () => {
+    setCreations([{ id: 'hoog', name: 'Hoog', slot: 'hoed', outline: false, rows: Array(10).fill('....rr....') }]);
+    for (const id of ['paddo', 'draakje']) {
+      const rows = render(id, { accessory: 'hoog' }).pixels.filter((row) => row.includes('#e8454f'));
+      expect(rows).toHaveLength(10);
+    }
+    setCreations([]);
   });
 
   it("a hat replaces the robot's antenna", () => {

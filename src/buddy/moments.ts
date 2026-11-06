@@ -1,6 +1,6 @@
 /**
  * Little things that depend on the clock and the calendar: coffee in the morning, a nightcap at night,
- * a party hat on Friday evening and New Year's Eve, a mitre in the Sinterklaas season. Hats only show
+ * a party hat on Friday evening and New Year's Eve, a beanie in winter. Hats only show
  * when the user hasn't picked one.
  */
 export interface Moment {
@@ -19,7 +19,7 @@ export function momentFor(date: Date): Moment {
   const fridayEvening = day === 5 && hour >= 17;
   const moment: Moment = {};
   if (newYear || fridayEvening) moment.hat = 'feesthoed';
-  else if ((month === 11 && dayOfMonth >= 11) || (month === 12 && dayOfMonth <= 6)) moment.hat = 'mijter';
+  else if (month === 12 || month <= 2) moment.hat = 'wintermuts';
   if (hour >= 7 && hour < 10) moment.item = 'koffie';
   return moment;
 }

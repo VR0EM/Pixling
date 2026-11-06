@@ -22,7 +22,7 @@ export function contextFor(app: FrontApp | null): Context | null {
 
 /** The item the buddy picks up for each context (see sprites/items.ts). */
 export const ITEM_FOR: Record<Context, string> = {
-  code: 'leesbril',
+  code: 'laptop',
   muziek: 'koptelefoon',
   video: 'popcorn',
   game: 'controller',

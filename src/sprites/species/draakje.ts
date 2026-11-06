@@ -1,50 +1,39 @@
 import { grid, set, stamp, stampPair } from '../grid.ts';
 import type { Species } from '../types.ts';
 
-const WING = [
-  'b.........',
-  '.b........',
-  '.bb.......',
-  '.bsbb.....',
-  '.bssbb....',
-  '.bsssbbb..',
-  '.bsssssbb.',
-  '..ssssssbb',
-  '..s.s.ssbb',
-  '.......sbb',
-  '........bb',
-];
-
-const TAIL = ['.....aa.', '....aaaa', '.....bb.', '.....bb.', '....bbb.', '..bbbb..', 'bbbb....'];
-
 const HEAD = [
-  '..bbbbbbbbbb..',
-  '.bhhbbbbbbbbb.',
-  'bhbbbbbbbbbbbb',
-  'bbbbbbbbbbbbbb',
-  'bbbbbbbbbbbbbb',
-  'bbbbbbbbbbbbbb',
-  'bbbaaaaaaaabbb',
-  '.bbaaaaaaaabb.',
-  '..bbaaaaaabb..',
-  '....bbbbbb....',
+  '...bbbbbbbbbb...',
+  '.bhhbbbbbbbbbbb.',
+  'bhbbbbbbbbbbbbbb',
+  'bbbbbbbbbbbbbbbb',
+  'bbbbbbbbbbbbbbbb',
+  'bbbbbbbbbbbbbbbs',
+  'bbbbbaaaaaabbbbs',
+  'bbbbaaaaaaaabbss',
+  '.bbbbaaaaaabbbs.',
+  '...bbbbbbbbbs...',
 ];
 
 const BODY = [
-  '.bbbbbbbbbb.',
-  'bbbaaaaaabbb',
-  'bbbaaaaaabbb',
-  'bbbssssssbbb',
-  'bbbaaaaaabbb',
-  'bbbssssssbbb',
-  'bbbaaaaaabbb',
-  'bbbbaaaabbbb',
-  'sbbbbbbbbbbs',
-  'ssbbbbbbbbss',
-  '.ssssssssss.',
+  '.bbbbbbbb.',
+  'bbbbbbbbbs',
+  'bbaaaaaabs',
+  'baaaaaaaas',
+  'baaaaaaaas',
+  'baaaaaaaas',
+  'bbaaaaaabs',
+  'bbbaaaabss',
+  'sbbbbbbbss',
+  '.ssssssss.',
 ];
 
-/** A little dragon standing up, wings spread behind it and a spade-tipped tail. */
+const HORN = ['a..', 'aa.', '.aa', '..a'];
+
+const WING = ['b......', 'bb.....', 'bsb....', 'bssb...', 'bsssbb.', 'bssssbb', '.s.s.s.'];
+
+const TAIL = ['......aa.', '.....aaaa', '......aa.', '.....bb..', '..bbbb...', 'bbbb.....'];
+
+/** A baby dragon: a big round head with little horns, folded wings and a curled tail. */
 export const draakje: Species = {
   id: 'draakje',
   name: 'Draakje',
@@ -52,39 +41,45 @@ export const draakje: Species = {
   build(o) {
     const d = o.frame === 'B' ? 1 : 0;
     const fx = o.faceDx ?? 0;
-    const flap = (o.tick ?? 0) % 2;
     const back = grid();
+    const feet = grid();
     const main = grid();
-    const limbs = grid();
+    const arms = grid();
     const face = grid();
 
-    stampPair(back, 1, 6 + flap, WING);
-    stamp(back, 21, 19, TAIL);
+    // The wings lift a pixel on every other tick.
+    stampPair(back, 4, 13 - ((o.tick ?? 0) % 2), WING);
+    stamp(back, 20, 20, TAIL);
+    stampPair(back, 8, 3 + d, HORN);
 
-    stamp(main, 10, 16, BODY);
-    stampPair(main, 9, 3 + d, ['a..', 'aa.', '.aa', '..a']);
-    stamp(main, 9, 7 + d, HEAD);
+    stamp(feet, 11, o.walk === 0 ? 25 : 26, ['bbbb', 'bbbb', 'ssss']);
+    stamp(feet, 17, o.walk === 2 ? 25 : 26, ['bbbb', 'bbbb', 'ssss']);
 
-    stampPair(limbs, 8, 18, ['bb', 'bb', 'bb']);
-    stamp(limbs, 10, o.walk === 0 ? 25 : 26, ['bbbb', 'bbbb', 'bbbb']);
-    stamp(limbs, 18, o.walk === 2 ? 25 : 26, ['bbbb', 'bbbb', 'bbbb']);
+    stamp(main, 11, 16, BODY);
+    stamp(main, 8, 6 + d, HEAD);
+    stampPair(arms, 9, 19, ['bb', 'bs']);
 
-    for (const x of [12 + fx, 19 + fx]) {
-      if (!o.blink) set(face, x, 10 + d, 'e');
-      set(face, x, 11 + d, 'e');
+    for (const x of [11 + fx, 19 + fx]) {
+      if (o.blink) stamp(face, x, 11 + d, ['ee']);
+      else stamp(face, x, 9 + d, ['we', 'ee', 'ee']);
     }
-    set(face, 14 + fx, 14 + d, 'o');
-    set(face, 17 + fx, 14 + d, 'o');
+    set(face, 9 + fx, 11 + d, 'c');
+    set(face, 22 + fx, 11 + d, 'c');
+    set(face, 14 + fx, 13 + d, 'o');
+    set(face, 17 + fx, 13 + d, 'o');
 
     return {
       layers: [
         [back, 'o'],
+        [feet, 'o'],
         [main, 'o'],
-        [limbs, 'o'],
+        [arms, 'o'],
         [face, null],
       ],
-      hat: [13, 6 + d],
+      hat: [13, 5 + d],
       glasses: [10 + fx, 9 + d],
+      hand: [22, 19],
+      bob: d,
     };
   },
 };

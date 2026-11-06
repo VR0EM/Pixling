@@ -1,4 +1,4 @@
-import type { Built } from './types.ts';
+import type { Built, Variant } from './types.ts';
 
 /**
  * Things the buddy picks up by itself, depending on the app in front. Unlike accessories they aren't
@@ -12,29 +12,123 @@ export interface Item {
   rows: string[];
   /** Top-left corner when the species has no own anchor for this slot. */
   at?: [number, number];
+  /** Always at `at`, never at the species' hand anchor (big things that stand on the ground). */
+  fixed?: boolean;
+  /** Species-specific versions, by species id; null leaves it off that species. */
+  variants?: Record<string, Variant | null>;
 }
 
-export const ITEMS: Record<string, Item> = {
-  leesbril: {
-    name: 'Leesbril',
-    slot: 'face',
-    outline: false,
-    rows: ['.YYY....YYY.', 'Y...YYYY...Y', '.YYY....YYY.'],
-  },
-  koptelefoon: {
-    name: 'Koptelefoon',
+/** Headphones drawn around each built-in head; the generic version is a boombox. */
+const HEADPHONES: Record<string, Variant> = /*HP*/ {
+  robotje: {
     slot: 'head',
     outline: false,
+    at: [1, 8],
     rows: [
-      '.....nnnnnn.....',
-      '...nn......nn...',
-      '..n..........n..',
-      '.n............n.',
-      '.n............n.',
-      'RRR..........RRR',
-      'Rrr..........rrR',
-      'RRR..........RRR',
+      '.........nnnnnnnnnnnn.........',
+      '.......nnNNNNNNNNNNNNnn.......',
+      '......nN..............Nn......',
+      '.....nN................Nn.....',
+      '....nN..................Nn....',
+      '...nN....................Nn...',
+      '...nN....................Nn...',
+      '.nnnn....................nnnn.',
+      'nwrrRn..................nRrrwn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      '.nnnn....................nnnn.',
     ],
+  },
+  spookje: {
+    slot: 'head',
+    outline: false,
+    at: [1, 8],
+    rows: [
+      '...........nnnnnnnn...........',
+      '.........nnNNNNNNNNnn.........',
+      '........nNN........NNn........',
+      '.......nN............Nn.......',
+      '......nN..............Nn......',
+      '.....nN................Nn.....',
+      '....nN..................Nn....',
+      '.nnnn....................nnnn.',
+      'nwrrRn..................nRrrwn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      'nrrrRn..................nRrrrn',
+      '.nnnn....................nnnn.',
+    ],
+  },
+  paddo: {
+    slot: 'head',
+    outline: false,
+    at: [5, 17],
+    rows: [
+      '.nnnn............nnnn.',
+      'nwrrRn..........nRrrwn',
+      'nrrrRn..........nRrrrn',
+      'nrrrRn..........nRrrrn',
+      'nrrrRn..........nRrrrn',
+      'nrrrRn..........nRrrrn',
+      '.nnnn............nnnn.',
+    ],
+  },
+  draakje: {
+    slot: 'head',
+    outline: false,
+    at: [2, 3],
+    rows: [
+      '.........nnnnnnnnnn.........',
+      '........nNNNNNNNNNNn........',
+      '.......nN..........Nn.......',
+      '......nN............Nn......',
+      '..nnnnN..............Nnnnn..',
+      'nwrrRn................nRrrwn',
+      'nrrrRn................nRrrrn',
+      'nrrrRn................nRrrrn',
+      'nrrrRn................nRrrrn',
+      'nrrrRn................nRrrrn',
+      '.nnnn..................nnnn.',
+    ],
+  },
+} /*/HP*/;
+
+/** A dark laptop seen from behind the lid, with a code sticker. */
+const LAPTOP = ['.NNNNNNNNNNNNN.', '.NNNqNNNqNqNNN.', '.NNqNNNqNNNqNN.', '.NNNqNqNNNqNNN.', '.NNNNNNNNNNNNN.', 'xXXXXXXXXXXXXXx'];
+
+/** A little boombox that stands next to the buddy. */
+const BOOMBOX = ['...nnnnnn...', '...n....n...', 'NNNNNNNNNNNN', 'NXXXNqqNXXXN', 'NXnXNryNXnXN', 'NXXXNNNNXXXN', 'NNNNNNNNNNNN'];
+
+/** An open book, pages towards the viewer. */
+const BOOK = ['ww......ww', 'wwww..wwww', 'wXXXwwXXXw', 'wXXwwwwXXw', 'rrrrrrrrrr'];
+
+export const ITEMS: Record<string, Item> = {
+  laptop: {
+    name: 'Laptop',
+    slot: 'hand',
+    outline: true,
+    fixed: true,
+    at: [8, 23],
+    rows: LAPTOP,
+    // The bean plant's eyes and the mug's mouth sit low.
+    variants: { boontje: { at: [8, 24], rows: LAPTOP }, mokje: { at: [8, 24], rows: LAPTOP } },
+  },
+  koptelefoon: {
+    name: 'Muziek',
+    slot: 'hand',
+    outline: true,
+    fixed: true,
+    at: [19, 22],
+    rows: BOOMBOX,
+    variants: {
+      ...HEADPHONES,
+      mokje: { at: [0, 22], rows: BOOMBOX },
+    },
   },
   popcorn: {
     name: 'Popcorn',
@@ -47,8 +141,10 @@ export const ITEMS: Record<string, Item> = {
     name: 'Boek',
     slot: 'hand',
     outline: true,
-    rows: ['ww......ww', 'wwww..wwww', 'wnnwwwwnnw', 'wwwwwwwwww', 'rrrrrrrrrr'],
-    at: [11, 22],
+    fixed: true,
+    rows: BOOK,
+    at: [11, 23],
+    variants: { boontje: { at: [11, 24], rows: BOOK } },
   },
   water: {
     name: 'Water',
@@ -63,13 +159,16 @@ export const ITEMS: Record<string, Item> = {
     outline: true,
     rows: ['.w.w..', 'wkkkw.', 'wwwwww', 'wwwww.', '.www..'],
     at: [23, 20],
+    variants: { mokje: null },
   },
   controller: {
     name: 'Controller',
     slot: 'hand',
     outline: true,
-    rows: ['.nnnnnn.', 'nntnnrnn', 'nnnnnnnn', 'nn....nn'],
-    at: [12, 21],
+    fixed: true,
+    rows: ['.XXXXXXXX.', 'XXNXXXXrXX', 'XNNNXXtXyX', 'XXNXXXXgXX', 'xXX....XXx'],
+    at: [11, 23],
+    variants: { boontje: { at: [11, 24], rows: ['.XXXXXXXX.', 'XXNXXXXrXX', 'XNNNXXtXyX', 'XXNXXXXgXX', 'xXX....XXx'] } },
   },
 };
 
@@ -78,5 +177,6 @@ export function itemAnchor(item: Item, built: Built): [number, number] {
   if (item.slot === 'face') return built.glasses;
   // A 16-wide band centred on the 6-wide hat anchor, resting on the head.
   if (item.slot === 'head') return [built.hat[0] - 5, built.hat[1]];
+  if (item.fixed && item.at) return item.at;
   return built.hand ?? item.at ?? [23, 19];
 }

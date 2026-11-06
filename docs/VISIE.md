@@ -8,7 +8,7 @@ Pixling is een klein pixelmaatje dat écht op je bureaublad woont. Het doet mee 
 Hij wandelt over de onderkant van je scherm en later over de titelbalken van je vensters. Sleep je een venster, dan rijdt hij mee; sluit je het, dan valt hij eraf. Je kan hem oppakken en weggooien. Zijn ogen volgen je muis. Ben je weg, dan slaapt hij.
 
 **2. Hij kijkt mee en doet mee.**
-Hij ziet welke app je gebruikt (nooit wát je typt) en past zich aan: een brilletje bij je code-editor, een koptelefoon bij muziek, popcorn bij YouTube. Ook de tijd telt mee: koffie 's ochtends, een slaapmuts 's nachts, een feesthoedje op vrijdag om vijf uur, een mijter rond Sinterklaas.
+Hij ziet welke app je gebruikt (nooit wát je typt) en past zich aan: een laptop bij je code-editor, een koptelefoon bij muziek, popcorn bij YouTube. Ook de tijd telt mee: koffie 's ochtends, een slaapmuts 's nachts, een feesthoedje op vrijdag om vijf uur, een wintermuts in de winter.
 
 **3. Hij helpt, zonder te zeuren.**
 Het maatje spiegelt jouw dag. Werk je te lang door, dan wordt híj eerst moe en haalt hij een flesje water boven. Pas als je dat negeert, komt er een tekstballon. Functies zitten in zijn **rugzak**: focustimer, herinneringen, muziek, snelle notities, bestanden voeren, systeemstatus.

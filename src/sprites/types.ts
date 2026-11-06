@@ -22,6 +22,18 @@ export interface Palette {
   e?: string;
 }
 
+/**
+ * A version of an accessory or item drawn especially for one species, because the general one doesn't fit
+ * its shape (headphones around a mushroom cap, shades on a robot's screen).
+ */
+export interface Variant {
+  rows: string[];
+  /** Top-left corner in sprite pixels; head and face things move along when the species bobs. */
+  at: [number, number];
+  slot?: 'head' | 'face' | 'hand';
+  outline?: boolean;
+}
+
 export interface Accessory {
   name: string;
   /** Sits on top of the head and hides things like antennas. */
@@ -35,6 +47,8 @@ export interface Accessory {
   hand?: boolean;
   /** Centred on the head instead of starting at the 6-wide hat anchor (for home-made hats). */
   centered?: boolean;
+  /** Species-specific versions, by species id; null leaves it off that species. */
+  variants?: Record<string, Variant | null>;
   rows: string[];
 }
 
@@ -66,6 +80,8 @@ export interface Built {
   glasses: [number, number];
   /** Where a held item's top-left goes, if the default spot doesn't suit this species. */
   hand?: [number, number];
+  /** How far the head moved down in this frame (breathing); variants follow it. */
+  bob?: number;
 }
 
 export interface Species {

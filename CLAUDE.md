@@ -16,6 +16,7 @@ Pixling is een desktopmaatje in pixelart: Tauri 2 (Rust) met een TypeScript-webp
 - Elk maatje een eigen silhouet. Grid van 32×32, voeten op rij 28, omlijning op rij 29.
 - Kleursleutels: `o` omlijning, `b` lichaam, `s` schaduw, `h` hooglicht, `a` accent, `c` neus of wangen, `e` ogen. Vaste kleuren staan in `src/sprites/palettes.ts`.
 - Elke soort geeft een hoed-anker en een bril-anker terug, zodat elk accessoire past.
+- Past een accessoire of voorwerp niet goed op een soort, teken dan een eigen versie onder `variants` (zie de koptelefoon in `src/sprites/items.ts`). De algemene versie moet op elk maatje werken, ook op zelfgetekende.
 
 ## Commando's
 

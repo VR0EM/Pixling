@@ -5,11 +5,12 @@ import { ITEMS, itemAnchor } from './items.ts';
 import { FIXED, PALETTES } from './palettes.ts';
 import { boontje } from './species/boontje.ts';
 import { draakje } from './species/draakje.ts';
-import { kat } from './species/kat.ts';
-import { konijn } from './species/konijn.ts';
+import { mokje } from './species/mokje.ts';
+import { paddo } from './species/paddo.ts';
 import { robotje } from './species/robotje.ts';
 import { spookje } from './species/spookje.ts';
-import type { Accessory, RenderOptions, Species, Sprite } from './types.ts';
+import type { Accessory, Built, RenderOptions, Species, Sprite, Variant } from './types.ts';
+import type { Item } from './items.ts';
 
 export { ACCESSORIES, ITEMS, PALETTES };
 export type { Creation } from './creations.ts';
@@ -29,7 +30,7 @@ export function accessory(id: string | undefined): Accessory | null {
   return ACCESSORIES[id ?? ''] ?? CUSTOM[id ?? ''] ?? null;
 }
 
-export const SPECIES: Species[] = [robotje, spookje, boontje, kat, konijn, draakje];
+export const SPECIES: Species[] = [robotje, spookje, boontje, paddo, mokje, draakje];
 
 const byId = new Map(SPECIES.map((s) => [s.id, s]));
 
@@ -51,6 +52,48 @@ export function catalog() {
   };
 }
 
+/** Something to stamp on top of the buddy, with its spot already worked out. */
+interface Placed {
+  rows: string[];
+  x: number;
+  y: number;
+  outline: boolean;
+  slot: 'head' | 'face' | 'hand';
+}
+
+/** A species' own version; head and face things move along with the breathing. */
+function fromVariant(v: Variant, slot: Placed['slot'], outline: boolean, bob: number): Placed {
+  const s = v.slot ?? slot;
+  return { rows: v.rows, x: v.at[0], y: v.at[1] + (s === 'hand' ? 0 : bob), outline: v.outline ?? outline, slot: s };
+}
+
+function placeItem(item: Item, id: string, built: Built, bob: number): Placed | null {
+  const v = item.variants?.[id];
+  if (v === null) return null;
+  if (v) return fromVariant(v, item.slot, item.outline, bob);
+  const [x, y] = itemAnchor(item, built);
+  return { rows: item.rows, x, y, outline: item.outline, slot: item.slot };
+}
+
+function placeAccessory(acc: Accessory, id: string, built: Built, bob: number): Placed | null {
+  const slot = acc.face ? 'face' : acc.hand ? 'hand' : 'head';
+  const outline = !acc.noOutline;
+  const v = acc.variants?.[id];
+  if (v === null) return null;
+  if (v) return fromVariant(v, slot, outline, bob);
+  let x: number;
+  let y: number;
+  if (slot === 'face') [x, y] = built.glasses;
+  else if (slot === 'hand') [x, y] = built.hand ?? [23, 19];
+  else {
+    const width = Math.max(...acc.rows.map((r) => r.length));
+    x = acc.centered ? built.hat[0] + 3 - Math.round(width / 2) : built.hat[0];
+    // A tall hat on a tall buddy sinks into the head rather than falling off the top of the sprite.
+    y = Math.max(0, built.hat[1] - acc.rows.length + 1);
+  }
+  return { rows: acc.rows, x, y, outline, slot };
+}
+
 const cache = new Map<string, Sprite>();
 
 /** Renders a species to colours. Results are cached, so calling this every frame is cheap. */
@@ -67,28 +110,20 @@ export function render(speciesId: string, o: RenderOptions = {}): Sprite {
 
   const out = grid();
   for (const [layer, outline] of built.layers) paint(out, layer, outline);
-  const drawItem = () => {
-    if (!item) return;
+  const draw = (p: Placed | null) => {
+    if (!p) return;
     const layer = grid();
-    const [x, y] = itemAnchor(item, built);
-    stamp(layer, x, y, item.rows);
-    paint(out, layer, item.outline ? 'o' : null);
+    stamp(layer, p.x, p.y, p.rows);
+    paint(out, layer, p.outline ? 'o' : null);
   };
+  const bob = built.bob ?? 0;
+  const held = item ? placeItem(item, sp.id, built, bob) : null;
+  const worn = acc ? placeAccessory(acc, sp.id, built, bob) : null;
   // Headphones go under a hat; glasses only when the buddy isn't already wearing something on its face.
-  if (item?.slot === 'head') drawItem();
-  if (acc) {
-    const layer = grid();
-    if (acc.face) stamp(layer, built.glasses[0], built.glasses[1], acc.rows);
-    else if (acc.hand) stamp(layer, ...(built.hand ?? [23, 19]), acc.rows);
-    else {
-      const width = Math.max(...acc.rows.map((r) => r.length));
-      const x = acc.centered ? built.hat[0] + 3 - Math.round(width / 2) : built.hat[0];
-      stamp(layer, x, built.hat[1] - acc.rows.length + 1, acc.rows);
-    }
-    paint(out, layer, acc.noOutline ? null : 'o');
-  }
-  if (item?.slot === 'face' && !acc?.face) drawItem();
-  if (item?.slot === 'hand') drawItem();
+  if (held?.slot === 'head') draw(held);
+  draw(worn);
+  if (held?.slot === 'face' && worn?.slot !== 'face') draw(held);
+  if (held?.slot === 'hand') draw(held);
 
   const pixels: (string | null)[][] = [];
   const box = { x0: W, y0: H, x1: -1, y1: -1 };

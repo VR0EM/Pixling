@@ -37,9 +37,9 @@ describe('creations', () => {
 
   it('is forgotten when deleted, without breaking the buddy that wore it', () => {
     setCreations([hat]);
-    const worn = render('kat', { accessory: hat.id }).pixels.flat().join();
+    const worn = render('paddo', { accessory: hat.id }).pixels.flat().join();
     setCreations([]);
-    expect(render('kat', { accessory: hat.id }).pixels.flat().join()).not.toBe(worn);
+    expect(render('paddo', { accessory: hat.id }).pixels.flat().join()).not.toBe(worn);
     expect(catalog().accessories.map((a) => a.id)).not.toContain(hat.id);
   });
 
