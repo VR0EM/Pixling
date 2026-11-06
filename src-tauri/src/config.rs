@@ -18,6 +18,13 @@ pub struct Config {
     pub watch_apps: bool,
     /// Climbs onto windows and rides along when they move.
     pub climb_windows: bool,
+    /// Backpack: holds up a glass of water now and then.
+    pub water: bool,
+    /// Backpack: gets tired after an hour without a break.
+    pub breaks: bool,
+    /// Backpack: length of a focus round and of the break after it, in minutes.
+    pub focus_minutes: u32,
+    pub break_minutes: u32,
 }
 
 impl Default for Config {
@@ -30,6 +37,10 @@ impl Default for Config {
             scale: 3,
             watch_apps: true,
             climb_windows: true,
+            water: true,
+            breaks: true,
+            focus_minutes: 25,
+            break_minutes: 5,
         }
     }
 }

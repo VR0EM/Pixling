@@ -203,6 +203,28 @@ describe('Brain', () => {
       }
     });
 
+    it('sits still and does not climb while reading during a focus round', () => {
+      const brain = new Brain(800, 600, seeded(19));
+      brain.stayPut = true;
+      for (let i = 0; i < 30 * 120; i++) {
+        brain.setWindows([{ id: 1, x: 200, y: 300, w: 400, h: 250 }]);
+        brain.update(1 / 30, awake);
+        expect(brain.mode).not.toBe('walk');
+        expect(brain.standingOn).toBeNull();
+      }
+    });
+
+    it('yawns when tired', () => {
+      const brain = new Brain(800, 600, seeded(20));
+      brain.tired = true;
+      let yawned = false;
+      for (let i = 0; i < 30 * 5; i++) {
+        brain.update(1 / 30, awake);
+        if (brain.pose(awake).emote === 'slaap') yawned = true;
+      }
+      expect(yawned).toBe(true);
+    });
+
     it('shows music notes while a music app is in front', () => {
       const brain = new Brain(800, 600, seeded(15));
       brain.context = 'muziek';

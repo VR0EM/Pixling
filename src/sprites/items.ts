@@ -43,6 +43,20 @@ export const ITEMS: Record<string, Item> = {
     rows: ['.y.w.', 'wywyw', 'rwrwr', 'rwrwr', 'rwrwr', '.rwr.'],
     at: [23, 19],
   },
+  boek: {
+    name: 'Boek',
+    slot: 'hand',
+    outline: true,
+    rows: ['ww......ww', 'wwww..wwww', 'wnnwwwwnnw', 'wwwwwwwwww', 'rrrrrrrrrr'],
+    at: [11, 22],
+  },
+  water: {
+    name: 'Water',
+    slot: 'hand',
+    outline: true,
+    rows: ['w..w', 'w..w', 'wttw', 'wttw', 'wwww'],
+    at: [24, 19],
+  },
   controller: {
     name: 'Controller',
     slot: 'hand',

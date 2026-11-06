@@ -129,6 +129,12 @@ fn active_app(state: State<'_, AppState>) -> Option<FrontApp> {
     state.front_app.lock().unwrap().clone()
 }
 
+/// Text next to the menu bar icon, used for the focus timer.
+#[tauri::command]
+fn set_tray_title(app: AppHandle, title: Option<String>) -> Result<(), String> {
+    tray::set_title(&app, title).map_err(|e| e.to_string())
+}
+
 /// Lets the webpage write to the app's log, so its errors show up in the terminal.
 #[tauri::command]
 fn log(message: String) {
@@ -188,6 +194,7 @@ pub fn run() {
             show_menu,
             windows,
             active_app,
+            set_tray_title,
             log
         ])
         .run(tauri::generate_context!())

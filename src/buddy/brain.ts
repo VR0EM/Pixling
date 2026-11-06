@@ -66,6 +66,10 @@ export class Brain {
   standingOn: number | null = null;
   /** What the user is doing, judged by the app in front; changes how it behaves a little. */
   context: Context | null = null;
+  /** Sits still (reading during a focus round) instead of wandering or climbing. */
+  stayPut = false;
+  /** Worked too long without a break: yawns now and then and walks less. */
+  tired = false;
 
   private time = 0;
   private modeStart = 0;
@@ -78,6 +82,7 @@ export class Brain {
   private emoteUntil = 0;
   private hopUntil = 0;
   private nextNoteAt = 3;
+  private nextYawnAt = 0;
   private impact = 0;
   private grabDx = 0;
   private grabDy = 0;
@@ -156,9 +161,13 @@ export class Brain {
           this.say('noot', 1);
           this.nextNoteAt = this.time + this.between(3, 6);
         }
+        if (this.tired && this.time > this.nextYawnAt) {
+          this.say('slaap', 1.2);
+          this.nextYawnAt = this.time + this.between(8, 15);
+        }
         if (this.followAt !== null && this.time >= this.followAt) {
           this.followAt = null;
-          if (this.climb(true)) break;
+          if (!this.stayPut && this.climb(true)) break;
         }
         if (this.mode === 'walk' && this.walk(dt)) break;
         if (this.elapsed() > this.modeLength) this.decide();
@@ -261,6 +270,7 @@ export class Brain {
         frame = 'B';
         break;
       case 'idle':
+        if (this.tired) frame = Math.floor(t / 0.9) % 2 ? 'B' : 'A'; // slow, heavy breathing
         if (this.context === 'muziek') frame = Math.floor(t / 0.3) % 2 ? 'B' : 'A'; // bobbing along
         if (input.cursor && this.context !== 'video') {
           const dx = input.cursor.x - this.x;
@@ -348,8 +358,8 @@ export class Brain {
 
   /** Picks what to do next: rest, walk, now and then climb a window, or hop down from one. */
   private decide(): void {
-    if (this.context === 'video') {
-      this.setMode('idle', this.between(3, 8)); // watching along
+    if (this.context === 'video' || this.stayPut) {
+      this.setMode('idle', this.between(3, 8)); // watching along, or reading
       return;
     }
     const roll = this.random();
@@ -358,7 +368,7 @@ export class Brain {
       this.drop(this.dir * 80, -300);
       return;
     }
-    const walkChance = this.context === 'code' ? 0.35 : 0.65;
+    const walkChance = this.tired ? 0.2 : this.context === 'code' ? 0.35 : 0.65;
     if (this.mode === 'walk' || this.random() > walkChance) {
       this.setMode('idle', this.between(2, 6));
       return;

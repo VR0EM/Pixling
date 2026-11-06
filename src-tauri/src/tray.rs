@@ -24,6 +24,14 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+/// Shows text next to the menu bar icon (the focus timer), or nothing.
+pub fn set_title(app: &AppHandle, title: Option<String>) -> tauri::Result<()> {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        tray.set_title(title)?;
+    }
+    Ok(())
+}
+
 /// Rebuilds the menu so the check marks and labels match the current state.
 pub fn refresh(app: &AppHandle) -> tauri::Result<()> {
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
@@ -65,6 +73,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         app.autolaunch().is_enabled().unwrap_or(false),
         None::<&str>,
     )?;
+    let backpack = backpack_menu(app, &cfg)?;
     let quit = MenuItem::with_id(app, "quit", "Stop Pixling", true, None::<&str>)?;
 
     Menu::with_items(
@@ -77,12 +86,33 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &accessories,
             &size,
             &PredefinedMenuItem::separator(app)?,
+            &backpack,
+            &PredefinedMenuItem::separator(app)?,
             &watch,
             &climb,
             &login,
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
+    )
+}
+
+/// The backpack: start or stop a focus round, its length, and the reminders.
+fn backpack_menu(app: &AppHandle, cfg: &config::Config) -> tauri::Result<Submenu<Wry>> {
+    let start = MenuItem::with_id(app, "backpack:start", format!("Start focus ({} min)", cfg.focus_minutes), true, None::<&str>)?;
+    let stop = MenuItem::with_id(app, "backpack:stop", "Stop focus", true, None::<&str>)?;
+    let lengths: Vec<Choice> = [15, 25, 50]
+        .iter()
+        .map(|m| Choice { id: m.to_string(), name: format!("{m} minuten") })
+        .collect();
+    let length = choices(app, "Focusduur", "focus", &lengths, &cfg.focus_minutes.to_string())?;
+    let water = CheckMenuItem::with_id(app, "flag:water", "Waterherinnering", true, cfg.water, None::<&str>)?;
+    let breaks = CheckMenuItem::with_id(app, "flag:breaks", "Pauzeherinnering", true, cfg.breaks, None::<&str>)?;
+    Submenu::with_items(
+        app,
+        "Rugzak",
+        true,
+        &[&start, &stop, &length, &PredefinedMenuItem::separator(app)?, &water, &breaks],
     )
 }
 
@@ -111,6 +141,9 @@ fn handle(app: &AppHandle, id: &str) {
                 eprintln!("Pixling: kon 'start bij inloggen' niet aanpassen: {e}");
             }
         }
+        "backpack:start" | "backpack:stop" => {
+            let _ = app.emit("backpack", &id["backpack:".len()..]);
+        }
         _ => {
             let Some((group, value)) = id.split_once(':') else { return };
             let state = app.state::<AppState>();
@@ -127,6 +160,13 @@ fn handle(app: &AppHandle, id: &str) {
                     }
                     ("flag", "watchApps") => cfg.watch_apps = !cfg.watch_apps,
                     ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
+                    ("flag", "water") => cfg.water = !cfg.water,
+                    ("flag", "breaks") => cfg.breaks = !cfg.breaks,
+                    ("focus", _) => {
+                        if let Ok(minutes) = value.parse() {
+                            cfg.focus_minutes = minutes;
+                        }
+                    }
                     _ => return,
                 }
                 cfg.clone()

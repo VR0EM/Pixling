@@ -32,9 +32,10 @@ Volgorde van platformen: eerst macOS, dan Windows, dan Linux.
 
 ## Fase 3: Hij helpt
 
-- [ ] Rugzak met modules die je aan en uit zet
-- [ ] Focustimer: hij leest mee en rekt zich uit bij de pauze
-- [ ] Herinneringen: water, pauze, volgende afspraak
+- [x] Rugzak in het menu, met herinneringen die je aan en uit zet
+- [x] Focustimer: hij leest mee, de tijd staat naast het menubalkicoon, daarna een pauze
+- [x] Herinneringen: water, en moe worden na een uur zonder pauze
+- [ ] Herinnering voor je volgende afspraak (agenda)
 - [ ] Snelle notitie: klik, typ, klaar
 - [ ] Bestanden voeren: zippen, afbeelding omzetten, pad kopiëren
 - [ ] Systeem: lege batterij, zwoegende computer

@@ -9,6 +9,10 @@ export interface Config {
   scale: number;
   watchApps: boolean;
   climbWindows: boolean;
+  water: boolean;
+  breaks: boolean;
+  focusMinutes: number;
+  breakMinutes: number;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -40,6 +44,10 @@ export const DEFAULT_CONFIG: Config = {
   scale: 3,
   watchApps: true,
   climbWindows: true,
+  water: true,
+  breaks: true,
+  focusMinutes: 25,
+  breakMinutes: 5,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -91,6 +99,16 @@ export function onActiveApp(callback: (app: FrontApp) => void): void {
 /** Clicking the buddy makes Pixling active; this hands focus back to the app the user was in. */
 export async function giveBackFocus(): Promise<void> {
   if (inApp) await invoke('give_back_focus');
+}
+
+/** "start" or "stop" for the focus timer, chosen in the menu's backpack. */
+export function onBackpack(callback: (command: string) => void): void {
+  if (inApp) void listen<string>('backpack', (event) => callback(event.payload));
+}
+
+/** Text next to the menu bar icon, or null to clear it. */
+export async function setTrayTitle(title: string | null): Promise<void> {
+  if (inApp) await invoke('set_tray_title', { title });
 }
 
 /** Opens the menu bar menu at the cursor. */

@@ -1,4 +1,5 @@
 import './styles.css';
+import { Backpack } from './buddy/backpack.ts';
 import { Brain, type Input } from './buddy/brain.ts';
 import { ITEM_FOR, contextFor } from './buddy/context.ts';
 import { View } from './buddy/view.ts';
@@ -31,6 +32,32 @@ async function start(): Promise<void> {
   });
   window.addEventListener('resize', () => brain.resize(window.innerWidth, window.innerHeight));
 
+  // The backpack: focus timer and reminders, checked once a second.
+  const backpack = new Backpack(Date.now());
+  const backpackSettings = () => ({
+    water: look.water,
+    breaks: look.breaks,
+    focusMinutes: look.focusMinutes,
+    breakMinutes: look.breakMinutes,
+  });
+  let advice = backpack.update(Date.now(), 0, backpackSettings());
+  let trayTitle: string | null = null;
+  const checkBackpack = () => {
+    advice = backpack.update(Date.now(), performance.now() - lastMove, backpackSettings());
+    brain.stayPut = advice.stayPut;
+    brain.tired = advice.tired;
+    if (advice.say) view.say(advice.say, 5000, performance.now());
+    if (advice.trayTitle !== trayTitle) {
+      trayTitle = advice.trayTitle;
+      void bridge.setTrayTitle(trayTitle);
+    }
+  };
+  bridge.onBackpack((command) => {
+    if (command === 'start') backpack.startFocus(Date.now(), backpackSettings());
+    else backpack.stopFocus();
+    checkBackpack();
+  });
+
   // Where the cursor is and when it last moved. The overlay usually lets clicks through, so it can't
   // rely on mouse events; it asks the app instead, more often when the cursor is close.
   let cursor: Input['cursor'] = null;
@@ -60,6 +87,7 @@ async function start(): Promise<void> {
     }
   };
   void pollCursor();
+  setInterval(checkBackpack, 1000);
 
   bridge.log(`gestart; app vooraan: ${front?.name ?? 'onbekend'}`);
 
@@ -98,7 +126,11 @@ async function start(): Promise<void> {
   const letGo = () => {
     if (!pressed) return;
     if (dragging) brain.release();
-    else brain.pet();
+    else {
+      // A click answers a reminder (water, a break) as well as being a pat on the head.
+      if (backpack.answer(Date.now())) checkBackpack();
+      brain.pet();
+    }
     pressed = null;
     dragging = false;
     canvas.classList.remove('dragging');
@@ -122,7 +154,7 @@ async function start(): Promise<void> {
       brain.update((now - last) / 1000, input);
       last = now;
       lastDraw = now;
-      const item = brain.context ? ITEM_FOR[brain.context] : undefined;
+      const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined);
       view.draw(look, brain.pose(input), brain.x, brain.y, now, item);
       if (brain.standingOn !== lastStand) {
         bridge.log(brain.standingOn === null ? 'van het venster af' : `op venster ${brain.standingOn}`);
