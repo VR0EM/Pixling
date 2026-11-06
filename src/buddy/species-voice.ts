@@ -31,6 +31,9 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     robotLow: ['Battery low... need... charger...', 'Running on fumes. I mean, electrons.'],
     robotCharging: ['Plugging in. Please hold.', 'Zzzt. Mmm, fresh electrons.', 'Charging... do not unplug.'],
     robotCharged: ['Fully charged! I could run a marathon!', '100%! Let’s goooo!'],
+    meetingSoon: ['Calendar alert: {title} in T-minus {min} minutes.'],
+    meetingDone: ['{title}: complete. Saving results...'],
+    birthday: ['Happy birthday protocol activated: {title}!'],
   },
 
   ghost: {
@@ -54,6 +57,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     chatNight: ['Ah, the witching hour. My favourite.', 'Night time is ghost time.'],
     ghostVanish: ['Now you see me...', 'Poof!'],
     ghostAppear: ['Boo!', 'Over here!', 'Did you miss me?'],
+    meetingSoon: ['Psst... {title} in {min} minutes.'],
+    meetingDone: ['{title} is over. I was very quiet, did you notice?'],
   },
 
   sprout: {
@@ -75,6 +80,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     sproutWatered: ['Ahh, refreshing!', 'Glug glug! Thank you!'],
     sproutGrew: ['Look! I grew a little!', 'A bit taller already. Thank you!', 'Is that... a bud? It is!'],
     sproutBloomed: ['I’m blooming! Thank you for looking after me.'],
+    meetingDone: ['{title} is done. Time for some sunlight?'],
+    dayFree: ['No more meetings. Let’s photosynthesise.'],
   },
 
   shroom: {
@@ -98,6 +105,7 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     chatNight: ['Look, I glow in the dark!', 'The night is when mushrooms shine.'],
     shroomSpores: ['Achoo!', 'Oops, spores everywhere.', 'Sorry, allergic to cuteness.'],
     shroomBounce: ['Boing!', 'Wheee, bouncy!'],
+    meetingSoon: ['{title} in {min} minutes. Don’t let it mush-room into a long one.'],
   },
 
   mug: {
@@ -117,6 +125,9 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     mugCold: ['My coffee’s gone cold...', 'Lukewarm. How sad.'],
     mugEmpty: ['I’m empty! Click me for a refill?', 'Running on empty... refill please?'],
     mugRefilled: ['Ahh, freshly brewed!', 'Full and steaming again!', 'Fresh pot! Let’s go!'],
+    meetingSoon: ['{title} in {min} minutes. Coffee first?'],
+    meetingDone: ['{title} done. You’ve earned a refill.'],
+    agenda: ['{things} today. First, {title} at {time}. I’ll keep the coffee hot.'],
   },
 
   dragon: {
@@ -140,5 +151,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     chatNight: ['Dragons guard the night. Go rest, I’ve got this.'],
     dragonTakeoff: ['To the skies!', 'Flap flap flap!', 'Wheee, I’m flying!'],
     dragonLanded: ['Nailed the landing.', 'Ta-da!', 'Did you see that? Did you?'],
+    meetingSoon: ['{title} in {min} minutes. Into battle!'],
+    meetingDone: ['You slew {title}! Victory!'],
+    birthday: ['{title}! Dragons give the best birthday hugs.'],
   },
 };

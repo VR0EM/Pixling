@@ -1,4 +1,5 @@
 import './wardrobe.css';
+import { occurrences, parseIcs } from './buddy/calendar.ts';
 import { PERSONALITIES } from './buddy/voice.ts';
 import * as bridge from './platform/bridge.ts';
 import { PALETTES, accessory, allSpecies, catalog, ownPalette, render, setCreations, species, type Creation, type RenderOptions } from './sprites/index.ts';
@@ -128,6 +129,7 @@ async function start(): Promise<void> {
   const habits: [keyof Config | 'autostart', string][] = [
     ['watchApps', 'Watches your apps'],
     ['climbWindows', 'Climbs windows'],
+    ['quirks', 'Buddy quirks (charging, coffee, flying, …)'],
     ['water', 'Water reminder'],
     ['breaks', 'Break reminder'],
     ['watchSystem', 'Watches battery and load'],
@@ -149,6 +151,89 @@ async function start(): Promise<void> {
     row.append(input, el('span', { textContent: label }));
     habitBox.append(row);
     return { key, input };
+  });
+
+  // The calendar: secret iCal addresses, each shown with its name and what's coming up.
+  const calendarToggles: [keyof Config, string][] = [
+    ['meetingAlerts', 'Heads-up before meetings, and what’s on in the morning'],
+    ['hideInCalls', 'Fades into the background during video calls'],
+  ];
+  const calendarToggleBox = document.getElementById('calendar-toggles')!;
+  const calendarInputs = calendarToggles.map(([key, label]) => {
+    const input = el('input', { type: 'checkbox' });
+    input.addEventListener('change', () => void change({ [key]: input.checked } as Partial<Config>));
+    const row = el('label', { className: 'toggle' });
+    row.append(input, el('span', { textContent: label }));
+    calendarToggleBox.append(row);
+    return { key, input };
+  });
+  const calendarStatus = document.getElementById('calendar-status')!;
+  const calendarUrl = document.getElementById('calendar-url') as HTMLInputElement;
+  const service = (url: string) => {
+    if (/google\.com/i.test(url)) return 'Google Calendar';
+    if (/icloud\.com/i.test(url)) return 'iCloud';
+    if (/outlook|office365|live\.com/i.test(url)) return 'Outlook';
+    try {
+      return new URL(url.replace(/^webcal:/i, 'https:')).hostname;
+    } catch {
+      return 'Calendar';
+    }
+  };
+  /** Reads a calendar to show its name and what's in the coming week. */
+  const describe = async (url: string): Promise<{ name: string; detail: string; ok: boolean }> => {
+    try {
+      const cal = parseIcs(await bridge.fetchCalendar(url));
+      const now = Date.now();
+      const week = occurrences(cal.events, now, now + 7 * 24 * 3_600_000).length;
+      const name = cal.name ? `${cal.name} · ${service(url)}` : service(url);
+      if (!cal.events.length && !cal.name) return { name, detail: 'That address didn’t give a calendar.', ok: false };
+      return { name, detail: week === 1 ? '1 thing in the next 7 days' : `${week} things in the next 7 days`, ok: true };
+    } catch (e) {
+      return { name: service(url), detail: String(e).replace(/^Error: /, ''), ok: false };
+    }
+  };
+  const calendarList = document.getElementById('calendar-list')!;
+  let drawnCalendars = '';
+  const drawCalendars = () => {
+    if (drawnCalendars === JSON.stringify(config.calendars)) return;
+    drawnCalendars = JSON.stringify(config.calendars);
+    calendarList.replaceChildren();
+    for (const url of config.calendars) {
+      const label = el('span');
+      const name = el('strong', { textContent: service(url) });
+      const detail = el('small', { textContent: 'Reading…' });
+      label.append(name, detail);
+      const remove = el('button', { type: 'button', textContent: 'Remove' });
+      remove.addEventListener('click', () => void change({ calendars: config.calendars.filter((u) => u !== url) }));
+      const li = el('li');
+      li.append(label, remove);
+      calendarList.append(li);
+      void describe(url).then((d) => {
+        name.textContent = d.name;
+        detail.textContent = d.detail;
+        detail.classList.toggle('error', !d.ok);
+      });
+    }
+  };
+  document.getElementById('calendar-form')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = calendarUrl.value.trim();
+    calendarStatus.classList.remove('error');
+    if (!url) return;
+    if (config.calendars.includes(url)) {
+      calendarStatus.textContent = 'That calendar is already there.';
+      return;
+    }
+    calendarStatus.textContent = 'Reading the calendar…';
+    const d = await describe(url);
+    if (!d.ok) {
+      calendarStatus.textContent = d.detail;
+      calendarStatus.classList.add('error');
+      return;
+    }
+    calendarUrl.value = '';
+    calendarStatus.textContent = `Added ${d.name}: ${d.detail}.`;
+    await change({ calendars: [...config.calendars, url] });
   });
 
   const summary = document.getElementById('summary')!;
@@ -174,6 +259,8 @@ async function start(): Promise<void> {
     for (const { id, button } of characterButtons) button.setAttribute('aria-pressed', String(id === config.character));
     for (const { id, button } of focusButtons) button.setAttribute('aria-pressed', String(id === config.focusMinutes));
     for (const { key, input } of habitInputs) input.checked = key === 'autostart' ? autostart : Boolean(config[key]);
+    for (const { key, input } of calendarInputs) input.checked = Boolean(config[key]);
+    drawCalendars();
   }
 
   // A living preview: breathing, blinking and looking around.

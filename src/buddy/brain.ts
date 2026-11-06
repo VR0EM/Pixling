@@ -48,6 +48,10 @@ export const GRAVITY = 2600; // px per second²
 export const SLEEP_AFTER_MS = 60_000;
 /** How far a window may jump sideways between two looks before the buddy loses its grip. */
 const SHAKE = 80;
+/** The ghost's vanishing act: seconds per fade step, when it moves, and how long it stays faint after. */
+const PHASE_STEP = 0.5;
+const PHASE_MOVE = 2;
+const PHASE_HOLD = 0.4;
 /** Height above a window's edge at the top of a jump; low enough to land without bouncing. */
 const JUMP_CLEARANCE = 40;
 
@@ -352,7 +356,8 @@ export class Brain {
     let fade: number | undefined;
     if (this.mode === 'phase') {
       const p = this.elapsed();
-      fade = p < 0.6 ? Math.min(3, Math.floor(p / 0.15)) : Math.max(0, 3 - Math.floor((p - 0.6) / 0.15));
+      // Fades out step by step, stays faint while it moves, then fades back in.
+      fade = p < PHASE_MOVE ? Math.min(3, 1 + Math.floor(p / PHASE_STEP)) : Math.min(3, Math.max(0, 3 - Math.floor((p - PHASE_MOVE - PHASE_HOLD) / PHASE_STEP)));
     }
     // A hovering buddy floats gently up and down.
     const hover = this.hovers && (this.mode === 'idle' || this.mode === 'walk' || this.mode === 'phase') ? Math.round(1 + Math.sin(t * 2.4)) : 0;
@@ -448,7 +453,7 @@ export class Brain {
     }
     // Now and then the dragon takes to the air, and the ghost pops up somewhere else.
     if (this.mode === 'idle' && this.canFly && !this.tired && this.random() < 0.22 && this.takeOff()) return;
-    if (this.mode === 'idle' && this.canPhase && this.random() < 0.15) return this.vanish();
+    if (this.mode === 'idle' && this.canPhase && this.random() < 0.1) return this.vanish();
     const roll = this.random();
     if (this.mode === 'idle' && roll < 0.3 && this.climb()) return;
     if (this.mode === 'idle' && this.standingOn !== null && roll < 0.25) {
@@ -632,7 +637,7 @@ export class Brain {
   private phaseOn(): void {
     const ph = this.phase;
     if (!ph) return this.setMode('idle', 1);
-    if (!ph.moved && this.elapsed() >= 0.6) {
+    if (!ph.moved && this.elapsed() >= PHASE_MOVE) {
       const win = ph.id === null ? undefined : this.rects.find((r) => r.id === ph.id);
       ph.moved = true;
       if (ph.id !== null && !win) ph.id = null;
@@ -642,7 +647,7 @@ export class Brain {
       if (win) this.standAt = { x: win.x, y: win.y };
       this.events.push('appear');
     }
-    if (this.elapsed() >= 1.2) {
+    if (this.elapsed() >= PHASE_MOVE + PHASE_HOLD + 3 * PHASE_STEP) {
       this.phase = null;
       this.setMode('idle', this.between(2, 4));
     }

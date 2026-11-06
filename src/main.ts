@@ -7,6 +7,8 @@ import { dayKey, emptyDay, sentence, type DayStats, type Diary } from './buddy/d
 import { momentFor } from './buddy/moments.ts';
 import { SystemWatch, type SystemReaction } from './buddy/system-watch.ts';
 import { Traits, type Reaction, type TraitLook } from './buddy/traits.ts';
+import { Agenda, type AgendaAdvice } from './buddy/agenda.ts';
+import { occurrences, parseIcs, type CalEvent, type Occurrence } from './buddy/calendar.ts';
 import { View } from './buddy/view.ts';
 import { PERSONALITIES, greetingFor, isCharacter, line, type Character, type Line, type Situation } from './buddy/voice.ts';
 import { migrateConfig, migrateCreations, migrateDiary } from './legacy.ts';
@@ -34,6 +36,7 @@ async function start(): Promise<void> {
   const personality = () => PERSONALITIES[character()];
   /** Says something in the buddy's own voice: its character, and for a built-in buddy its species. */
   const say = (what: Line | Situation, ms = 4500) => {
+    if (agendaAdvice.away) return; // not a word during a video call
     const text = line(character(), typeof what === 'string' ? { key: what } : what, Math.random, look.species);
     if (text) view.say(text, ms, performance.now());
   };
@@ -43,11 +46,12 @@ async function start(): Promise<void> {
     brain.context = look.watchApps ? contextFor(front) : null;
     brain.speed = personality().speed;
     brain.walkiness = personality().walkiness;
-    // What only some buddies can do.
-    brain.canFly = look.species === 'dragon';
-    brain.canPhase = look.species === 'ghost';
-    brain.hovers = look.species === 'ghost';
-    brain.bouncy = look.species === 'shroom';
+    // What only some buddies can do (unless their quirks are switched off; their voices stay).
+    const quirks = look.quirks;
+    brain.canFly = quirks && look.species === 'dragon';
+    brain.canPhase = quirks && look.species === 'ghost';
+    brain.hovers = quirks && look.species === 'ghost';
+    brain.bouncy = quirks && look.species === 'shroom';
   };
   applyLook();
   // Home-made accessories and buddies from the studio, and the menu that lists them.
@@ -103,11 +107,39 @@ async function start(): Promise<void> {
   };
   const count = (what: keyof DayStats, n = 1) => {
     const day = (diary.days[today] ??= emptyDay());
-    day[what] += n;
+    day[what] = (day[what] ?? 0) + n;
     saveDiary();
   };
   closeOldDays();
   if (oldDiary) saveDiary();
+
+  // The calendar: read from its secret iCal address every ten minutes, checked every second.
+  const agenda = new Agenda();
+  let agendaAdvice: AgendaAdvice = { quiet: false, away: false, next: null };
+  let calendarEvents: CalEvent[] = [];
+  let upcoming: Occurrence[] = [];
+  let readCalendarsFor = '';
+  let nextEvent: string | null = null;
+  const plan = () => {
+    const now = Date.now();
+    upcoming = occurrences(calendarEvents, now - 24 * 60 * MIN, now + 48 * 60 * MIN);
+  };
+  const readCalendars = async () => {
+    readCalendarsFor = JSON.stringify(look.calendars);
+    const all: CalEvent[] = [];
+    for (const url of look.calendars) {
+      try {
+        all.push(...parseIcs(await bridge.fetchCalendar(url)).events);
+      } catch (e) {
+        bridge.log(`calendar: ${String(e)}`); // never the address itself: it's a secret
+      }
+    }
+    calendarEvents = all;
+    plan();
+  };
+  void readCalendars();
+  setInterval(() => void readCalendars(), 10 * MIN);
+  setInterval(plan, MIN);
 
   // The backpack: focus timer and reminders, checked once a second.
   const backpack = new Backpack(Date.now());
@@ -143,7 +175,7 @@ async function start(): Promise<void> {
     reaction = systemWatch.react(info, look.watchSystem);
     if (reaction.say) say(reaction.say, 6000);
     // Plugging in the computer charges the robot too.
-    if (reaction.say?.key === 'charging') react(traits.powered());
+    if (reaction.say?.key === 'charging' && look.quirks) react(traits.powered());
   });
 
   // Now and then it says something by itself, fitting what you're doing.
@@ -171,9 +203,18 @@ async function start(): Promise<void> {
     advice = backpack.update(now.getTime(), performance.now() - lastMove, backpackSettings());
     if (traits.species !== look.species) traits = new Traits(look.species, diary.sprout);
     const active = performance.now() - lastMove < 2 * MIN && brain.mode !== 'sleep';
-    react(traits.tick(now.getTime(), active, today, now.getHours()), 5000);
-    traitLook = traits.look(now.getTime(), now.getHours());
-    brain.stayPut = advice.stayPut || traitLook.stayPut;
+    if (look.quirks) react(traits.tick(now.getTime(), active, today, now.getHours()), 5000);
+    traitLook = look.quirks ? traits.look(now.getTime(), now.getHours()) : { render: {}, stayPut: false, speed: 1 };
+    if (readCalendarsFor !== JSON.stringify(look.calendars)) void readCalendars();
+    agendaAdvice = agenda.update(upcoming, now.getTime(), { alerts: look.meetingAlerts, hideInCalls: look.hideInCalls }, active);
+    if (agendaAdvice.ended) count('meetings');
+    if (agendaAdvice.say) say(agendaAdvice.say, 6000);
+    if (agendaAdvice.next !== nextEvent) {
+      nextEvent = agendaAdvice.next;
+      void bridge.setNextEvent(nextEvent);
+    }
+    // In a meeting it sits still and doesn't chat.
+    brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet;
     brain.speed = personality().speed * traitLook.speed;
     if (!look.watchSystem) reaction = { tired: false, sweaty: false };
     brain.tired = advice.tired || reaction.tired;
@@ -183,7 +224,7 @@ async function start(): Promise<void> {
       if (advice.say.key === 'cheers') count('water');
       say(advice.say, 5000);
       // Drinking water together waters the sprout.
-      if (advice.say.key === 'cheers') react(traits.watered(today));
+      if (advice.say.key === 'cheers' && look.quirks) react(traits.watered(today));
     }
     if (advice.trayTitle !== trayTitle) {
       trayTitle = advice.trayTitle;
@@ -280,7 +321,7 @@ async function start(): Promise<void> {
       brain.pet();
       count('pets');
       // Or it refills the mug, plugs in the robot, waters the sprout...
-      const wanted = answered ? undefined : traits.click(today);
+      const wanted = answered || !look.quirks ? undefined : traits.click(today);
       if (wanted) {
         react(wanted, 3500);
         traitLook = traits.look(Date.now(), new Date().getHours());
@@ -363,9 +404,12 @@ async function start(): Promise<void> {
       lastDraw = now;
       // Priority: the backpack, then the app in front, then the time of day.
       const moment = momentFor(new Date());
-      const item = advice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
-      const shown = look.accessory === 'none' && moment.hat ? { ...look, accessory: moment.hat } : look;
-      view.draw(shown, brain.pose(input), brain.x, brain.y, now, item, traitLook.render);
+      const item = advice.item ?? agendaAdvice.item ?? (brain.context ? ITEM_FOR[brain.context] : undefined) ?? moment.item;
+      const hat = agendaAdvice.hat ?? moment.hat;
+      const shown = look.accessory === 'none' && hat ? { ...look, accessory: hat } : look;
+      // During a video call it fades into the background.
+      const extra = agendaAdvice.away ? { ...traitLook.render, fade: 3 } : traitLook.render;
+      view.draw(shown, brain.pose(input), brain.x, brain.y, now, item, extra);
       // The dragon announces its flights, the ghost its tricks, the shroom its bounces (not every time).
       for (const event of brain.events.splice(0)) {
         const said: Partial<Record<BrainEvent, [Situation, number]>> = {

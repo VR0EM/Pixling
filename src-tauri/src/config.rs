@@ -31,6 +31,14 @@ pub struct Config {
     /// Backpack: length of a focus round and of the break after it, in minutes.
     pub focus_minutes: u32,
     pub break_minutes: u32,
+    /// What only a built-in buddy does: the robot charging, the mug's coffee, the dragon flying, ...
+    pub quirks: bool,
+    /// Calendars to read, as secret iCal addresses (Google Calendar, iCloud, Outlook, ...).
+    pub calendars: Vec<String>,
+    /// Calendar: says so a few minutes before something starts.
+    pub meeting_alerts: bool,
+    /// Calendar: steps aside and keeps quiet during video calls.
+    pub hide_in_calls: bool,
 }
 
 impl Default for Config {
@@ -50,6 +58,10 @@ impl Default for Config {
             breaks: true,
             focus_minutes: 25,
             break_minutes: 5,
+            quirks: true,
+            calendars: Vec::new(),
+            meeting_alerts: true,
+            hide_in_calls: true,
         }
     }
 }

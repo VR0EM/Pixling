@@ -1,3 +1,4 @@
+mod calendar;
 mod config;
 mod files;
 mod notes;
@@ -87,6 +88,8 @@ pub struct AppState {
     pub front_app: Mutex<Option<FrontApp>>,
     /// Files last dropped on the buddy, waiting for a choice in the file menu.
     pub dropped: Mutex<Vec<String>>,
+    /// The next thing in the calendar, shown at the top of the menu.
+    pub next_event: Mutex<Option<String>>,
 }
 
 #[tauri::command]
@@ -285,6 +288,19 @@ fn copy_text(text: String) -> Result<(), String> {
     }
 }
 
+/// Reads a calendar from its secret iCal address, off the main thread.
+#[tauri::command]
+async fn fetch_calendar(url: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || calendar::fetch(&url)).await.map_err(|e| e.to_string())?
+}
+
+/// The next thing in the calendar, for the menu; None hides it.
+#[tauri::command]
+fn set_next_event(app: AppHandle, state: State<'_, AppState>, text: Option<String>) -> Result<(), String> {
+    *state.next_event.lock().unwrap() = text;
+    tray::refresh(&app).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn open_studio(app: AppHandle) -> Result<(), String> {
     overlay::open_page(&app, overlay::STUDIO).map_err(|e| e.to_string())
@@ -356,6 +372,7 @@ pub fn run() {
                 catalog: Mutex::new(Catalog::default()),
                 front_app: Mutex::new(platform::frontmost_app()),
                 dropped: Mutex::new(Vec::new()),
+                next_event: Mutex::new(None),
             });
             overlay::create(&handle)?;
             tray::create(&handle)?;
@@ -386,6 +403,8 @@ pub fn run() {
             get_creations,
             set_creations,
             open_studio,
+            fetch_calendar,
+            set_next_event,
             read_text_file,
             export_file,
             copy_text,

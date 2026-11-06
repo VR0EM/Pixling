@@ -29,6 +29,9 @@ Older versions are on the [releases page](https://github.com/VR0EM/Pixling/relea
   - **Ghost:** hovers, fades away and pops up somewhere else
   - **Sprout:** gets thirsty and droops; water it with a click (or by drinking water together) and it grows a little every day you do, until it blooms
   - **Shroom:** bounces like a sponge, sneezes spores and glows at night
+
+  Don't want the quirks? Switch off **Buddy quirks** in the wardrobe or the menu; the voices stay.
+- **Follows your calendar** (Google Calendar, iCloud, Outlook): paste the calendar's secret iCal address in the wardrobe. In the morning it tells you what's on, ten minutes before a meeting it holds up a little calendar and gives you a heads-up, during meetings it sits still and keeps quiet, during video calls (Meet, Zoom, Teams) it fades into the background, afterwards it asks how it went, it cheers when the last meeting of a busy day is over, and it wears a party hat on birthdays. The next event is at the top of the menu. It only reads the calendar, on your computer, and counts meetings in the diary
 - Falls asleep after a minute without mouse movement and wakes up as soon as you move it
 - Pick it up and drag it; let go while moving and you throw it, with gravity and bouncing
 - A click is a pat on the head: it hops and a heart appears; your own app stays active
@@ -86,6 +89,7 @@ Every push to `main` is also checked on macOS and Windows (`.github/workflows/ci
 | `src/wardrobe.ts`, `src/notes.ts` | The wardrobe and notes windows |
 | `src/buddy/voice.ts`, `src/buddy/species-voice.ts` | What it says, per character and situation, and each built-in buddy's own lines |
 | `src/buddy/traits.ts` | What each built-in buddy does on its own: coffee, battery, thirst and growth, glowing |
+| `src/buddy/calendar.ts`, `src/buddy/agenda.ts` | Reading calendars (iCalendar, repeats, time zones) and what the buddy does with them |
 | `src/buddy/diary.ts`, `src/diary-page.ts` | The diary: counts per day and the sentence that goes with them |
 | `src/buddy/system-watch.ts` | How it reacts to the battery and load |
 | `src/buddy/context.ts` | Which app belongs to which context (code, music, video, game) |

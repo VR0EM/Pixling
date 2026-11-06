@@ -80,6 +80,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let size = choices(app, "Size", "scale", &sizes, &cfg.scale.to_string())?;
     let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Watches your apps", true, cfg.watch_apps, None::<&str>)?;
     let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Climbs windows", true, cfg.climb_windows, None::<&str>)?;
+    let quirks = CheckMenuItem::with_id(app, "flag:quirks", "Buddy quirks", true, cfg.quirks, None::<&str>)?;
     let login = CheckMenuItem::with_id(
         app,
         "autostart",
@@ -90,9 +91,17 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     )?;
     let backpack = backpack_menu(app, &cfg)?;
     let quit = MenuItem::with_id(app, "quit", "Quit Pixling", true, None::<&str>)?;
+    let next = state.next_event.lock().unwrap().clone();
+    let next = next.map(|text| MenuItem::with_id(app, "next", text, false, None::<&str>)).transpose()?;
+    let separator = PredefinedMenuItem::separator(app)?;
 
-    Menu::with_items(
-        app,
+    let mut items: Vec<&dyn IsMenuItem<Wry>> = Vec::new();
+    if let Some(next) = &next {
+        items.push(next);
+        items.push(&separator);
+    }
+    let menu = Menu::with_items(app, &items)?;
+    menu.append_items(
         &[
             &toggle,
             &wardrobe,
@@ -110,11 +119,13 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &PredefinedMenuItem::separator(app)?,
             &watch,
             &climb,
+            &quirks,
             &login,
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
-    )
+    )?;
+    Ok(menu)
 }
 
 /// The backpack: start or stop a focus round, its length, and the reminders.
@@ -195,6 +206,9 @@ fn handle(app: &AppHandle, id: &str) {
                     }
                     ("flag", "watchApps") => cfg.watch_apps = !cfg.watch_apps,
                     ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
+                    ("flag", "quirks") => cfg.quirks = !cfg.quirks,
+                    ("flag", "meetingAlerts") => cfg.meeting_alerts = !cfg.meeting_alerts,
+                    ("flag", "hideInCalls") => cfg.hide_in_calls = !cfg.hide_in_calls,
                     ("flag", "water") => cfg.water = !cfg.water,
                     ("flag", "breaks") => cfg.breaks = !cfg.breaks,
                     ("flag", "watchSystem") => cfg.watch_system = !cfg.watch_system,

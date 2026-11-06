@@ -17,7 +17,8 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Start at login (option in the menu)
 - [x] No focus change at all on a click (macOS: non-activating panel)
 - [ ] Several screens: moving along and throwing between screens
-- [ ] Hiding for fullscreen apps and video calls
+- [x] Fading into the background during video calls in your calendar
+- [ ] Hiding for fullscreen apps and video calls that aren't in the calendar
 
 ## Phase 2: It watches along
 
@@ -38,7 +39,8 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Backpack in the menu, with reminders you switch on and off
 - [x] Focus timer: it reads along, the time shows next to the menu bar icon, then a break
 - [x] Reminders: water, and getting tired after an hour without a break
-- [ ] Reminder for your next appointment (calendar)
+- [x] Calendar (Google, iCloud, Outlook through their iCal address): today's plan, heads-up before meetings, quiet in meetings, fading away in video calls, birthdays
+- [ ] Your own calendar from the computer (macOS Calendar, Windows Calendar) without an address
 - [x] Quick note: type, Enter, done
 - [x] Feeding it files: zip, convert an image, copy the path, show in Finder
 - [x] System: low battery, plugged in, busy computer

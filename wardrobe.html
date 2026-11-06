@@ -51,6 +51,30 @@
         <h2>Habits</h2>
         <div id="habits" class="toggles"></div>
       </section>
+
+      <section>
+        <h2>Calendar</h2>
+        <p class="hint">
+          Your buddy can follow your calendar: what's on today, a heads-up before meetings, quiet during them, and a party
+          hat for birthdays. It only reads the calendar, on this computer.
+        </p>
+        <details class="howto">
+          <summary>Where do I find the address?</summary>
+          <ol>
+            <li><strong>Google Calendar</strong> on the web: Settings → click your calendar on the left → <em>Integrate calendar</em> → copy <em>Secret address in iCal format</em>.</li>
+            <li><strong>iCloud</strong>: Calendar app → right-click the calendar → <em>Share Calendar</em> → <em>Public Calendar</em> → copy the link.</li>
+            <li><strong>Outlook</strong>: Settings → Calendar → <em>Shared calendars</em> → <em>Publish a calendar</em> → copy the ICS link.</li>
+          </ol>
+          <p class="hint">Treat the address like a password: anyone who has it can read that calendar.</p>
+        </details>
+        <form id="calendar-form" class="field">
+          <input id="calendar-url" type="url" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" spellcheck="false" />
+          <button type="submit" class="pill">Add</button>
+        </form>
+        <p id="calendar-status" class="hint" role="status"></p>
+        <ul id="calendar-list" class="calendars"></ul>
+        <div id="calendar-toggles" class="toggles"></div>
+      </section>
     </main>
     <script type="module" src="/src/wardrobe.ts"></script>
   </body>

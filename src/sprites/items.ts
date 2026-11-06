@@ -147,6 +147,13 @@ export const ITEMS: Record<string, Item> = {
       mug: { at: [0, 22], rows: BOOMBOX },
     },
   },
+  calendar: {
+    name: 'Calendar',
+    slot: 'hand',
+    outline: true,
+    rows: ['.n..n.', 'rnrrnr', 'rrrrrr', 'wwwwww', 'wnwnww', 'wwwwww', 'wnwrww', 'wwwwww'],
+    at: [23, 18],
+  },
   popcorn: {
     name: 'Popcorn',
     slot: 'hand',

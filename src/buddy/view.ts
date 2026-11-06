@@ -55,7 +55,7 @@ export class View {
     const options: RenderOptions = {
       ...extra,
       fly: pose.flap,
-      fade: pose.fade,
+      fade: pose.fade ?? extra.fade,
       palette: look.palette === 'default' ? undefined : look.palette,
       accessory: look.accessory === 'none' ? undefined : look.accessory,
       frame: pose.frame,

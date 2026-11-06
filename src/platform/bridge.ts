@@ -17,6 +17,12 @@ export interface Config {
   breaks: boolean;
   focusMinutes: number;
   breakMinutes: number;
+  /** What only a built-in buddy does: charging, coffee, flying, vanishing, growing, bouncing. */
+  quirks: boolean;
+  /** Secret iCal addresses of calendars to read. */
+  calendars: string[];
+  meetingAlerts: boolean;
+  hideInCalls: boolean;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -56,6 +62,10 @@ export const DEFAULT_CONFIG: Config = {
   breaks: true,
   focusMinutes: 25,
   breakMinutes: 5,
+  quirks: true,
+  calendars: [],
+  meetingAlerts: true,
+  hideInCalls: true,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -227,6 +237,17 @@ export async function exportFile(name: string, contents: string): Promise<string
 export async function copyText(text: string): Promise<void> {
   if (inApp) await invoke('copy_text', { text });
   else await navigator.clipboard.writeText(text);
+}
+
+/** Reads a calendar from its secret iCal address; throws a short explanation when that fails. */
+export async function fetchCalendar(url: string): Promise<string> {
+  if (!inApp) throw new Error('Calendars can only be read in the app.');
+  return invoke<string>('fetch_calendar', { url });
+}
+
+/** The next thing in the calendar, shown at the top of the menu (null for nothing). */
+export async function setNextEvent(text: string | null): Promise<void> {
+  if (inApp) await invoke('set_next_event', { text });
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

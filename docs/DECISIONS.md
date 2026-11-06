@@ -106,3 +106,17 @@ The character (sweet, hyper, calm, cheeky) decides how a buddy talks and how liv
 - **Its own looks for it.** Each species draws its states from render options: `charging` and `charge` for the robot, `fill` for the mug, `growth` and `wilt` for the sprout, `glow` for the shroom, `fly` for the dragon. `fade` works for any buddy: it leaves out a growing share of the pixels in a 2×2 pattern.
 
 Home-made buddies stay simple on purpose: they speak with their character only, and can't fly or vanish. That keeps a Pixling file one still drawing.
+
+**Buddy quirks** can be switched off (wardrobe and menu): the needs, flying, vanishing, hovering and bouncing stop, but the voices stay, because they're what makes the buddy itself even when it sits still. The ghost's vanishing act takes about four seconds (fading out in steps, moving while faint, fading back in) so it reads as a trick instead of a glitch.
+
+## Calendars through their secret iCal address
+
+Google Calendar, iCloud and Outlook can all publish a calendar as an iCal (.ics) address. Pixling reads that address, so:
+
+- there's no sign-in with Google and no developer project with OAuth consent screens and app verification, which a small open-source app can't easily get for calendar access;
+- it works the same for every calendar service, and on macOS and Windows alike;
+- it can only read, never change anything, and everything stays on the computer.
+
+The address is a secret (anyone with it can read the calendar), so it lives only in `config.json` and is never written to the log. Rust fetches it with the system's own `curl` (in macOS and Windows 10 and 11), https only, with a time limit, every ten minutes.
+
+`src/buddy/calendar.ts` reads the iCalendar format itself: folded lines, escaped text, time zones (IANA names, and the Windows names Outlook uses), all-day events, durations, and repeats (daily, weekly on certain days, monthly on a date or "the 2nd Tuesday", yearly) with their exceptions and moved or cancelled occurrences. That covers what calendar services publish; anything it doesn't understand is skipped instead of breaking the calendar. `src/buddy/agenda.ts` decides what the buddy does with it, says everything only once, and only when someone is at the computer to hear it.

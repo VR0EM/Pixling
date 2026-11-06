@@ -34,7 +34,13 @@ export type BasicSituation =
   | 'chatGame'
   | 'chatNight'
   | 'newFriend'
-  | 'newThing';
+  | 'newThing'
+  | 'meetingSoon'
+  | 'meetingNow'
+  | 'meetingDone'
+  | 'agenda'
+  | 'birthday'
+  | 'dayFree';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
 export type SpeciesSituation =
@@ -112,6 +118,12 @@ const SWEET: Record<BasicSituation, string[]> = {
   chatNight: ['It’s getting late, you know.', 'Not too much longer, okay?'],
   newFriend: ['A new friend! Hi {name}!', 'Welcome, {name}!'],
   newThing: ['Ooh, {name}! For me?', 'I got {name}!'],
+  meetingSoon: ['{title} in {min} minutes!', 'Heads up: {title} starts in {min} minutes.'],
+  meetingNow: ['{title} starts now. Good luck!', 'Time for {title}. You’ve got this!'],
+  meetingDone: ['How did {title} go?', '{title} is done. Well done!'],
+  agenda: ['{things} on the calendar today. First up: {title} at {time}.'],
+  birthday: ['{title} today! 🎉', 'It’s a birthday! {title}!'],
+  dayFree: ['That was the last meeting of the day!', 'No more meetings today. Phew!'],
 };
 
 const HYPER: Lines = {
@@ -141,6 +153,12 @@ const HYPER: Lines = {
   chatNight: ['It’s night! Exciting!', 'Sleep? No way!'],
   newFriend: ['NEW FRIEND! HI {name}!!'],
   newThing: ['{name}! I LOVE IT!'],
+  meetingSoon: ['{title} in {min} minutes! Quick, quick!', '{min} minutes till {title}! Go go go!'],
+  meetingNow: ['{title}! NOW! Go!'],
+  meetingDone: ['{title} survived! Woohoo!'],
+  agenda: ['{things} today!! First: {title} at {time}! Busy busy!'],
+  birthday: ['{title}!!! PARTY!!!'],
+  dayFree: ['NO MORE MEETINGS! Dance break!'],
 };
 
 const CALM: Lines = {
@@ -170,6 +188,12 @@ const CALM: Lines = {
   chatNight: ['It’s late.'],
   newFriend: ['Hello, {name}.'],
   newThing: ['{name}. Nice.'],
+  meetingSoon: ['{title} in {min} minutes.'],
+  meetingNow: ['{title}. Breathe.'],
+  meetingDone: ['{title}, done.'],
+  agenda: ['{things} today. First, {title} at {time}.'],
+  birthday: ['{title}. How nice.'],
+  dayFree: ['Meetings are over. Good.'],
 };
 
 const CHEEKY: Lines = {
@@ -199,6 +223,12 @@ const CHEEKY: Lines = {
   chatNight: ['Go to sleep. Seriously.', 'You’ll be tired tomorrow. Just saying.'],
   newFriend: ['Who’s {name}? Fine, they can stay.'],
   newThing: ['{name}? It suits me, obviously.'],
+  meetingSoon: ['{title} in {min} minutes. Don’t be late this time.', '{min} minutes till {title}. Comb your hair.'],
+  meetingNow: ['{title}. Try to look interested.'],
+  meetingDone: ['{title} is over. Could’ve been an email.'],
+  agenda: ['{things} today. Starting with {title} at {time}. Good luck.'],
+  birthday: ['{title}. Is there cake? There should be cake.'],
+  dayFree: ['Meetings over. Finally some peace.'],
 };
 
 const VOICES: Record<Character, Lines> = { sweet: SWEET, hyper: HYPER, calm: CALM, cheeky: CHEEKY };

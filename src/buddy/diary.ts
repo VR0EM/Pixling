@@ -10,6 +10,8 @@ export interface DayStats {
   notes: number;
   files: number;
   climbs: number;
+  /** Meetings from the calendar that ended. Older days may not have it. */
+  meetings?: number;
 }
 
 export interface DiaryDay extends DayStats {
@@ -44,6 +46,7 @@ const times = (n: number) => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times
 function facts(s: DayStats): string[] {
   const all: [number, string][] = [
     [s.focus * 3, plural(s.focus, 'focus round', 'focus rounds')],
+    [(s.meetings ?? 0) * 2, `${plural(s.meetings ?? 0, 'meeting', 'meetings')} survived`],
     [s.files * 2, `${plural(s.files, 'file', 'files')} eaten`],
     [s.notes * 2, plural(s.notes, 'note', 'notes')],
     [s.water * 2, `water ${times(s.water)}`],
