@@ -74,11 +74,14 @@ export async function setCatalog(catalog: Catalog): Promise<void> {
   if (inApp) await invoke('set_catalog', { catalog });
 }
 
-/** Where the cursor is, in overlay pixels. Works even while the overlay lets clicks through. */
-export async function cursor(): Promise<{ x: number; y: number } | null> {
-  if (!inApp) return browserCursor;
-  const position = await invoke<[number, number] | null>('cursor');
-  return position ? { x: position[0], y: position[1] } : null;
+/**
+ * Where the cursor is, in overlay pixels, and whether the user is dragging something (like a file).
+ * Works even while the overlay lets clicks through.
+ */
+export async function cursor(): Promise<{ x: number; y: number; dragging: boolean } | null> {
+  if (!inApp) return browserCursor ? { ...browserCursor, dragging: false } : null;
+  const position = await invoke<[number, number, boolean] | null>('cursor');
+  return position ? { x: position[0], y: position[1], dragging: position[2] } : null;
 }
 
 export async function setClickThrough(on: boolean): Promise<void> {

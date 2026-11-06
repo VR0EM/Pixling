@@ -8,7 +8,8 @@ use core_graphics::window::{
     copy_window_info, kCGNullWindowID, kCGWindowListExcludeDesktopElements, kCGWindowListOptionOnScreenOnly,
 };
 use objc2::MainThreadMarker;
-use objc2_app_kit::{NSApplication, NSWorkspace};
+use objc2_app_kit::{NSApplication, NSEvent, NSPasteboard, NSPasteboardNameDrag, NSWorkspace};
+use std::sync::atomic::{AtomicIsize, Ordering};
 
 use crate::{FrontApp, WindowRect};
 
@@ -17,6 +18,21 @@ pub fn deactivate() {
     if let Some(mtm) = MainThreadMarker::new() {
         NSApplication::sharedApplication(mtm).deactivate();
     }
+}
+
+/// The drag pasteboard's change count the last time no mouse button was down.
+static DRAG_COUNT_AT_REST: AtomicIsize = AtomicIsize::new(-1);
+
+/// Is the user dragging something (a file, say) right now? macOS bumps the drag pasteboard's change count
+/// when a drag starts, so: a mouse button is down and that count moved since the button went down.
+pub fn dragging() -> bool {
+    let count = NSPasteboard::pasteboardWithName(unsafe { NSPasteboardNameDrag }).changeCount();
+    if NSEvent::pressedMouseButtons() == 0 {
+        DRAG_COUNT_AT_REST.store(count, Ordering::Relaxed);
+        return false;
+    }
+    let at_rest = DRAG_COUNT_AT_REST.load(Ordering::Relaxed);
+    at_rest >= 0 && count != at_rest
 }
 
 pub fn frontmost_app() -> Option<FrontApp> {

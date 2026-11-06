@@ -17,6 +17,10 @@ mod platform {
 
     pub fn deactivate() {}
 
+    pub fn dragging() -> bool {
+        false
+    }
+
     pub fn frontmost_app() -> Option<FrontApp> {
         None
     }
@@ -87,14 +91,14 @@ fn set_catalog(app: AppHandle, state: State<'_, AppState>, catalog: Catalog) -> 
     tray::refresh(&app).map_err(|e| e.to_string())
 }
 
-/// The cursor position in CSS pixels, relative to the overlay's top-left corner. The overlay ignores the
-/// mouse most of the time, so the frontend polls this to know where the cursor is.
+/// The cursor position in CSS pixels, relative to the overlay's top-left corner, and whether something is
+/// being dragged. The overlay ignores the mouse most of the time, so the frontend polls this.
 #[tauri::command]
-fn cursor(app: AppHandle, window: WebviewWindow) -> Option<(f64, f64)> {
+fn cursor(app: AppHandle, window: WebviewWindow) -> Option<(f64, f64, bool)> {
     let pos = app.cursor_position().ok()?;
     let origin = window.outer_position().ok()?;
     let scale = window.scale_factor().ok()?;
-    Some(((pos.x - origin.x as f64) / scale, (pos.y - origin.y as f64) / scale))
+    Some(((pos.x - origin.x as f64) / scale, (pos.y - origin.y as f64) / scale, platform::dragging()))
 }
 
 /// Lets clicks fall through the transparent overlay to the windows below it.

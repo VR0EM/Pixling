@@ -80,6 +80,33 @@ describe('Brain', () => {
     expect(brain.pose({ cursor: { x: 800, y: 0 }, idleMs: 0 }).faceDx).toBe(1);
   });
 
+  it('stops walking and waits when the cursor comes close', () => {
+    const brain = new Brain(800, 600, seeded(21));
+    for (let i = 0; i < 30 * 60 && brain.mode !== 'walk'; i++) brain.update(1 / 30, awake);
+    expect(brain.mode).toBe('walk');
+    const close: Input = { cursor: { x: brain.x + 30, y: brain.y - 40 }, idleMs: 0 };
+    brain.update(1 / 30, close);
+    expect(brain.mode).toBe('idle');
+    const x = brain.x;
+    for (let i = 0; i < 30 * 20; i++) brain.update(1 / 30, { cursor: { x: brain.x + 30, y: brain.y - 40 }, idleMs: 0 });
+    expect(brain.x).toBe(x);
+    expect(brain.pose(close).faceDx).toBe(0);
+  });
+
+  it('stands still and looks up while a file is dragged towards it', () => {
+    const brain = new Brain(800, 600, seeded(22));
+    const coming: Input = { cursor: { x: brain.x - 200, y: brain.y - 150 }, idleMs: 0, dragging: true };
+    brain.update(1 / 30, coming);
+    expect(brain.pose(coming).emote).toBe('uitroep');
+    const x = brain.x;
+    for (let i = 0; i < 30 * 20; i++) {
+      brain.update(1 / 30, coming);
+      expect(brain.mode).not.toBe('walk');
+    }
+    expect(brain.x).toBe(x);
+    expect(brain.pose(coming).faceDx).toBe(-1);
+  });
+
   it('keeps standing on the ground when the screen shrinks', () => {
     const brain = new Brain(800, 600, seeded(7));
     brain.resize(500, 550);

@@ -9,6 +9,8 @@ export interface Input {
   cursor: { x: number; y: number } | null;
   /** Milliseconds since the cursor last moved. */
   idleMs: number;
+  /** The user is dragging something, probably a file to feed it. */
+  dragging?: boolean;
 }
 
 /** Everything the view needs to draw one frame. */
@@ -86,6 +88,7 @@ export class Brain {
   private nextNoteAt = 3;
   private nextYawnAt = 0;
   private nextSweatAt = 0;
+  private wasDragging = false;
   private impact = 0;
   private grabDx = 0;
   private grabDy = 0;
@@ -155,9 +158,18 @@ export class Brain {
 
     switch (this.mode) {
       case 'idle':
-      case 'walk':
+      case 'walk': {
         if (input.idleMs > SLEEP_AFTER_MS) {
           this.setMode('sleep');
+          break;
+        }
+        // Someone is coming to it, maybe with a file: stop and wait.
+        const waiting = !!input.dragging || this.near(input);
+        if (input.dragging && !this.wasDragging && this.near(input, 260)) this.say('uitroep', 0.8);
+        this.wasDragging = !!input.dragging;
+        if (waiting) {
+          if (this.mode === 'walk') this.setMode('idle', 1);
+          this.followAt = null;
           break;
         }
         if (this.context === 'muziek' && this.time > this.nextNoteAt) {
@@ -179,6 +191,7 @@ export class Brain {
         if (this.mode === 'walk' && this.walk(dt)) break;
         if (this.elapsed() > this.modeLength) this.decide();
         break;
+      }
       case 'sleep':
         if (input.idleMs < 400) {
           this.setMode('idle', this.between(2, 4));
@@ -332,6 +345,12 @@ export class Brain {
 
   private hop(): void {
     this.hopUntil = this.time + 0.25;
+  }
+
+  /** Is the cursor close to it (within `reach` pixels sideways, around its height)? */
+  private near(input: Input, reach = 110): boolean {
+    const c = input.cursor;
+    return !!c && Math.abs(c.x - this.x) < reach && c.y > this.y - this.tall - reach && c.y < this.y + 40;
   }
 
   /** How close to a window's corner the feet may get. */

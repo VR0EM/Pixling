@@ -75,6 +75,7 @@ async function start(): Promise<void> {
   // Where the cursor is and when it last moved. The overlay usually lets clicks through, so it can't
   // rely on mouse events; it asks the app instead, more often when the cursor is close.
   let cursor: Input['cursor'] = null;
+  let fileDrag = false; // something (a file) is being dragged somewhere on screen
   let lastMove = performance.now();
   let clickThrough = true;
   let pressed: { x: number; y: number } | null = null;
@@ -86,14 +87,16 @@ async function start(): Promise<void> {
       const c = await bridge.cursor();
       const now = performance.now();
       if (c && (!cursor || Math.abs(c.x - cursor.x) + Math.abs(c.y - cursor.y) > 0.5)) lastMove = now;
-      cursor = c;
-      const over = c !== null && view.hit(c.x, c.y);
+      cursor = c ? { x: c.x, y: c.y } : null;
+      fileDrag = c?.dragging ?? false;
+      // While a file is dragged, catch it on a wide area around the buddy so the drop lands here.
+      const over = c !== null && view.hit(c.x, c.y, fileDrag ? 60 : 6);
       const through = !(over || pressed || brain.mode === 'drag');
       if (through !== clickThrough) {
         await bridge.setClickThrough(through);
         clickThrough = through;
       }
-      near = c !== null && Math.abs(c.x - brain.x) < 300 && Math.abs(c.y - brain.y) < 300;
+      near = fileDrag || (c !== null && Math.abs(c.x - brain.x) < 300 && Math.abs(c.y - brain.y) < 300);
     } catch (e) {
       bridge.log(`cursor opvragen mislukt: ${String(e)}`);
     } finally {
@@ -171,7 +174,10 @@ async function start(): Promise<void> {
   // Files dragged onto the buddy get eaten; then a menu asks what to do with them.
   let tasting = false;
   bridge.onFileDrop((kind, paths, x, y) => {
-    const onBuddy = view.hit(x, y, 24);
+    // The cursor we track ourselves is the most reliable place of the drop; the event's own position
+    // is only a fallback.
+    const onBuddy = cursor ? view.hit(cursor.x, cursor.y, 60) : view.hit(x, y, 60);
+    if (kind === 'drop') bridge.log(`bestand losgelaten (${paths.length}); op het maatje: ${onBuddy}`);
     if (kind === 'over' && onBuddy && !tasting) brain.notice('uitroep');
     tasting = kind === 'over' && onBuddy;
     if (kind === 'drop' && onBuddy && paths.length > 0) {
@@ -189,7 +195,7 @@ async function start(): Promise<void> {
   const frame = (now: number) => {
     const busy = brain.mode === 'fall' || brain.mode === 'drag' || brain.standingOn !== null;
     if (busy || now - lastDraw >= 50) {
-      const input: Input = { cursor, idleMs: now - lastMove };
+      const input: Input = { cursor, idleMs: now - lastMove, dragging: fileDrag };
       brain.update((now - last) / 1000, input);
       last = now;
       lastDraw = now;
