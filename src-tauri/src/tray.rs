@@ -120,6 +120,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let update = state.update.lock().unwrap().as_ref().map(|u| u.version.clone());
     let update = update.map(|v| MenuItem::with_id(app, "update", format!("Update to Pixling {v}…"), true, None::<&str>)).transpose()?;
     let check = MenuItem::with_id(app, "check-update", "Check for updates…", true, None::<&str>)?;
+    let welcome = MenuItem::with_id(app, "welcome", "Welcome tour…", true, None::<&str>)?;
 
     let mut items: Vec<&dyn IsMenuItem<Wry>> = Vec::new();
     if let Some(update) = &update {
@@ -154,6 +155,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &fun,
             &login,
             &PredefinedMenuItem::separator(app)?,
+            &welcome,
             &check,
             &quit,
         ],
@@ -194,11 +196,12 @@ fn choices(app: &AppHandle, title: &str, group: &str, list: &[Choice], current: 
 fn handle(app: &AppHandle, id: &str) {
     match id {
         "quit" => app.exit(0),
-        "wardrobe" | "notes" | "diary" | "studio" => {
+        "wardrobe" | "notes" | "diary" | "studio" | "welcome" => {
             let label = match id {
                 "notes" => overlay::NOTES,
                 "diary" => overlay::DIARY,
                 "studio" => overlay::STUDIO,
+                "welcome" => overlay::WELCOME,
                 _ => overlay::WARDROBE,
             };
             if let Err(e) = overlay::open_page(app, label) {

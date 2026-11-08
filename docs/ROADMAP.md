@@ -51,6 +51,7 @@ Platform order: macOS first, then Windows, then Linux.
 ## Phase 4: It's yours
 
 - [x] Wardrobe window with a preview
+- [x] A welcome tour on the first start: pick your buddy, where to find it, a few extras
 - [x] Studio: pixel editor for your own accessories (hat, face, to hold)
 - [x] Drawing your own buddies, in layers, with your own colours
 - [x] Sharing and adding creations as `.pixling.json` files, also by dropping them on the buddy

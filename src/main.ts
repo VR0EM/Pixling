@@ -673,6 +673,8 @@ async function start(): Promise<void> {
   requestAnimationFrame(frame);
 
   say({ key: 'greeting', vars: { greeting: greetingFor(new Date()) } }, 4500);
+  // The first time, a short welcome tour (after the buddy has said hello).
+  if (!look.welcomed) setTimeout(() => void bridge.openWelcome(), 2500);
 }
 
 window.addEventListener('error', (e) => bridge.log(`error: ${e.message}`));

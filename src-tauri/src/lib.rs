@@ -328,6 +328,12 @@ fn open_studio(app: AppHandle) -> Result<(), String> {
     overlay::open_page(&app, overlay::STUDIO).map_err(|e| e.to_string())
 }
 
+/// The welcome: shown on the first start, and from the menu.
+#[tauri::command]
+fn open_welcome(app: AppHandle) -> Result<(), String> {
+    overlay::open_page(&app, overlay::WELCOME).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn open_diary(app: AppHandle) -> Result<(), String> {
     overlay::open_page(&app, overlay::DIARY).map_err(|e| e.to_string())
@@ -427,6 +433,7 @@ pub fn run() {
             get_creations,
             set_creations,
             open_studio,
+            open_welcome,
             fetch_calendar,
             find_place,
             fetch_weather,

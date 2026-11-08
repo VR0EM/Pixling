@@ -139,3 +139,7 @@ Pixling uses Tauri's updater. Every release carries a `latest.json` next to the 
 - **Only release builds are signed.** The update files are switched on by `src-tauri/tauri.release.conf.json`, which only the release workflow passes, so `npm run tauri build` and `npm run install-mac` work without the key.
 - **The system's TLS** (`native-tls`) instead of rustls, so the Windows build has no C crypto library to compile and the app stays smaller.
 - **What gets updated:** the macOS app as a whole (one universal `.app.tar.gz` for Apple Silicon and Intel) and on Windows the installer, which runs by itself (`passive`). The portable `.exe` can't replace itself; its users download the new one.
+
+## A welcome tour
+
+New users only see a little buddy appear, and nothing tells them the menu is in the menu bar (or the system tray) or that double-clicking opens the wardrobe. So the first start opens a short tour (`welcome.html`) a few seconds after the buddy says hello: hello, pick the buddy, colour and character with a live preview, where to find everything, a few optional extras (town, birthday, start at login, updates), done. Every choice is saved right away, so closing the window halfway loses nothing. It sets `welcomed` as soon as it opens, so it never opens by itself twice; "Welcome tour…" in the menu brings it back.

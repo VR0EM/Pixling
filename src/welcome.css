@@ -1,0 +1,134 @@
+.welcome {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 18px 28px 20px;
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  margin-bottom: 4px;
+  background: linear-gradient(var(--soft), var(--soft)) bottom / 100% 6px no-repeat;
+}
+
+.stage canvas {
+  width: 96px;
+  height: 132px;
+}
+
+/* Saying hello and goodbye, the buddy takes the stage. */
+.welcome[data-step='hello'] .stage,
+.welcome[data-step='done'] .stage {
+  height: 300px;
+  margin-top: 30px;
+}
+
+.welcome[data-step='hello'] .stage canvas,
+.welcome[data-step='done'] .stage canvas {
+  width: 192px;
+  height: 264px;
+}
+
+.step {
+  flex: 1;
+}
+
+.step h1 {
+  margin: 10px 0 8px;
+  font: 500 26px/1.2 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+  text-align: center;
+}
+
+.step h2 {
+  margin: 16px 0 8px;
+}
+
+.lead {
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 15px;
+  text-align: center;
+}
+
+.step[data-step='hello'] .hint,
+.step[data-step='done'] .hint {
+  text-align: center;
+  margin-top: 14px;
+}
+
+.step .cards {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.step .card canvas {
+  width: 56px;
+  height: 56px;
+}
+
+.step .characters {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.tips {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.tips li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--soft);
+}
+
+.key {
+  flex: none;
+  min-width: 104px;
+  padding: 2px 8px;
+  text-align: center;
+  font: 500 13px/1.6 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 2px 2px 0 var(--pick);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.nav .pill {
+  min-width: 96px;
+}
+
+.nav .pill.primary {
+  border-color: var(--line);
+  font-weight: 600;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--soft);
+  border-radius: 2px;
+}
+
+.dots span.on {
+  background: var(--line);
+}
+
+[hidden] {
+  display: none !important;
+}

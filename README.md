@@ -119,6 +119,8 @@ Pixling is built to stay on your computer.
 
 **Windows 10 and 11:** download the [installer](https://github.com/VR0EM/Pixling/releases/latest/download/Pixling-windows-setup.exe), or the [portable version](https://github.com/VR0EM/Pixling/releases/latest/download/Pixling-windows-portable.exe) that runs without installing.
 
+On the first start a short **welcome tour** introduces your buddy: pick how it looks and who it is, learn where to find it, and set a few optional extras. It's in the menu under **Welcome tour…** whenever you want it back.
+
 Pixling lives in the menu bar (macOS) or the system tray (Windows). Double-click your buddy to open the wardrobe, and right-click it for the menu.
 
 **Updates come by themselves** (from 0.10 on): Pixling looks for a new version now and then, your buddy tells you when there is one, and **Update** in the menu installs it. Nothing is installed until you pick it, and you can switch the looking off in the wardrobe.
@@ -181,7 +183,7 @@ Pixling is a [Tauri 2](https://tauri.app) app: a small Rust side for the operati
 | `src/buddy/weather.ts`, `src/buddy/seasons.ts`, `src/buddy/stickers.ts` | Weather, holidays and birthdays, the sticker book |
 | `src/buddy/backpack.ts`, `src/buddy/diary.ts` | Focus timer and reminders; the diary |
 | `src/main.ts` | Ties it all together |
-| `src/wardrobe.ts`, `src/studio.ts`, `src/notes.ts`, `src/diary-page.ts` | The windows |
+| `src/wardrobe.ts`, `src/studio.ts`, `src/notes.ts`, `src/diary-page.ts`, `src/welcome.ts` | The windows |
 | `src-tauri/src/` | The Rust side; `macos.rs` and `win.rs` per platform |
 | `scripts/` | Sprite sheet, icons and README art, drawn with the same engine |
 | `examples/` | Example Pixling files |

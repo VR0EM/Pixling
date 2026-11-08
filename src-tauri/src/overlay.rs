@@ -35,6 +35,7 @@ pub const WARDROBE: &str = "wardrobe";
 pub const NOTES: &str = "notes";
 pub const DIARY: &str = "diary";
 pub const STUDIO: &str = "studio";
+pub const WELCOME: &str = "welcome";
 
 /// Opens one of the normal windows (the wardrobe or the notes), or brings it forward.
 pub fn open_page(app: &AppHandle, label: &str) -> tauri::Result<()> {
@@ -42,6 +43,7 @@ pub fn open_page(app: &AppHandle, label: &str) -> tauri::Result<()> {
         NOTES => ("Pixling · Notes", 420.0, 520.0),
         DIARY => ("Pixling · Diary", 460.0, 600.0),
         STUDIO => ("Pixling · Studio", 1040.0, 760.0),
+        WELCOME => ("Welcome to Pixling", 560.0, 660.0),
         _ => ("Pixling · Wardrobe", 640.0, 880.0),
     };
     let window = match app.get_webview_window(label) {
@@ -49,7 +51,7 @@ pub fn open_page(app: &AppHandle, label: &str) -> tauri::Result<()> {
         None => WebviewWindowBuilder::new(app, label, WebviewUrl::App(format!("{label}.html").into()))
             .title(title)
             .inner_size(width, height)
-            .resizable(label != WARDROBE && label != STUDIO)
+            .resizable(label != WARDROBE && label != STUDIO && label != WELCOME)
             .center()
             .build()?,
     };

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Pixling</title>
+  </head>
+  <body>
+    <main class="welcome">
+      <header class="stage">
+        <canvas id="buddy" width="32" height="44" aria-label="Your buddy"></canvas>
+      </header>
+
+      <section class="step" data-step="hello">
+        <h1>Hi! I’m your Pixling.</h1>
+        <p class="lead">
+          A little buddy that lives on your desktop. I walk along your screen, climb your windows, keep an eye on your
+          day and help out now and then, without nagging.
+        </p>
+        <p class="hint">This takes a minute. You can change everything later.</p>
+      </section>
+
+      <section class="step" data-step="pick" hidden>
+        <h1>Who shall I be?</h1>
+        <h2>Buddy</h2>
+        <div id="species" class="cards"></div>
+        <h2>Colour</h2>
+        <div id="palettes" class="swatches"></div>
+        <h2>Character</h2>
+        <div id="characters" class="characters"></div>
+      </section>
+
+      <section class="step" data-step="find" hidden>
+        <h1>Where to find me</h1>
+        <ul class="tips">
+          <li><span class="key" id="menu-place">Menu bar</span><span id="menu-tip">My icon in the menu bar at the top of your screen opens my menu.</span></li>
+          <li><span class="key">Double-click</span><span>me to open the wardrobe: buddy, colour, accessories and habits.</span></li>
+          <li><span class="key">Right-click</span><span>me for the same menu as the menu bar.</span></li>
+          <li><span class="key">Click</span><span>me for a pat on the head. <em>Drag</em> me around, or throw me!</span></li>
+          <li><span class="key">Drop a file</span><span>on me and I’ll zip it, convert it or show you where it is.</span></li>
+          <li><span class="key">Play</span><span>in the menu: fetch, hide and seek, or basket.</span></li>
+          <li><span class="key">Studio</span><span>in the menu: draw your own hats, or a whole new buddy.</span></li>
+        </ul>
+      </section>
+
+      <section class="step" data-step="extras" hidden>
+        <h1>A few extras</h1>
+        <p class="hint">All optional. Skip anything you like.</p>
+        <h2>Your town, for the weather</h2>
+        <form id="place-form" class="field">
+          <input id="place-name" type="text" placeholder="Like Ghent or New York" autocomplete="off" spellcheck="false" />
+          <button type="submit" class="pill">Find</button>
+        </form>
+        <p id="place-status" class="hint" role="status"></p>
+        <div id="place-results" class="pills"></div>
+        <h2>Your birthday</h2>
+        <div class="birthday">
+          <input id="birthday" type="date" aria-label="Your birthday" />
+          <span class="hint">I’ll bring cake.</span>
+        </div>
+        <h2>Habits</h2>
+        <div class="toggles">
+          <label class="toggle"><input id="autostart" type="checkbox" /> <span>Start when I log in</span></label>
+          <label class="toggle"><input id="updates" type="checkbox" /> <span>Look for new versions</span></label>
+        </div>
+        <p class="hint">Your calendar, reminders and more are in the wardrobe.</p>
+      </section>
+
+      <section class="step" data-step="done" hidden>
+        <h1>All set!</h1>
+        <p class="lead">See you on your desktop. Pet me now and then?</p>
+        <p class="hint">This tour is in the menu under “Welcome tour…” if you ever want it back.</p>
+      </section>
+
+      <footer class="nav">
+        <button id="back" type="button" class="pill">Back</button>
+        <div id="dots" class="dots" aria-hidden="true"></div>
+        <button id="next" type="button" class="pill primary">Let’s go</button>
+      </footer>
+    </main>
+    <script type="module" src="/src/welcome.ts"></script>
+  </body>
+</html>

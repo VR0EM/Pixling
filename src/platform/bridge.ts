@@ -1,6 +1,7 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 /** The saved look; mirrors `Config` in src-tauri/src/config.rs. */
 export interface Config {
@@ -35,6 +36,8 @@ export interface Config {
   unlockAll: boolean;
   /** Looks for a new version now and then; it's only installed when you choose to. */
   checkUpdates: boolean;
+  /** The welcome has been shown. */
+  welcomed: boolean;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -86,6 +89,7 @@ export const DEFAULT_CONFIG: Config = {
   stickers: true,
   unlockAll: false,
   checkUpdates: true,
+  welcomed: false,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -234,6 +238,16 @@ export async function setCreations(list: unknown[]): Promise<void> {
 
 export function onCreationsChanged<T>(callback: (list: T[]) => void): void {
   if (inApp) void listen<T[]>('creations-changed', (event) => callback(event.payload));
+}
+
+/** Closes the window this page is in. */
+export async function closeWindow(): Promise<void> {
+  if (inApp) await getCurrentWindow().close();
+  else window.close();
+}
+
+export async function openWelcome(): Promise<void> {
+  if (inApp) await invoke('open_welcome');
 }
 
 export async function openStudio(): Promise<void> {
