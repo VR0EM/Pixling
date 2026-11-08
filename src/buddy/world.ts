@@ -1,6 +1,6 @@
 import { FIXED } from '../sprites/palettes.ts';
 import type { Rect } from './brain.ts';
-import { ballRadius, type Ball, type Hoop } from './games.ts';
+import { ballRadius, hoopParts, type Ball, type Hoop } from './games.ts';
 
 /**
  * Everything drawn around the buddy rather than on it, on one transparent canvas over the whole overlay:
@@ -197,6 +197,11 @@ export class World {
     // The rim.
     px(h.x - s, h.y - s, h.w + 2 * s, 3 * s, OUTLINE);
     px(h.x, h.y, h.w, s, FIXED.O);
+    // A little × above the corner to put the hoop away.
+    const close = hoopParts(h, s).close;
+    px(close.x, close.y, close.w, close.h, OUTLINE);
+    px(close.x + s, close.y + s, close.w - 2 * s, close.h - 2 * s, FIXED.r);
+    for (const [cx, cy] of [[1, 1], [3, 1], [2, 2], [1, 3], [3, 3]]) px(close.x + (cx + 1) * s, close.y + (cy + 1) * s, s, s, FIXED.w);
   }
 
   /** Draws a little pixel map with a dark outline, its top-left at (x, y). */

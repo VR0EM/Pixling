@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Brain, type Input } from './brain.ts';
-import { Games, resting, stepBall, type Ball, type GameEvent } from './games.ts';
+import { Games, hoopParts, resting, stepBall, type Ball, type GameEvent } from './games.ts';
 
 function seeded(seed: number) {
   let s = seed >>> 0;
@@ -70,6 +70,22 @@ describe('games', () => {
     games.update(3500, 1 / 60, brain, screen, [{ id: 1, x: 200, y: 300, w: 600, h: 300 }], null);
     expect(games.clipY).toBe(300);
     expect(brain.y).toBeGreaterThan(300);
+  });
+
+  it('basket: the hoop can be dragged anywhere on screen, and put away with its ×', () => {
+    const brain = new Brain(screen.width, screen.height, seeded(10));
+    const games = new Games(seeded(11));
+    games.start('basket', 0, brain, screen);
+    const parts = hoopParts(games.hoop!, screen.scale);
+    expect(games.hoopHit(parts.close.x + 2, parts.close.y + 2, screen)).toBe('close');
+    expect(games.hoopHit(parts.board.x + 10, parts.board.y + 30, screen)).toBe('board');
+    expect(games.hoopHit(10, 10, screen)).toBeNull();
+    games.moveHoop(100, 200, screen, 1000);
+    expect(games.hoop).toMatchObject({ x: 100, y: 200 });
+    // It never leaves the screen.
+    games.moveHoop(-500, 5000, screen, 1000);
+    expect(games.hoop!.x).toBeGreaterThan(0);
+    expect(games.hoop!.y).toBeLessThan(screen.height);
   });
 
   it('basket: dropping through the hoop scores', () => {

@@ -81,9 +81,9 @@ From the menu, under **Play**:
 
 - **Fetch:** throw the ball with your mouse; it runs after it and brings it back to your cursor.
 - **Hide and seek:** it hides behind the edge of a window or off the side of the screen. Click it when you find it.
-- **Basket:** a hoop appears on your screen; throw your buddy through it.
+- **Basket:** a hoop appears on your screen; throw your buddy through it. Drag the hoop wherever you like, and close it with its ×.
 
-It asks to play by itself now and then, too.
+Games only start when you pick one. Now and then your buddy asks if you want to play.
 
 ### Make it yours
 

@@ -30,6 +30,26 @@ export interface Hoop {
   w: number;
 }
 
+export interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** Where the hoop's backboard (with the rim and net) and its little close button are. */
+export function hoopParts(h: Hoop, scale: number): { board: Box; close: Box } {
+  const s = scale;
+  const bx = h.x - 3 * s;
+  const bw = h.w + 6 * s;
+  return {
+    board: { x: bx - s, y: h.y - 17 * s, w: bw + 2 * s, h: 25 * s },
+    close: { x: bx + bw - 6 * s, y: h.y - 24 * s, w: 7 * s, h: 7 * s },
+  };
+}
+
+const inBox = (x: number, y: number, b: Box, pad = 0) => x >= b.x - pad && x <= b.x + b.w + pad && y >= b.y - pad && y <= b.y + b.h + pad;
+
 /** What happened in a game, for the app to show and count. */
 export interface GameEvent {
   say?: Line;
@@ -243,6 +263,23 @@ export class Games {
     if (!through) return undefined;
     this.lastAction = now;
     return { say: { key: 'basketScore' }, emote: 'heart', count: 'baskets', confetti: { x: brain.x, y: h.y } };
+  }
+
+  /** Is this point on the hoop's close button, on the hoop itself (to drag it), or neither? */
+  hoopHit(x: number, y: number, s: Screen): 'close' | 'board' | null {
+    if (!this.hoop) return null;
+    const parts = hoopParts(this.hoop, s.scale);
+    if (inBox(x, y, parts.close, 4)) return 'close';
+    return inBox(x, y, parts.board) ? 'board' : null;
+  }
+
+  /** Moves the hoop so its rim's left end is at (x, y), keeping all of it on screen. */
+  moveHoop(x: number, y: number, s: Screen, now: number): void {
+    const h = this.hoop;
+    if (!h) return;
+    h.x = Math.round(Math.min(Math.max(x, 6 * s.scale), s.width - h.w - 6 * s.scale));
+    h.y = Math.round(Math.min(Math.max(y, 26 * s.scale), s.height - 10 * s.scale));
+    this.lastAction = now;
   }
 
   /** Is this point on the ball (with a little room to grab it)? */

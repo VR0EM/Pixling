@@ -330,11 +330,11 @@ async function start(): Promise<void> {
     if (season.eggHunt && eggsFor !== today) hideEggs();
     if (!season.eggHunt) eggs = [];
     if (now.getSeconds() === 0) checkStickers(true);
-    // Now and then it asks to play.
+    // Now and then it asks to play; a game only starts when you pick one from the Play menu.
     const free = active && !games.active && !brain.stayPut && brain.mode === 'idle' && bubble.hidden;
     if (look.games && free && performance.now() > nextOffer) {
       nextOffer = performance.now() + between(40, 80) * MIN;
-      play((['fetch', 'basket', 'hide'] as const)[Math.floor(Math.random() * 3)]);
+      say('playInvite', 6000);
     }
     brain.speed = personality().speed * traitLook.speed;
     if (!look.watchSystem) reaction = { tired: false, sweaty: false };
@@ -368,10 +368,23 @@ async function start(): Promise<void> {
   let pressed: { x: number; y: number } | null = null;
   let dragging = false;
   let ballHeld = false;
+  /** Dragging the hoop: where the rim is relative to the pointer. */
+  let hoopGrab: { dx: number; dy: number } | null = null;
 
   // The ball and the eggs live on the world layer; clicks there reach the page when the cursor is on them.
   document.addEventListener('pointerdown', (e) => {
     if (e.target === canvas || e.button !== 0) return;
+    // The hoop: its × puts it away, anywhere else on it drags it.
+    const onHoop = games.hoopHit(e.clientX, e.clientY, screen());
+    if (onHoop === 'close') {
+      play('stop');
+      void bridge.giveBackFocus();
+      return;
+    }
+    if (onHoop === 'board' && games.hoop) {
+      hoopGrab = { dx: games.hoop.x - e.clientX, dy: games.hoop.y - e.clientY };
+      return;
+    }
     if (games.ballHit(e.clientX, e.clientY, screen())) {
       ballHeld = true;
       games.grabBall(e.clientX, e.clientY, performance.now(), brain);
@@ -390,8 +403,13 @@ async function start(): Promise<void> {
   });
   document.addEventListener('pointermove', (e) => {
     if (ballHeld) games.dragBall(e.clientX, e.clientY, performance.now());
+    if (hoopGrab) games.moveHoop(e.clientX + hoopGrab.dx, e.clientY + hoopGrab.dy, screen(), performance.now());
   });
   const letGoOfBall = () => {
+    if (hoopGrab) {
+      hoopGrab = null;
+      void bridge.giveBackFocus();
+    }
     if (!ballHeld) return;
     ballHeld = false;
     games.releaseBall(performance.now());
@@ -411,8 +429,12 @@ async function start(): Promise<void> {
       // While a file is dragged, catch it on a wide area around the buddy so the drop lands here.
       const over = c !== null && view.hit(c.x, c.y, fileDrag ? 60 : 6);
       // The ball and eggs can be picked up too.
-      const toy = c !== null && (games.ballHit(c.x, c.y, screen()) || world.eggAt(c.x, c.y, eggs, rects, window.innerHeight, look.scale) >= 0);
-      const through = !(over || toy || pressed || ballHeld || brain.mode === 'drag');
+      const toy =
+        c !== null &&
+        (games.ballHit(c.x, c.y, screen()) ||
+          games.hoopHit(c.x, c.y, screen()) !== null ||
+          world.eggAt(c.x, c.y, eggs, rects, window.innerHeight, look.scale) >= 0);
+      const through = !(over || toy || pressed || ballHeld || hoopGrab || brain.mode === 'drag');
       if (through !== clickThrough) {
         await bridge.setClickThrough(through);
         clickThrough = through;

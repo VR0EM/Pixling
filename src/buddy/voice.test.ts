@@ -10,7 +10,7 @@ const situations: Situation[] = [
   'meetingDone', 'agenda', 'birthday', 'dayFree', 'weatherRain', 'weatherSnow', 'weatherStorm', 'weatherCold',
   'weatherHot', 'weatherSun', 'birthdayYou', 'anniversary', 'daysTogether', 'halloween', 'christmas', 'newYear',
   'valentine', 'easter', 'eggFound', 'eggsAll', 'fetchStart', 'fetchAgain', 'fetchBored', 'hideStart', 'hideHint',
-  'hideFound', 'hideGiveUp', 'basketStart', 'basketScore', 'newSticker',
+  'hideFound', 'hideGiveUp', 'basketStart', 'basketScore', 'newSticker', 'playInvite',
 ];
 
 describe('voice', () => {

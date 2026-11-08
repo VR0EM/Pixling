@@ -66,6 +66,7 @@ export type BasicSituation =
   | 'hideGiveUp'
   | 'basketStart'
   | 'basketScore'
+  | 'playInvite'
   | 'newSticker';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
@@ -175,6 +176,7 @@ const SWEET: Record<BasicSituation, string[]> = {
   hideGiveUp: ['Here I am! I was right here.', 'Okay, okay, I’ll come out!'],
   basketStart: ['Throw me in the hoop!', 'Basket time! Aim well.'],
   basketScore: ['SCORE!', 'Swish! Nothing but net!', 'Two points!'],
+  playInvite: ['Wanna play? Pick a game under Play in the menu.', 'I’m bored... fetch? Hide and seek? It’s under Play!'],
   newSticker: ['New sticker: {name}!', 'We earned a sticker: {name}!'],
 };
 
@@ -222,6 +224,7 @@ const HYPER: Lines = {
   hideFound: ['NOOO you found me! Again!'],
   basketStart: ['THROW ME! I’m ready!'],
   basketScore: ['SLAM DUNK!!!', 'WOOO! Did you see that?!'],
+  playInvite: ['PLAY WITH ME! Menu, Play, any game! Please?!'],
   newSticker: ['STICKER!! {name}!!'],
 };
 
@@ -269,6 +272,7 @@ const CALM: Lines = {
   hideFound: ['Found me.'],
   basketStart: ['A hoop. Go on.'],
   basketScore: ['In.'],
+  playInvite: ['A game, maybe? It’s under Play.'],
   newSticker: ['A sticker. {name}.'],
 };
 
@@ -319,6 +323,7 @@ const CHEEKY: Lines = {
   hideGiveUp: ['Too hard? I’ll come out. Pathetic.'],
   basketStart: ['Throw me in that hoop. If you can aim.'],
   basketScore: ['Obviously. I’m a natural.'],
+  playInvite: ['You work too much. Menu, Play. Go on.'],
   newSticker: ['A sticker: {name}. I earned that one.'],
 };
 
