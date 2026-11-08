@@ -1,6 +1,6 @@
 [package]
 name = "pixling"
-version = "0.11.0"
+version = "0.12.0"
 description = "Pixling: a little pixel buddy that lives on your desktop"
 authors = ["VR0EM"]
 license = "MIT"
