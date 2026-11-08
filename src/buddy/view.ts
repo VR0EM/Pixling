@@ -27,6 +27,14 @@ export class View {
   private bubbleUntil = 0;
   /** Nothing of the buddy shows below this overlay y (hiding behind a window's edge), or null. */
   clipY: number | null = null;
+  /** Out of the way (a fullscreen app, a call): not drawn, not clickable, not talking. */
+  private away = false;
+
+  setAway(on: boolean): void {
+    this.away = on;
+    this.canvas.style.visibility = on ? 'hidden' : '';
+    if (on) this.bubble.hidden = true;
+  }
 
   private readonly canvas: HTMLCanvasElement;
   private readonly bubble: HTMLElement;
@@ -104,6 +112,7 @@ export class View {
 
   /** Is this overlay point on (or right next to) the visible part of the buddy? */
   hit(px: number, py: number, padding = 6): boolean {
+    if (this.away) return false;
     const s = this.scale;
     const x0 = this.left + this.box.x0 * s - padding;
     const x1 = this.left + (this.box.x1 + 1) * s + padding;
@@ -114,6 +123,7 @@ export class View {
 
   /** Shows a short text balloon above the buddy. */
   say(text: string, ms: number, now: number): void {
+    if (this.away) return;
     this.bubble.textContent = text;
     this.bubble.hidden = false;
     this.bubbleUntil = now + ms;

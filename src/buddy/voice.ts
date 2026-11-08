@@ -73,6 +73,7 @@ export type BasicSituation =
   | 'updateRestart'
   | 'updateFailed'
   | 'updateCheckFailed'
+  | 'callOver'
   | 'newSticker';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
@@ -189,6 +190,7 @@ const SWEET: Record<BasicSituation, string[]> = {
   updateRestart: ['Back in a second, with something new!'],
   updateFailed: ['The update didn’t work. Let’s try again later.'],
   updateCheckFailed: ['I couldn’t look for updates just now. Maybe later?'],
+  callOver: ['Call over? I kept quiet!', 'How was the call?', 'Back! I stayed out of sight.'],
   newSticker: ['New sticker: {name}!', 'We earned a sticker: {name}!'],
 };
 

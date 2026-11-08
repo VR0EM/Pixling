@@ -18,7 +18,7 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] No focus change at all on a click (macOS: non-activating panel)
 - [ ] Several screens: moving along and throwing between screens
 - [x] Fading into the background during video calls in your calendar
-- [ ] Hiding for fullscreen apps and video calls that aren't in the calendar
+- [x] Hiding while an app fills the screen, and during calls (the microphone is on)
 
 ## Phase 2: It watches along
 

@@ -25,6 +25,14 @@ mod platform {
 
     pub const PHYSICAL_PIXELS: bool = false;
 
+    pub fn fullscreen(_skip_pid: i32) -> bool {
+        false
+    }
+
+    pub fn mic_in_use() -> bool {
+        false
+    }
+
     pub fn deactivate() {}
 
     pub fn dragging() -> bool {
@@ -310,6 +318,19 @@ async fn fetch_weather(lat: f64, lon: f64) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || calendar::weather(lat, lon)).await.map_err(|e| e.to_string())?
 }
 
+/// Whether the buddy should step aside: an app fills the main screen, or the microphone is in use (a call).
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ScreenState {
+    fullscreen: bool,
+    in_call: bool,
+}
+
+#[tauri::command]
+fn screen_state() -> ScreenState {
+    ScreenState { fullscreen: platform::fullscreen(std::process::id() as i32), in_call: platform::mic_in_use() }
+}
+
 /// Looks for a newer version on GitHub; returns its number, or None when this is the newest.
 #[tauri::command]
 async fn check_update(app: AppHandle) -> Result<Option<String>, String> {
@@ -439,6 +460,7 @@ pub fn run() {
             fetch_weather,
             set_next_event,
             check_update,
+            screen_state,
             read_text_file,
             export_file,
             copy_text,

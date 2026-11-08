@@ -120,3 +120,61 @@ pub fn windows(skip_pid: i32) -> Vec<WindowRect> {
     }
     out
 }
+
+/// Is the window in front covering the whole main screen (a film, a presentation, a game)?
+pub fn fullscreen(skip_pid: i32) -> bool {
+    let screen = core_graphics::display::CGDisplay::main().bounds();
+    let (sx, sy, sw, sh) = (screen.origin.x, screen.origin.y, screen.size.width, screen.size.height);
+    windows(skip_pid)
+        .first()
+        .is_some_and(|w| w.x <= sx + 1.0 && w.y <= sy + 1.0 && w.x + w.w >= sx + sw - 1.0 && w.y + w.h >= sy + sh - 1.0)
+}
+
+#[repr(C)]
+struct PropertyAddress {
+    selector: u32,
+    scope: u32,
+    element: u32,
+}
+
+#[link(name = "CoreAudio", kind = "framework")]
+extern "C" {
+    fn AudioObjectGetPropertyData(
+        object: u32,
+        address: *const PropertyAddress,
+        qualifier_size: u32,
+        qualifier: *const std::ffi::c_void,
+        size: *mut u32,
+        data: *mut std::ffi::c_void,
+    ) -> i32;
+}
+
+/// Reads a 32-bit CoreAudio property; the four-letter codes are CoreAudio's own.
+fn audio_property(object: u32, selector: &[u8; 4]) -> Option<u32> {
+    let address = PropertyAddress { selector: u32::from_be_bytes(*selector), scope: u32::from_be_bytes(*b"glob"), element: 0 };
+    let mut value: u32 = 0;
+    let mut size = std::mem::size_of::<u32>() as u32;
+    let status = unsafe {
+        AudioObjectGetPropertyData(object, &address, 0, std::ptr::null(), &mut size, (&mut value as *mut u32).cast())
+    };
+    (status == 0).then_some(value)
+}
+
+/// Is any app using the microphone right now (a call)? Only whether it's on, never what it hears; this
+/// needs no permission.
+pub fn mic_in_use() -> bool {
+    // The system object (1): its default input device ('dIn '), and whether that is running anywhere ('gone').
+    match audio_property(1, b"dIn ") {
+        Some(device) if device != 0 => audio_property(device, b"gone").unwrap_or(0) != 0,
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn reads_the_screen_state_without_permissions() {
+        // Whatever the answer on this computer, asking must work and not crash.
+        println!("fullscreen: {}, microphone in use: {}", super::fullscreen(0), super::mic_in_use());
+    }
+}

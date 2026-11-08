@@ -9,7 +9,11 @@ use std::{
 
 use ::windows::Win32::{
     Foundation::{CloseHandle, HWND, LPARAM, POINT, RECT},
-    Graphics::Dwm::{DwmGetWindowAttribute, DWMWA_CLOAKED, DWMWA_EXTENDED_FRAME_BOUNDS},
+    Graphics::{
+        Dwm::{DwmGetWindowAttribute, DWMWA_CLOAKED, DWMWA_EXTENDED_FRAME_BOUNDS},
+        Gdi::{GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST},
+    },
+    System::Registry::{RegCloseKey, RegEnumKeyExW, RegGetValueW, RegOpenKeyExW, HKEY, HKEY_CURRENT_USER, KEY_READ, RRF_RT_REG_QWORD},
     System::Threading::{OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION},
     UI::{
         Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON},
@@ -20,7 +24,7 @@ use ::windows::Win32::{
         },
     },
 };
-use ::windows::core::{BOOL, PWSTR};
+use ::windows::core::{BOOL, PCWSTR, PWSTR};
 
 use crate::{FrontApp, WindowRect};
 
@@ -156,4 +160,88 @@ pub fn windows(skip_pid: i32) -> Vec<WindowRect> {
         let _ = EnumWindows(Some(visit), LPARAM(&mut collect as *mut Collect as isize));
     }
     collect.out
+}
+
+/// Is the window in front covering the whole main screen (a film, a presentation, a game)?
+pub fn fullscreen(skip_pid: i32) -> bool {
+    unsafe {
+        let hwnd = GetForegroundWindow();
+        if hwnd.0.is_null() || hidden(hwnd) {
+            return false;
+        }
+        let mut pid = 0u32;
+        GetWindowThreadProcessId(hwnd, Some(&mut pid));
+        // The desktop and the taskbar cover the screen too, but aren't fullscreen apps.
+        if pid == skip_pid as u32 || matches!(class_name(hwnd).as_str(), "Progman" | "WorkerW" | "Shell_TrayWnd") {
+            return false;
+        }
+        let mut rect = RECT::default();
+        if ::windows::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut rect).is_err() {
+            return false;
+        }
+        let monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        let mut info = MONITORINFO { cbSize: size_of::<MONITORINFO>() as u32, ..Default::default() };
+        // Only the main screen, where the buddy lives.
+        if !GetMonitorInfoW(monitor, &mut info).as_bool() || info.dwFlags & 1 == 0 {
+            return false;
+        }
+        let m = info.rcMonitor;
+        rect.left <= m.left && rect.top <= m.top && rect.right >= m.right && rect.bottom >= m.bottom
+    }
+}
+
+fn wide(text: &str) -> Vec<u16> {
+    text.encode_utf16().chain(std::iter::once(0)).collect()
+}
+
+/// Whether an app's entry in Windows' microphone privacy list says it's using the microphone now:
+/// it started and hasn't stopped yet.
+unsafe fn using(parent: HKEY, name: &[u16]) -> bool {
+    let read = |value: &str| {
+        let mut data = 0u64;
+        let mut size = size_of::<u64>() as u32;
+        let value = wide(value);
+        let ok = RegGetValueW(
+            parent,
+            PCWSTR(name.as_ptr()),
+            PCWSTR(value.as_ptr()),
+            RRF_RT_REG_QWORD,
+            None,
+            Some((&mut data as *mut u64).cast()),
+            Some(&mut size),
+        )
+        .is_ok();
+        ok.then_some(data)
+    };
+    matches!((read("LastUsedTimeStart"), read("LastUsedTimeStop")), (Some(start), Some(0)) if start != 0)
+}
+
+/// Goes through the apps under a key of the microphone privacy list.
+unsafe fn any_using(path: &str) -> bool {
+    let mut key = HKEY::default();
+    let path = wide(path);
+    if RegOpenKeyExW(HKEY_CURRENT_USER, PCWSTR(path.as_ptr()), Some(0), KEY_READ, &mut key).is_err() {
+        return false;
+    }
+    let mut found = false;
+    for index in 0.. {
+        let mut name = [0u16; 512];
+        let mut len = name.len() as u32;
+        if RegEnumKeyExW(key, index, Some(PWSTR(name.as_mut_ptr())), &mut len, None, None, None, None).is_err() {
+            break;
+        }
+        if using(key, &name[..=len as usize]) {
+            found = true;
+            break;
+        }
+    }
+    let _ = RegCloseKey(key);
+    found
+}
+
+/// Is any app using the microphone right now (a call)? Windows keeps this in its privacy settings;
+/// only whether it's on is read, never what it hears.
+pub fn mic_in_use() -> bool {
+    const BASE: &str = r"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone";
+    unsafe { any_using(BASE) || any_using(&format!(r"{BASE}\NonPackaged")) }
 }

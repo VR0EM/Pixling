@@ -143,3 +143,12 @@ Pixling uses Tauri's updater. Every release carries a `latest.json` next to the 
 ## A welcome tour
 
 New users only see a little buddy appear, and nothing tells them the menu is in the menu bar (or the system tray) or that double-clicking opens the wardrobe. So the first start opens a short tour (`welcome.html`) a few seconds after the buddy says hello: hello, pick the buddy, colour and character with a live preview, where to find everything, a few optional extras (town, birthday, start at login, updates), done. Every choice is saved right away, so closing the window halfway loses nothing. It sets `welcomed` as soon as it opens, so it never opens by itself twice; "Welcome tour…" in the menu brings it back.
+
+## Stepping aside for films, presentations and calls
+
+Twice a second-ish (every 1.5 s) the page asks Rust for the screen state, and the buddy disappears (not drawn, not clickable, not talking, games put away) while:
+
+- **an app fills the main screen.** The window in front covers the whole main display: CoreGraphics' window list against the main display's bounds on macOS, the foreground window against its monitor (only the primary one) on Windows. Maximised windows leave the menu bar or the taskbar free, so they don't count.
+- **the microphone is on.** The operating systems don't say when the screen is being shared, but every call app uses the microphone, so that's the signal. macOS: CoreAudio's "is running somewhere" on the default input device. Windows: the microphone section of its privacy settings in the registry (an app that started and hasn't stopped). Neither needs a permission, and only *whether* it's on is read.
+
+Both have a switch. The calendar's video calls still only fade the buddy, because those are known in advance; this is for everything else.

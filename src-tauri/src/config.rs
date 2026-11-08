@@ -64,6 +64,10 @@ pub struct Config {
     pub check_updates: bool,
     /// The welcome has been shown (it opens by itself only once).
     pub welcomed: bool,
+    /// Steps aside while an app fills the main screen (a film, a presentation, a game).
+    pub hide_fullscreen: bool,
+    /// Steps aside while the microphone is in use (a call, maybe sharing the screen).
+    pub hide_calls: bool,
 }
 
 impl Default for Config {
@@ -96,6 +100,8 @@ impl Default for Config {
             unlock_all: false,
             check_updates: true,
             welcomed: false,
+            hide_fullscreen: true,
+            hide_calls: true,
         }
     }
 }

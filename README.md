@@ -41,7 +41,7 @@
 
 ### It's alive
 
-Your buddy walks along the bottom of the screen, breathes, blinks and follows your cursor with its eyes. It climbs onto the top edge of your windows and rides along when you drag them, and falls off when you close one. Pick it up and throw it across the screen, pet it with a click, and when you step away it falls asleep. Clicks pass straight through everything but the buddy, and it never takes the focus from the app you're working in.
+Your buddy walks along the bottom of the screen, breathes, blinks and follows your cursor with its eyes. It climbs onto the top edge of your windows and rides along when you drag them, and falls off when you close one. Pick it up and throw it across the screen, pet it with a click, and when you step away it falls asleep. Clicks pass straight through everything but the buddy, and it never takes the focus from the app you're working in. It steps out of sight while an app fills the screen (a film, a presentation, a game) and during calls, and comes back when they're over.
 
 ### Six buddies, each with a personality
 
@@ -109,7 +109,7 @@ The format, the style guide and examples are in **[Creating buddies](docs/CREATI
 Pixling is built to stay on your computer.
 
 - No accounts, no analytics, no telemetry.
-- It never takes screenshots and never reads what you type. It only knows which app is in front and where windows are.
+- It never takes screenshots and never reads what you type. It only knows which app is in front and where windows are, and, to hide during calls, whether the microphone is on (never what it hears).
 - Your settings, notes, diary and creations live in your app data folder.
 - It only goes online when you turn something on: your calendar is read from the secret address you paste in, and the weather is fetched from [Open-Meteo](https://open-meteo.com) with just your town's coordinates.
 

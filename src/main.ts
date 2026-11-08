@@ -41,9 +41,11 @@ async function start(): Promise<void> {
 
   const character = (): Character => (isCharacter(look.character) ? look.character : 'sweet');
   const personality = () => PERSONALITIES[character()];
+  /** Why the buddy stepped aside (an app fills the screen, a call), or null when it's out and about. */
+  let awayFor: 'fullscreen' | 'call' | null = null;
   /** Says something in the buddy's own voice: its character, and for a built-in buddy its species. */
   const say = (what: Line | Situation, ms = 4500) => {
-    if (agendaAdvice.away) return; // not a word during a video call
+    if (agendaAdvice.away || awayFor) return; // not a word during a call or a film
     const text = line(character(), typeof what === 'string' ? { key: what } : what, Math.random, look.species);
     if (text) view.say(text, ms, performance.now());
   };
@@ -342,7 +344,7 @@ async function start(): Promise<void> {
       void bridge.setNextEvent(nextEvent);
     }
     // In a meeting it sits still and doesn't chat; while playing it stays for the game.
-    brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet || games.active;
+    brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet || games.active || awayFor !== null;
     if (weatherFor !== JSON.stringify(look.weather ? look.place : null)) void readWeather();
     if (active && look.weather) {
       const remark = weatherWatch.update(weather);
@@ -475,6 +477,30 @@ async function start(): Promise<void> {
   };
   void pollCursor();
   setInterval(checkBackpack, 1000);
+
+  // Out of the way while an app fills the screen (a film, a presentation, a game) or the microphone is on
+  // (a call, maybe sharing the screen); back as soon as that's over.
+  const worldCanvas = document.getElementById('world') as HTMLCanvasElement;
+  const checkScreen = async () => {
+    try {
+      const state = await bridge.screenState();
+      const reason = look.hideCalls && state?.inCall ? 'call' : look.hideFullscreen && state?.fullscreen ? 'fullscreen' : null;
+      if (reason !== awayFor) {
+        const was = awayFor;
+        awayFor = reason;
+        view.setAway(reason !== null);
+        worldCanvas.style.visibility = reason ? 'hidden' : '';
+        if (reason) games.stop(brain);
+        bridge.log(reason ? `stepping aside: ${reason}` : 'back from stepping aside');
+        if (!reason && was === 'call' && Math.random() < 0.6) setTimeout(() => say('callOver', 3500), 800);
+      }
+    } catch (e) {
+      bridge.log(`screen state: ${String(e)}`);
+    } finally {
+      setTimeout(() => void checkScreen(), 1500);
+    }
+  };
+  void checkScreen();
 
   bridge.log(`started; app in front: ${front?.name ?? 'unknown'}; character: ${character()}`);
 

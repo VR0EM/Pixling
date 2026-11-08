@@ -163,6 +163,8 @@ async function start(): Promise<void> {
   const habits: [keyof Config | 'autostart', string][] = [
     ['watchApps', 'Watches your apps'],
     ['climbWindows', 'Climbs windows'],
+    ['hideFullscreen', 'Hides while an app fills the screen'],
+    ['hideCalls', 'Hides during calls (while the microphone is on)'],
     ['quirks', 'Buddy quirks (charging, coffee, flying, …)'],
     ['water', 'Water reminder'],
     ['breaks', 'Break reminder'],

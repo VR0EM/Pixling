@@ -38,6 +38,10 @@ export interface Config {
   checkUpdates: boolean;
   /** The welcome has been shown. */
   welcomed: boolean;
+  /** Steps aside while an app fills the main screen. */
+  hideFullscreen: boolean;
+  /** Steps aside while the microphone is in use (a call). */
+  hideCalls: boolean;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -90,6 +94,8 @@ export const DEFAULT_CONFIG: Config = {
   unlockAll: false,
   checkUpdates: true,
   welcomed: false,
+  hideFullscreen: true,
+  hideCalls: true,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -309,6 +315,11 @@ export async function checkUpdate(): Promise<string | null> {
 /** What the updater is doing: available:<version>, latest, downloading, restarting, failed, check-failed. */
 export function onUpdateStatus(callback: (status: string) => void): void {
   if (inApp) void listen<string>('update-status', (event) => callback(event.payload));
+}
+
+/** Whether an app fills the main screen, and whether the microphone is in use (null outside the app). */
+export async function screenState(): Promise<{ fullscreen: boolean; inCall: boolean } | null> {
+  return inApp ? invoke<{ fullscreen: boolean; inCall: boolean }>('screen_state') : null;
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

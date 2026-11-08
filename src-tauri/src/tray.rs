@@ -80,6 +80,8 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let size = choices(app, "Size", "scale", &sizes, &cfg.scale.to_string())?;
     let watch = CheckMenuItem::with_id(app, "flag:watchApps", "Watches your apps", true, cfg.watch_apps, None::<&str>)?;
     let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Climbs windows", true, cfg.climb_windows, None::<&str>)?;
+    let fullscreen = CheckMenuItem::with_id(app, "flag:hideFullscreen", "Hides in fullscreen", true, cfg.hide_fullscreen, None::<&str>)?;
+    let calls = CheckMenuItem::with_id(app, "flag:hideCalls", "Hides during calls", true, cfg.hide_calls, None::<&str>)?;
     let login = CheckMenuItem::with_id(
         app,
         "autostart",
@@ -152,6 +154,8 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &PredefinedMenuItem::separator(app)?,
             &watch,
             &climb,
+            &fullscreen,
+            &calls,
             &fun,
             &login,
             &PredefinedMenuItem::separator(app)?,
@@ -254,6 +258,8 @@ fn handle(app: &AppHandle, id: &str) {
                     ("flag", "watchApps") => cfg.watch_apps = !cfg.watch_apps,
                     ("flag", "climbWindows") => cfg.climb_windows = !cfg.climb_windows,
                     ("flag", "quirks") => cfg.quirks = !cfg.quirks,
+                    ("flag", "hideFullscreen") => cfg.hide_fullscreen = !cfg.hide_fullscreen,
+                    ("flag", "hideCalls") => cfg.hide_calls = !cfg.hide_calls,
                     ("flag", "games") => cfg.games = !cfg.games,
                     ("flag", "weather") => cfg.weather = !cfg.weather,
                     ("flag", "seasons") => cfg.seasons = !cfg.seasons,
