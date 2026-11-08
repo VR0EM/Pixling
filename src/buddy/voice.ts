@@ -74,6 +74,13 @@ export type BasicSituation =
   | 'updateFailed'
   | 'updateCheckFailed'
   | 'callOver'
+  | 'friendHello'
+  | 'friendBonk'
+  | 'friendVisit'
+  | 'friendPush'
+  | 'tagStart'
+  | 'tagYoureIt'
+  | 'tagDone'
   | 'newSticker';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
@@ -191,6 +198,13 @@ const SWEET: Record<BasicSituation, string[]> = {
   updateFailed: ['The update didn’t work. Let’s try again later.'],
   updateCheckFailed: ['I couldn’t look for updates just now. Maybe later?'],
   callOver: ['Call over? I kept quiet!', 'How was the call?', 'Back! I stayed out of sight.'],
+  friendHello: ['Hi, {name}!', 'Oh, hello {name}!', 'There you are, {name}!'],
+  friendBonk: ['Ow! Watch it!', 'Bonk!'],
+  friendVisit: ['Room for one more up there?', 'Wait for me!'],
+  friendPush: ['Oops! Sorry!', 'Hehe, gotcha!'],
+  tagStart: ['Tag! I’m it!', 'Let’s play tag! Run!'],
+  tagYoureIt: ['Tag, you’re it!', 'Got you!'],
+  tagDone: ['Phew! Good game.', 'I’m out of breath!'],
   newSticker: ['New sticker: {name}!', 'We earned a sticker: {name}!'],
 };
 
@@ -239,6 +253,9 @@ const HYPER: Lines = {
   basketStart: ['THROW ME! I’m ready!'],
   basketScore: ['SLAM DUNK!!!', 'WOOO! Did you see that?!'],
   playInvite: ['PLAY WITH ME! Menu, Play, any game! Please?!'],
+  friendHello: ['{name}!!! HI HI HI!'],
+  tagStart: ['TAG!!! You can’t catch me!'],
+  tagDone: ['AGAIN! Later. Again later!'],
   newSticker: ['STICKER!! {name}!!'],
 };
 
@@ -287,6 +304,8 @@ const CALM: Lines = {
   basketStart: ['A hoop. Go on.'],
   basketScore: ['In.'],
   playInvite: ['A game, maybe? It’s under Play.'],
+  friendHello: ['Hey, {name}.'],
+  tagStart: ['Tag. Gently.'],
   newSticker: ['A sticker. {name}.'],
 };
 
@@ -338,6 +357,9 @@ const CHEEKY: Lines = {
   basketStart: ['Throw me in that hoop. If you can aim.'],
   basketScore: ['Obviously. I’m a natural.'],
   playInvite: ['You work too much. Menu, Play. Go on.'],
+  friendHello: ['Oh. It’s {name}. Hi, I guess.'],
+  friendPush: ['Oops. Totally an accident.'],
+  tagStart: ['Tag! You’ll never catch me.'],
   newSticker: ['A sticker: {name}. I earned that one.'],
 };
 

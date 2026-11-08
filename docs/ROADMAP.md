@@ -63,7 +63,7 @@ Platform order: macOS first, then Windows, then Linux.
 - [x] Diary and "buddies for … days"
 - [x] Games: fetch, hide and seek, basket
 - [x] Sticker book with accessories to earn (or unlock everything)
-- [ ] Two buddies at once, waving and playing tag
+- [x] Two buddies at once, waving and playing tag
 - [ ] Music in the background, not only when the music app is in front
 
 ## Later

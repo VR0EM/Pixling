@@ -42,6 +42,10 @@ export interface Config {
   hideFullscreen: boolean;
   /** Steps aside while the microphone is in use (a call). */
   hideCalls: boolean;
+  /** A second buddy: a species id, or 'none'; its palette ('default' for its own) and character. */
+  friend: string;
+  friendPalette: string;
+  friendCharacter: string;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -96,6 +100,9 @@ export const DEFAULT_CONFIG: Config = {
   welcomed: false,
   hideFullscreen: true,
   hideCalls: true,
+  friend: 'none',
+  friendPalette: 'default',
+  friendCharacter: 'hyper',
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */

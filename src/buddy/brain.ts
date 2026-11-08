@@ -99,6 +99,9 @@ export class Brain {
   target: number | null = null;
   /** Which way it looks while hiding. */
   private hideFace = 0;
+  /** Something it's looking at, until when. */
+  private lookingAt: number | null = null;
+  private lookUntil = 0;
 
   private time = 0;
   private modeStart = 0;
@@ -329,6 +332,20 @@ export class Brain {
     this.say(emote, seconds);
   }
 
+  /** Looks towards this x for a while (when idle), like at its friend. */
+  look(x: number, seconds: number): void {
+    this.lookingAt = x;
+    this.lookUntil = this.time + seconds;
+  }
+
+  /** Gets knocked into the air, by its friend or a thrown buddy. */
+  bump(vx: number, vy: number): void {
+    if (this.mode === 'drag' || this.mode === 'hide') return;
+    this.target = null;
+    this.say('exclaim', 0.9);
+    this.drop(vx, vy);
+  }
+
   /** Leaps up to a higher spot, such as a window's top edge, and lands there on the way down. */
   jumpTo(x: number, top: number): void {
     const rise = this.y - top + JUMP_CLEARANCE;
@@ -375,6 +392,8 @@ export class Brain {
           const dx = input.cursor.x - this.x;
           if (Math.abs(dx) > 60) faceDx = Math.sign(dx);
         }
+        // Looking at something in particular (its friend) wins over the cursor.
+        if (this.lookingAt !== null && t < this.lookUntil) faceDx = Math.sign(this.lookingAt - this.x);
         break;
     }
 

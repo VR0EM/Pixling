@@ -68,6 +68,11 @@ pub struct Config {
     pub hide_fullscreen: bool,
     /// Steps aside while the microphone is in use (a call, maybe sharing the screen).
     pub hide_calls: bool,
+    /// A second buddy keeping it company: a species id, or "none".
+    pub friend: String,
+    /// The friend's palette id, or "default", and its character.
+    pub friend_palette: String,
+    pub friend_character: String,
 }
 
 impl Default for Config {
@@ -102,6 +107,9 @@ impl Default for Config {
             welcomed: false,
             hide_fullscreen: true,
             hide_calls: true,
+            friend: "none".into(),
+            friend_palette: "default".into(),
+            friend_character: "hyper".into(),
         }
     }
 }

@@ -18,7 +18,8 @@ body {
   pointer-events: none;
 }
 
-#buddy {
+#buddy,
+#friend {
   position: absolute;
   left: 0;
   top: 0;
@@ -27,11 +28,13 @@ body {
   will-change: transform;
 }
 
-#buddy.dragging {
+#buddy.dragging,
+#friend.dragging {
   cursor: grabbing;
 }
 
-#bubble {
+#bubble,
+#bubble2 {
   position: absolute;
   left: 0;
   top: 0;
@@ -48,7 +51,8 @@ body {
 }
 
 /* A little pixel tail pointing down at the buddy. */
-#bubble::after {
+#bubble::after,
+#bubble2::after {
   content: '';
   position: absolute;
   left: 18px;
@@ -61,6 +65,8 @@ body {
   transform: skewX(35deg);
 }
 
-#bubble[hidden] {
+#bubble[hidden],
+#bubble2[hidden],
+#friend[hidden] {
   display: none;
 }

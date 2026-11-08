@@ -72,6 +72,10 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
         None::<&str>,
     )?;
     let species = choices(app, "Buddy", "species", &catalog.species, &cfg.species)?;
+    let friends: Vec<Choice> = std::iter::once(Choice { id: "none".into(), name: "None".into() })
+        .chain(catalog.species.iter().cloned())
+        .collect();
+    let friend = choices(app, "Friend", "friend", &friends, &cfg.friend)?;
     let palettes = choices(app, "Colour", "palette", &catalog.palettes, &cfg.palette)?;
     let accessories = choices(app, "Accessory", "accessory", &catalog.accessories, &cfg.accessory)?;
     let sizes: Vec<Choice> = (2..=4)
@@ -144,6 +148,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &diary,
             &PredefinedMenuItem::separator(app)?,
             &species,
+            &friend,
             &palettes,
             &accessories,
             &size,
@@ -247,6 +252,7 @@ fn handle(app: &AppHandle, id: &str) {
                 let mut cfg = state.config.lock().unwrap();
                 match (group, value) {
                     ("species", _) => cfg.species = value.to_string(),
+                    ("friend", _) => cfg.friend = value.to_string(),
                     ("palette", _) => cfg.palette = value.to_string(),
                     ("accessory", _) => cfg.accessory = value.to_string(),
                     ("character", _) => cfg.character = value.to_string(),

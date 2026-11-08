@@ -152,3 +152,9 @@ Twice a second-ish (every 1.5 s) the page asks Rust for the screen state, and th
 - **the microphone is on.** The operating systems don't say when the screen is being shared, but every call app uses the microphone, so that's the signal. macOS: CoreAudio's "is running somewhere" on the default input device. Windows: the microphone section of its privacy settings in the registry (an app that started and hasn't stopped). Neither needs a permission, and only *whether* it's on is read.
 
 Both have a switch. The calendar's video calls still only fade the buddy, because those are known in advance; this is for everything else.
+
+## A friend: a second buddy
+
+The friend is a second `Brain` and `View` (its own canvas and speech bubble) in the same overlay, not a second window, so there's still one click-through window to manage. It shares what's around it: the windows to climb, the app in front (it sits still while you code or watch), the calendar's quiet times, fullscreen and calls. It doesn't carry things, and only wears the hats that come from the weather, holidays and time of day, so the two stay easy to tell apart. Its look and character are saved as `friend`, `friendPalette` and `friendCharacter`; `friend: "none"` is the switch.
+
+What they do together lives in `src/buddy/social.ts`, which only nudges the two brains through their own moves (`target`, `jumpTo`, `look`, `bump`), so each keeps its own behaviour and the whole thing is tested with real brains and no DOM. Meeting (close together on the same floor) makes them look at each other and say hi. Tag, visiting and pushing are rare on purpose (minutes apart) and only happen while you're at the computer and neither is busy; picking one up ends any game.

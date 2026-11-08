@@ -11,6 +11,7 @@ import { Agenda, type AgendaAdvice } from './buddy/agenda.ts';
 import { occurrences, parseIcs, type CalEvent, type Occurrence } from './buddy/calendar.ts';
 import { View } from './buddy/view.ts';
 import { Games, type GameEvent, type GameKind } from './buddy/games.ts';
+import { Social, type SocialEvent } from './buddy/social.ts';
 import { seasonFor, type Season } from './buddy/seasons.ts';
 import { STICKERS, earned, totals } from './buddy/stickers.ts';
 import { WeatherWatch, dress, parseWeather, type Weather } from './buddy/weather.ts';
@@ -19,7 +20,7 @@ import { PERSONALITIES, greetingFor, isCharacter, line, type Character, type Lin
 import { migrateConfig, migrateCreations, migrateDiary } from './legacy.ts';
 import * as bridge from './platform/bridge.ts';
 import { parsePixling } from './sprites/format.ts';
-import { catalog, setCreations, setUnlocked, type Creation } from './sprites/index.ts';
+import { catalog, setCreations, setUnlocked, species, type Creation } from './sprites/index.ts';
 import { FIXED } from './sprites/palettes.ts';
 
 const MIN = 60_000;
@@ -31,6 +32,13 @@ async function start(): Promise<void> {
   const view = new View(canvas, bubble);
   const world = new World(document.getElementById('world') as HTMLCanvasElement);
   const brain = new Brain(window.innerWidth, window.innerHeight);
+  // A friend: a second buddy with its own brain, view and speech bubble.
+  const friendCanvas = document.getElementById('friend') as HTMLCanvasElement;
+  const friendBubble = document.getElementById('bubble2') as HTMLElement;
+  const friendView = new View(friendCanvas, friendBubble);
+  const friend = new Brain(window.innerWidth, window.innerHeight);
+  friend.x = Math.round(window.innerWidth * 0.55);
+  const social = new Social(performance.now() / 1000);
 
   let look = await bridge.getConfig();
   // Settings saved while Pixling was still in Dutch.
@@ -50,6 +58,29 @@ async function start(): Promise<void> {
     if (text) view.say(text, ms, performance.now());
   };
 
+  const hasFriend = () => look.friend !== 'none';
+  // Pressing the friend: where, and whether it turned into a drag.
+  let friendPressed: { x: number; y: number } | null = null;
+  let friendDragging = false;
+  /** The friend speaks in its own character and species voice. */
+  const friendSay = (what: Line | Situation, ms = 3500) => {
+    if (agendaAdvice.away || awayFor || !hasFriend()) return;
+    const character = isCharacter(look.friendCharacter) ? look.friendCharacter : 'hyper';
+    const text = line(character, typeof what === 'string' ? { key: what } : what, Math.random, look.friend);
+    if (text) friendView.say(text, ms, performance.now());
+  };
+  /** Something one of the two does together with the other. */
+  const together = (e: SocialEvent) => {
+    const self = e.who === 0 ? brain : friend;
+    if (e.emote) self.notice(e.emote, 1.2);
+    if (!e.say) return;
+    // Saying hi uses the other one's name.
+    const other = e.who === 0 ? look.friend : look.species;
+    const said: Line = e.say.key === 'friendHello' ? { key: 'friendHello', vars: { name: species(other).name } } : e.say;
+    if (e.who === 0) say(said, 2800);
+    else friendSay(said, 2800);
+  };
+
   let front = await bridge.activeApp();
   const applyLook = () => {
     brain.context = look.watchApps ? contextFor(front) : null;
@@ -61,6 +92,21 @@ async function start(): Promise<void> {
     brain.canPhase = quirks && look.species === 'ghost';
     brain.hovers = quirks && look.species === 'ghost';
     brain.bouncy = quirks && look.species === 'shroom';
+    // The friend: its own character and abilities; it notices the same apps.
+    const theirs = PERSONALITIES[isCharacter(look.friendCharacter) ? look.friendCharacter : 'hyper'];
+    friend.context = brain.context;
+    friend.speed = theirs.speed;
+    friend.walkiness = theirs.walkiness;
+    friend.canFly = quirks && look.friend === 'dragon';
+    friend.canPhase = quirks && look.friend === 'ghost';
+    friend.hovers = quirks && look.friend === 'ghost';
+    friend.bouncy = quirks && look.friend === 'shroom';
+    const on = look.friend !== 'none';
+    if (friendCanvas.hidden === on) {
+      friendCanvas.hidden = !on;
+      friendBubble.hidden = true;
+      if (!on) social.stop(brain, friend);
+    }
   };
   applyLook();
   // Home-made accessories and buddies from the studio, and the menu that lists them.
@@ -93,6 +139,7 @@ async function start(): Promise<void> {
   });
   window.addEventListener('resize', () => {
     brain.resize(window.innerWidth, window.innerHeight);
+    friend.resize(window.innerWidth, window.innerHeight);
     world.resize();
   });
 
@@ -268,8 +315,21 @@ async function start(): Promise<void> {
     else if (status === 'failed') say('updateFailed', 4500);
     else if (status === 'check-failed') say('updateCheckFailed', 4500);
   });
-  // In a plain browser (npm run dev) there's no menu: play from the console with pixling.play('fetch').
-  if (!bridge.inApp) Object.assign(window, { pixling: { play, games, brain } });
+  // In a plain browser (npm run dev) there's no menu: play from the console with pixling.play('fetch'),
+  // or bring a friend with pixling.set({ friend: 'ghost' }).
+  if (!bridge.inApp) Object.assign(window, {
+      pixling: {
+        play,
+        games,
+        brain,
+        friend,
+        social,
+        set: (patch: Partial<bridge.Config>) => {
+          look = { ...look, ...patch };
+          applyLook();
+        },
+      },
+    });
 
   // The backpack: focus timer and reminders, checked once a second.
   const backpack = new Backpack(Date.now());
@@ -345,6 +405,9 @@ async function start(): Promise<void> {
     }
     // In a meeting it sits still and doesn't chat; while playing it stays for the game.
     brain.stayPut = advice.stayPut || traitLook.stayPut || agendaAdvice.quiet || games.active || awayFor !== null;
+    // The friend sits still for the same reasons (coding, a meeting, a game) but goes its own way otherwise.
+    friend.stayPut = (brain.context === 'code' || brain.context === 'video' || agendaAdvice.quiet || games.active || awayFor !== null);
+    friend.tired = brain.tired;
     if (weatherFor !== JSON.stringify(look.weather ? look.place : null)) void readWeather();
     if (active && look.weather) {
       const remark = weatherWatch.update(weather);
@@ -456,14 +519,14 @@ async function start(): Promise<void> {
       cursor = c ? { x: c.x, y: c.y } : null;
       fileDrag = c?.dragging ?? false;
       // While a file is dragged, catch it on a wide area around the buddy so the drop lands here.
-      const over = c !== null && view.hit(c.x, c.y, fileDrag ? 60 : 6);
+      const over = c !== null && (view.hit(c.x, c.y, fileDrag ? 60 : 6) || (hasFriend() && friendView.hit(c.x, c.y, 6)));
       // The ball and eggs can be picked up too.
       const toy =
         c !== null &&
         (games.ballHit(c.x, c.y, screen()) ||
           games.hoopHit(c.x, c.y, screen()) !== null ||
           world.eggAt(c.x, c.y, eggs, rects, window.innerHeight, look.scale) >= 0);
-      const through = !(over || toy || pressed || ballHeld || hoopGrab || brain.mode === 'drag');
+      const through = !(over || toy || pressed || friendPressed || ballHeld || hoopGrab || brain.mode === 'drag' || friend.mode === 'drag');
       if (through !== clickThrough) {
         await bridge.setClickThrough(through);
         clickThrough = through;
@@ -489,6 +552,7 @@ async function start(): Promise<void> {
         const was = awayFor;
         awayFor = reason;
         view.setAway(reason !== null);
+        friendView.setAway(reason !== null);
         worldCanvas.style.visibility = reason ? 'hidden' : '';
         if (reason) games.stop(brain);
         bridge.log(reason ? `stepping aside: ${reason}` : 'back from stepping aside');
@@ -512,6 +576,7 @@ async function start(): Promise<void> {
       if (firstLook && look.climbWindows) bridge.log(`windows seen: ${list.length}`);
       firstLook = false;
       brain.setWindows(list);
+      friend.setWindows(list);
       rects = list;
     } catch (e) {
       bridge.log(`reading the windows failed: ${String(e)}`);
@@ -575,6 +640,43 @@ async function start(): Promise<void> {
   canvas.addEventListener('contextmenu', () => void bridge.showMenu());
   canvas.addEventListener('dblclick', () => void bridge.openWardrobe());
 
+  // The friend can be petted, dragged and thrown too.
+  friendCanvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    friendCanvas.setPointerCapture(e.pointerId);
+    friendPressed = { x: e.clientX, y: e.clientY };
+    friendDragging = false;
+  });
+  friendCanvas.addEventListener('pointermove', (e) => {
+    if (!friendPressed) return;
+    if (!friendDragging && Math.hypot(e.clientX - friendPressed.x, e.clientY - friendPressed.y) > 4) {
+      friendDragging = true;
+      social.stop(brain, friend);
+      friend.grab(friendPressed.x, friendPressed.y, e.timeStamp / 1000);
+      friendCanvas.classList.add('dragging');
+    }
+    if (friendDragging) friend.dragTo(e.clientX, e.clientY, e.timeStamp / 1000);
+  });
+  const letGoOfFriend = () => {
+    if (!friendPressed) return;
+    if (friendDragging) {
+      friend.release();
+      if (Math.hypot(friend.vx, friend.vy) > 900) friendSay('thrown', 2000);
+    } else {
+      friend.pet();
+      count('pets');
+      if (Math.random() < 0.5) friendSay('petted', 2500);
+    }
+    friendPressed = null;
+    friendDragging = false;
+    friendCanvas.classList.remove('dragging');
+    void bridge.giveBackFocus();
+  };
+  friendCanvas.addEventListener('pointerup', letGoOfFriend);
+  friendCanvas.addEventListener('pointercancel', letGoOfFriend);
+  friendCanvas.addEventListener('contextmenu', () => void bridge.showMenu());
+  friendCanvas.addEventListener('dblclick', () => void bridge.openWardrobe());
+
   // Notes: say so when one is added.
   let openNotes = (await bridge.getNotes()).filter((n) => !n.done).length;
   bridge.onNotesChanged((open) => {
@@ -631,8 +733,8 @@ async function start(): Promise<void> {
   let lastStand: number | null = null;
   let lastMode: Mode = brain.mode;
   const frame = (now: number) => {
-    const busy =
-      brain.mode === 'fall' || brain.mode === 'drag' || brain.mode === 'fly' || brain.mode === 'phase' || brain.standingOn !== null || games.active;
+    const moving = (b: Brain) => b.mode === 'fall' || b.mode === 'drag' || b.mode === 'fly' || b.mode === 'phase' || b.standingOn !== null;
+    const busy = moving(brain) || (hasFriend() && (moving(friend) || social.playingTag)) || games.active;
     if (busy || now - lastDraw >= 50) {
       const input: Input = { cursor, idleMs: now - lastMove, dragging: fileDrag };
       const dt = Math.min(0.1, (now - last) / 1000);
@@ -693,12 +795,29 @@ async function start(): Promise<void> {
       lastMode = brain.mode;
       brain.margin = view.halfWidth;
       brain.tall = view.height;
+
+      // The friend: same weather, holiday and time-of-day hats, but no things in its hands.
+      if (hasFriend()) {
+        friend.update(dt, input);
+        const theirs = { species: look.friend, palette: look.friendPalette, accessory: hat ?? 'none', scale: look.scale };
+        friendView.draw(theirs, friend.pose(input), friend.x, friend.y, now, undefined, agendaAdvice.away ? { fade: 3 } : {});
+        friend.margin = friendView.halfWidth;
+        friend.tall = friendView.height;
+        const active = now - lastMove < 2 * MIN && brain.mode !== 'sleep';
+        for (const e of social.update(now / 1000, brain, friend, rects, active)) together(e);
+        for (const event of friend.events.splice(0)) {
+          const said: Partial<Record<BrainEvent, Situation>> = { takeoff: 'dragonTakeoff', appear: 'ghostAppear', bounce: 'shroomBounce' };
+          const key = said[event];
+          if (key && friendBubble.hidden && Math.random() < 0.3) friendSay(key, 2200);
+        }
+      }
     }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
 
   say({ key: 'greeting', vars: { greeting: greetingFor(new Date()) } }, 4500);
+  if (hasFriend()) setTimeout(() => friendSay({ key: 'friendHello', vars: { name: species(look.species).name } }, 3500), 1800);
   // The first time, a short welcome tour (after the buddy has said hello).
   if (!look.welcomed) setTimeout(() => void bridge.openWelcome(), 2500);
 }

@@ -225,6 +225,28 @@ button[aria-pressed='true'] {
   font-size: 12px;
 }
 
+.friend-looks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.friend-looks .swatch {
+  width: 26px;
+  height: 26px;
+}
+
+.card.none .plus {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  color: var(--muted);
+  font: 500 15px/1 'Pixelify Sans', ui-rounded, system-ui, sans-serif;
+}
+
 .card.new {
   border-style: dashed;
   color: var(--muted);

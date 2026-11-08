@@ -85,6 +85,10 @@ From the menu, under **Play**:
 
 Games only start when you pick one. Now and then your buddy asks if you want to play.
 
+### Bring a friend
+
+Pick a **friend** in the wardrobe or under **Friend** in the menu: a second buddy with its own look and character. The two wave when they meet, play tag now and then, jump up to visit each other on a window, and sometimes push each other off one. Throw one at the other and both go flying. You can pet, drag and throw the friend too; it sits still while you code or have a meeting, and hides along in fullscreen and during calls.
+
 ### Make it yours
 
 - **Wardrobe:** buddy, colour, accessory, size, character and habits, with a living preview.
@@ -196,9 +200,7 @@ More background: [vision](docs/VISION.md) · [decisions](docs/DECISIONS.md) · [
 
 macOS comes first, then Windows, then Linux. Next up:
 
-- Two buddies at once, waving to each other and playing tag
 - Music playing in the background, not only when the music app is in front
-- Hiding during fullscreen apps and screen sharing
 - Writing your own phrases and "if … then …" rules
 
 The full list is in the [roadmap](docs/ROADMAP.md).

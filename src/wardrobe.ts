@@ -104,6 +104,39 @@ async function start(): Promise<void> {
   };
   buildSpecies();
 
+  // A friend: none, or any buddy, in its own colour and character.
+  const friendBox = document.getElementById('friends')!;
+  let friendCards: { id: string; button: HTMLButtonElement; canvas: HTMLCanvasElement | null }[] = [];
+  const buildFriends = () => {
+    friendBox.replaceChildren();
+    const none = el('button', { type: 'button', className: 'card none' });
+    none.append(el('span', { className: 'plus', textContent: 'none' }), el('span', { textContent: 'No friend' }));
+    none.addEventListener('click', () => void change({ friend: 'none' }));
+    friendBox.append(none);
+    friendCards = [{ id: 'none', button: none, canvas: null }];
+    for (const sp of allSpecies()) {
+      const button = el('button', { type: 'button', className: 'card' });
+      const canvas = el('canvas', { width: 32, height: 32 });
+      button.append(canvas, el('span', { textContent: sp.name }));
+      button.addEventListener('click', () => void change({ friend: sp.id }));
+      friendBox.append(button);
+      friendCards.push({ id: sp.id, button, canvas });
+    }
+  };
+  buildFriends();
+  const friendPaletteBox = document.getElementById('friend-palettes')!;
+  const friendPaletteButtons = list.palettes.map((p) => {
+    const button = choice(friendPaletteBox, '', 'swatch', () => void change({ friendPalette: p.id }));
+    button.title = `Friend: ${p.name}`;
+    button.setAttribute('aria-label', `Friend: ${p.name}`);
+    return { id: p.id, button };
+  });
+  const friendCharacterBox = document.getElementById('friend-characters')!;
+  const friendCharacterButtons = Object.entries(PERSONALITIES).map(([id, p]) => ({
+    id,
+    button: choice(friendCharacterBox, p.name, 'pill', () => void change({ friendCharacter: id })),
+  }));
+
   const paletteBox = document.getElementById('palettes')!;
   const paletteButtons = list.palettes.map((p) => {
     const button = choice(paletteBox, '', 'swatch', () => void change({ palette: p.id }));
@@ -135,6 +168,7 @@ async function start(): Promise<void> {
   bridge.onCreationsChanged<Creation>((creations) => {
     setCreations(creations);
     buildSpecies();
+    buildFriends();
     buildAccessories();
     refresh();
   });
@@ -294,6 +328,19 @@ async function start(): Promise<void> {
     for (const { id, button } of accessoryButtons) button.setAttribute('aria-pressed', String(id === config.accessory));
     for (const { id, button } of scaleButtons) button.setAttribute('aria-pressed', String(id === config.scale));
     for (const { id, button } of characterButtons) button.setAttribute('aria-pressed', String(id === config.character));
+    const friendLooks: RenderOptions = { palette: config.friendPalette === 'default' ? undefined : config.friendPalette };
+    for (const card of friendCards) {
+      if (card.canvas) paint(card.canvas, card.id, friendLooks);
+      card.button.setAttribute('aria-pressed', String(card.id === config.friend));
+    }
+    const friendOn = config.friend !== 'none';
+    friendPaletteBox.parentElement!.hidden = !friendOn;
+    for (const { id, button } of friendPaletteButtons) {
+      const p = PALETTES[id] ?? ownPalette(friendOn ? config.friend : config.species);
+      button.style.background = id === 'default' ? `linear-gradient(135deg, ${p.b} 50%, ${p.s} 50%)` : p.b;
+      button.setAttribute('aria-pressed', String(id === config.friendPalette));
+    }
+    for (const { id, button } of friendCharacterButtons) button.setAttribute('aria-pressed', String(id === config.friendCharacter));
     for (const { id, button } of focusButtons) button.setAttribute('aria-pressed', String(id === config.focusMinutes));
     for (const { key, input } of habitInputs) input.checked = key === 'autostart' ? autostart : Boolean(config[key]);
     for (const { key, input } of calendarInputs) input.checked = Boolean(config[key]);
