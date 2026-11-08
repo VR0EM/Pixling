@@ -33,6 +33,8 @@ export interface Config {
   birthday: string | null;
   stickers: boolean;
   unlockAll: boolean;
+  /** Looks for a new version now and then; it's only installed when you choose to. */
+  checkUpdates: boolean;
 }
 
 /** The app in front; mirrors `FrontApp` in src-tauri/src/lib.rs. */
@@ -83,6 +85,7 @@ export const DEFAULT_CONFIG: Config = {
   birthday: null,
   stickers: true,
   unlockAll: false,
+  checkUpdates: true,
 };
 
 /** False when the page runs in a normal browser (`npm run dev`), which is handy while working on the art. */
@@ -282,6 +285,16 @@ export async function findPlace(name: string): Promise<string> {
 export async function fetchWeather(lat: number, lon: number): Promise<string> {
   if (!inApp) throw new Error('The weather can only be read in the app.');
   return invoke<string>('fetch_weather', { lat, lon });
+}
+
+/** Looks for a newer version on GitHub: its number, or null when this one is the newest. */
+export async function checkUpdate(): Promise<string | null> {
+  return inApp ? invoke<string | null>('check_update') : null;
+}
+
+/** What the updater is doing: available:<version>, latest, downloading, restarting, failed, check-failed. */
+export function onUpdateStatus(callback: (status: string) => void): void {
+  if (inApp) void listen<string>('update-status', (event) => callback(event.payload));
 }
 
 export async function systemInfo(): Promise<SystemInfo | null> {

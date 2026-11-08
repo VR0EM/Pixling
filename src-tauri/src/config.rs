@@ -60,6 +60,8 @@ pub struct Config {
     pub stickers: bool,
     /// Every accessory available right away, without earning it.
     pub unlock_all: bool,
+    /// Looks for a new version now and then (it's only installed when you choose to).
+    pub check_updates: bool,
 }
 
 impl Default for Config {
@@ -90,6 +92,7 @@ impl Default for Config {
             birthday: None,
             stickers: true,
             unlock_all: false,
+            check_updates: true,
         }
     }
 }

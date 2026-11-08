@@ -67,6 +67,12 @@ export type BasicSituation =
   | 'basketStart'
   | 'basketScore'
   | 'playInvite'
+  | 'updateReady'
+  | 'updateNone'
+  | 'updateDownloading'
+  | 'updateRestart'
+  | 'updateFailed'
+  | 'updateCheckFailed'
   | 'newSticker';
 
 /** Situations only one species gets into; their lines are in species-voice.ts. */
@@ -177,6 +183,12 @@ const SWEET: Record<BasicSituation, string[]> = {
   basketStart: ['Throw me in the hoop!', 'Basket time! Aim well.'],
   basketScore: ['SCORE!', 'Swish! Nothing but net!', 'Two points!'],
   playInvite: ['Wanna play? Pick a game under Play in the menu.', 'I’m bored... fetch? Hide and seek? It’s under Play!'],
+  updateReady: ['There’s a new Pixling: {version}! Pick “Update” in the menu when you like.'],
+  updateNone: ['You have the newest Pixling!'],
+  updateDownloading: ['Getting the new version...'],
+  updateRestart: ['Back in a second, with something new!'],
+  updateFailed: ['The update didn’t work. Let’s try again later.'],
+  updateCheckFailed: ['I couldn’t look for updates just now. Maybe later?'],
   newSticker: ['New sticker: {name}!', 'We earned a sticker: {name}!'],
 };
 

@@ -31,6 +31,8 @@ export const SPECIES_VOICES: Record<string, Partial<Record<Situation, string[]>>
     robotLow: ['Battery low... need... charger...', 'Running on fumes. I mean, electrons.'],
     robotCharging: ['Plugging in. Please hold.', 'Zzzt. Mmm, fresh electrons.', 'Charging... do not unplug.'],
     robotCharged: ['Fully charged! I could run a marathon!', '100%! Let’s goooo!'],
+    updateReady: ['Firmware {version} available. Pick “Update” in the menu.'],
+    updateRestart: ['Rebooting... see you in a second!'],
     meetingSoon: ['Calendar alert: {title} in T-minus {min} minutes.'],
     meetingDone: ['{title}: complete. Saving results...'],
     birthday: ['Happy birthday protocol activated: {title}!'],

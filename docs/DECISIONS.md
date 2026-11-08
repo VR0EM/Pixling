@@ -130,3 +130,12 @@ The address is a secret (anyone with it can read the calendar), so it lives only
 - **Stickers come from the diary's counts**, so nothing new is tracked. Rewards are accessories with a `reward` sticker id; they stay out of the menu until earned, and the wardrobe shows them locked with how to earn them. "Every accessory right away" unlocks them all for whoever doesn't want to earn them.
 - **Everything has a switch** (quirks, games, weather, holidays, stickers), in the wardrobe and the menu's Fun submenu, because a buddy should be exactly as lively as you like. The Play menu always works, even with "asks to play" off.
 - **You start every game.** The buddy may ask to play, but nothing appears on screen until you pick a game from the Play menu. A game that showed up by itself was hard to get rid of. The hoop can be dragged by its backboard and closed with its ×; the ball and hide and seek end by themselves when nobody plays.
+
+## Updates through GitHub releases
+
+Pixling uses Tauri's updater. Every release carries a `latest.json` next to the downloads (written by `scripts/updater-manifest.ts`), and installed copies read it from `releases/latest/download/latest.json` half a minute after starting and every six hours. When there's something newer, the buddy says so and **Update to Pixling x.y.z…** appears at the top of the menu; nothing is downloaded until you pick it. Then it downloads, installs and restarts. "Check for updates…" in the menu looks right away. "Looks for new versions" in the wardrobe switches the looking off.
+
+- **Signed.** Updates are signed with the project's own key (minisign). The public half is in `tauri.conf.json`; the private half lives only with the maintainer (`~/.tauri/pixling.key`) and as the `TAURI_SIGNING_PRIVATE_KEY` secret on GitHub. The updater refuses anything not signed with it. Losing the key means installed copies can't update anymore and need one manual download, so it's backed up.
+- **Only release builds are signed.** The update files are switched on by `src-tauri/tauri.release.conf.json`, which only the release workflow passes, so `npm run tauri build` and `npm run install-mac` work without the key.
+- **The system's TLS** (`native-tls`) instead of rustls, so the Windows build has no C crypto library to compile and the app stays smaller.
+- **What gets updated:** the macOS app as a whole (one universal `.app.tar.gz` for Apple Silicon and Intel) and on Windows the installer, which runs by itself (`passive`). The portable `.exe` can't replace itself; its users download the new one.

@@ -239,6 +239,33 @@ async function start(): Promise<void> {
     brain.stayPut = true;
   };
   bridge.onPlay((game) => play(game as GameKind | 'stop'));
+
+  // Updates: it looks on GitHub now and then and tells you; you install from the menu.
+  let toldUpdate: string | null = null;
+  const lookForUpdate = async () => {
+    if (!look.checkUpdates) return;
+    try {
+      const version = await bridge.checkUpdate();
+      if (version && version !== toldUpdate) {
+        toldUpdate = version;
+        say({ key: 'updateReady', vars: { version } }, 7000);
+      }
+    } catch (e) {
+      bridge.log(`checking for updates: ${String(e)}`);
+    }
+  };
+  setTimeout(() => void lookForUpdate(), MIN / 2);
+  setInterval(() => void lookForUpdate(), 6 * 60 * MIN);
+  bridge.onUpdateStatus((status) => {
+    if (status.startsWith('available:')) {
+      toldUpdate = status.slice('available:'.length);
+      say({ key: 'updateReady', vars: { version: toldUpdate } }, 7000);
+    } else if (status === 'latest') say('updateNone', 3500);
+    else if (status === 'downloading') say('updateDownloading', 20_000);
+    else if (status === 'restarting') say('updateRestart', 3000);
+    else if (status === 'failed') say('updateFailed', 4500);
+    else if (status === 'check-failed') say('updateCheckFailed', 4500);
+  });
   // In a plain browser (npm run dev) there's no menu: play from the console with pixling.play('fetch').
   if (!bridge.inApp) Object.assign(window, { pixling: { play, games, brain } });
 

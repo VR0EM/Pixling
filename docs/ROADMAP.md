@@ -74,5 +74,6 @@ Platform order: macOS first, then Windows, then Linux.
 
 - [x] Windows: window list, app in front, dragging files, file actions, battery and load, tray icon, no focus stealing
 - [x] Downloads: a .dmg and Windows .exe files built by GitHub for every release
+- [x] Updates: signed, found by the app itself, installed when you pick Update
 - [ ] Windows: try it on a real PC (transparency, letting clicks through, the tray, DPI scaling, several screens)
 - [ ] Linux: test X11 and Wayland; letting clicks through doesn't work the same everywhere

@@ -117,10 +117,18 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let next = state.next_event.lock().unwrap().clone();
     let next = next.map(|text| MenuItem::with_id(app, "next", text, false, None::<&str>)).transpose()?;
     let separator = PredefinedMenuItem::separator(app)?;
+    let update = state.update.lock().unwrap().as_ref().map(|u| u.version.clone());
+    let update = update.map(|v| MenuItem::with_id(app, "update", format!("Update to Pixling {v}…"), true, None::<&str>)).transpose()?;
+    let check = MenuItem::with_id(app, "check-update", "Check for updates…", true, None::<&str>)?;
 
     let mut items: Vec<&dyn IsMenuItem<Wry>> = Vec::new();
+    if let Some(update) = &update {
+        items.push(update);
+    }
     if let Some(next) = &next {
         items.push(next);
+    }
+    if update.is_some() || next.is_some() {
         items.push(&separator);
     }
     let menu = Menu::with_items(app, &items)?;
@@ -146,6 +154,7 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &fun,
             &login,
             &PredefinedMenuItem::separator(app)?,
+            &check,
             &quit,
         ],
     )?;
@@ -209,6 +218,14 @@ fn handle(app: &AppHandle, id: &str) {
             if let Err(e) = result {
                 eprintln!("Pixling: could not change 'start at login': {e}");
             }
+        }
+        "update" => {
+            tauri::async_runtime::spawn(crate::updater::install(app.clone()));
+            return;
+        }
+        "check-update" => {
+            tauri::async_runtime::spawn(crate::updater::check_and_tell(app.clone()));
+            return;
         }
         _ if id.starts_with("play:") => {
             let _ = app.emit("play", &id["play:".len()..]);

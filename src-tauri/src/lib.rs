@@ -6,6 +6,7 @@ mod notes;
 mod overlay;
 mod system;
 mod tray;
+mod updater;
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -91,6 +92,8 @@ pub struct AppState {
     pub dropped: Mutex<Vec<String>>,
     /// The next thing in the calendar, shown at the top of the menu.
     pub next_event: Mutex<Option<String>>,
+    /// A newer version found on GitHub, waiting for "Update" in the menu.
+    pub update: Mutex<Option<tauri_plugin_updater::Update>>,
 }
 
 #[tauri::command]
@@ -307,6 +310,12 @@ async fn fetch_weather(lat: f64, lon: f64) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || calendar::weather(lat, lon)).await.map_err(|e| e.to_string())?
 }
 
+/// Looks for a newer version on GitHub; returns its number, or None when this is the newest.
+#[tauri::command]
+async fn check_update(app: AppHandle) -> Result<Option<String>, String> {
+    updater::check(&app).await
+}
+
 /// The next thing in the calendar, for the menu; None hides it.
 #[tauri::command]
 fn set_next_event(app: AppHandle, state: State<'_, AppState>, text: Option<String>) -> Result<(), String> {
@@ -374,6 +383,7 @@ fn watch_front_app(app: &AppHandle) {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // Pixling lives in the menu bar, not in the Dock or the app switcher.
             #[cfg(target_os = "macos")]
@@ -386,6 +396,7 @@ pub fn run() {
                 front_app: Mutex::new(platform::frontmost_app()),
                 dropped: Mutex::new(Vec::new()),
                 next_event: Mutex::new(None),
+                update: Mutex::new(None),
             });
             overlay::create(&handle)?;
             tray::create(&handle)?;
@@ -420,6 +431,7 @@ pub fn run() {
             find_place,
             fetch_weather,
             set_next_event,
+            check_update,
             read_text_file,
             export_file,
             copy_text,

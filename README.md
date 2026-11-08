@@ -121,6 +121,8 @@ Pixling is built to stay on your computer.
 
 Pixling lives in the menu bar (macOS) or the system tray (Windows). Double-click your buddy to open the wardrobe, and right-click it for the menu.
 
+**Updates come by themselves** (from 0.10 on): Pixling looks for a new version now and then, your buddy tells you when there is one, and **Update** in the menu installs it. Nothing is installed until you pick it, and you can switch the looking off in the wardrobe.
+
 <details>
 <summary><strong>"Apple could not verify…" or "Windows protected your PC"</strong></summary>
 
@@ -153,7 +155,7 @@ npm run tauri dev
 | `npm run icons` | Make the app and menu bar icons again |
 | `npm run dev` | Only the web pages, in your browser |
 
-**Releases** are built by GitHub: raise the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, then push a tag like `v0.9.0`. The [release workflow](.github/workflows/release.yml) builds the .dmg and both Windows .exe files and publishes them.
+**Releases** are built by GitHub: raise the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, then push a tag like `v0.10.0`. The [release workflow](.github/workflows/release.yml) builds the .dmg and both Windows .exe files, signs the updates with the key in the `TAURI_SIGNING_PRIVATE_KEY` repository secret, and publishes everything with a `latest.json` that installed copies read to find the update.
 
 ## How it works
 

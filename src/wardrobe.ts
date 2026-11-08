@@ -168,6 +168,7 @@ async function start(): Promise<void> {
     ['breaks', 'Break reminder'],
     ['watchSystem', 'Watches battery and load'],
     ['autostart', 'Start at login'],
+    ['checkUpdates', 'Looks for new versions'],
   ];
   const habitBox = document.getElementById('habits')!;
   const habitInputs = habits.map(([key, label]) => {
