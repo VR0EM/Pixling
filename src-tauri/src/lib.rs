@@ -179,6 +179,7 @@ fn update_config(app: AppHandle, state: State<'_, AppState>, patch: serde_json::
         cfg.clone()
     };
     config::save(&app, &cfg).map_err(|e| e.to_string())?;
+    overlay::skip_in_window_screenshots(&app, cfg.skip_window_screenshots);
     let _ = app.emit("config-changed", &cfg);
     let _ = tray::refresh(&app);
     Ok(cfg)
@@ -426,6 +427,8 @@ pub fn run() {
                 update: Mutex::new(None),
             });
             overlay::create(&handle)?;
+            let skip = handle.state::<AppState>().config.lock().unwrap().skip_window_screenshots;
+            overlay::skip_in_window_screenshots(&handle, skip);
             tray::create(&handle)?;
             overlay::follow_screen_changes(&handle);
             watch_front_app(&handle);

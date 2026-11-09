@@ -54,6 +54,22 @@ Clicking a window of another app normally makes that app active, so a click on t
 
 As a safety net Pixling still calls `NSApplication.deactivate()` after a click; if the app didn't become active, that does nothing.
 
+## Window screenshots look past the overlay
+
+A window screenshot on macOS (⌘⇧4, then Space, then click a window) captured only the buddy's overlay, never the window you clicked. The picker asks the window server for the topmost window under the cursor (`CGSFindWindowByGeometry` in `/usr/sbin/screencapture`). It doesn't care that the overlay lets clicks through, and Pixling's overlay covers the whole work area, so it always won.
+
+The same picker then checks a window property, `IgnoreForScreencaptureWindowSelection`. If it's `true`, the picker looks at the next window down. macOS's screenshot tool sets it on its own windows. Pixling now sets it on the overlay too (`CGSSetWindowProperty`, private like `_setPreventsActivation:`), so the picker finds the window under the buddy. Nothing else changes: full-screen and area screenshots, and screen recordings, still show the buddy.
+
+Other options, and why not:
+
+- **`NSWindow.sharingType = .none`** hides the buddy from every capture: screenshots, recordings and screen sharing. That's more than the bug asked for, and showing the buddy off in a screenshot is half the fun.
+- **Another window level or collection behaviour.** The picker also picks the menu bar, the Dock and menus, so a level doesn't get the overlay skipped. Its hit test only looks at the property below.
+- **An overlay as small as the buddy.** This would also fix it, but the page positions everything (the buddy, the friend, games, bubbles) in one full-screen coordinate space. Moving to small windows would be a rewrite, for a bug that one property fixes.
+
+The switch is `skipWindowScreenshots` ("Window screenshots look past it" in the wardrobe and the menu), on by default and only shown on macOS. Turning it off sets the property back to `false`. It's private API, so a future macOS may ignore it; then the screenshot picker simply picks the overlay again, and nothing else breaks.
+
+**Windows** isn't changed. While the overlay lets clicks through, Tauri gives it `WS_EX_TRANSPARENT | WS_EX_LAYERED`, and Pixling adds `WS_EX_TOOLWINDOW`. Windows' own hit test (`WindowFromPoint`) skips transparent layered windows, and capture tools usually skip tool windows. Whether the Snipping Tool's window mode (Win+Shift+S) does too still needs a test on a Windows PC. If it doesn't, the Windows counterpart, `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)`, hides the buddy from every capture, like `sharingType`, so it would also need its own switch.
+
 ## Watching along by app, not by content
 
 Every 0.7 seconds Rust checks which app is in front (`NSWorkspace.frontmostApplication`) and only reports changes; Pixling itself doesn't count. The web page maps the bundle id and name to a context (code, music, video, game) with a few regular expressions in `src/buddy/context.ts`. What happens inside the app is never read. Watching is on, but can be switched off in the menu.

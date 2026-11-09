@@ -199,6 +199,10 @@ async function start(): Promise<void> {
     ['climbWindows', 'Climbs windows'],
     ['hideFullscreen', 'Hides while an app fills the screen'],
     ['hideCalls', 'Hides during calls (while the microphone is on)'],
+    // Only macOS's window screenshots trip over the overlay.
+    ...(/Mac/i.test(navigator.userAgent)
+      ? ([['skipWindowScreenshots', 'Window screenshots (⌘⇧4, then Space) look past it']] as [keyof Config, string][])
+      : []),
     ['quirks', 'Buddy quirks (charging, coffee, flying, …)'],
     ['water', 'Water reminder'],
     ['breaks', 'Break reminder'],

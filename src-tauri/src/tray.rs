@@ -86,6 +86,16 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let climb = CheckMenuItem::with_id(app, "flag:climbWindows", "Climbs windows", true, cfg.climb_windows, None::<&str>)?;
     let fullscreen = CheckMenuItem::with_id(app, "flag:hideFullscreen", "Hides in fullscreen", true, cfg.hide_fullscreen, None::<&str>)?;
     let calls = CheckMenuItem::with_id(app, "flag:hideCalls", "Hides during calls", true, cfg.hide_calls, None::<&str>)?;
+    // Only macOS's window screenshots trip over the overlay; see "Window screenshots" in DECISIONS.md.
+    #[cfg(target_os = "macos")]
+    let screenshots = CheckMenuItem::with_id(
+        app,
+        "flag:skipWindowScreenshots",
+        "Window screenshots look past it",
+        true,
+        cfg.skip_window_screenshots,
+        None::<&str>,
+    )?;
     let login = CheckMenuItem::with_id(
         app,
         "autostart",
@@ -161,6 +171,12 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
             &climb,
             &fullscreen,
             &calls,
+        ],
+    )?;
+    #[cfg(target_os = "macos")]
+    menu.append(&screenshots)?;
+    menu.append_items(
+        &[
             &fun,
             &login,
             &PredefinedMenuItem::separator(app)?,
@@ -266,6 +282,7 @@ fn handle(app: &AppHandle, id: &str) {
                     ("flag", "quirks") => cfg.quirks = !cfg.quirks,
                     ("flag", "hideFullscreen") => cfg.hide_fullscreen = !cfg.hide_fullscreen,
                     ("flag", "hideCalls") => cfg.hide_calls = !cfg.hide_calls,
+                    ("flag", "skipWindowScreenshots") => cfg.skip_window_screenshots = !cfg.skip_window_screenshots,
                     ("flag", "games") => cfg.games = !cfg.games,
                     ("flag", "weather") => cfg.weather = !cfg.weather,
                     ("flag", "seasons") => cfg.seasons = !cfg.seasons,
@@ -287,6 +304,7 @@ fn handle(app: &AppHandle, id: &str) {
             if let Err(e) = config::save(app, &cfg) {
                 eprintln!("Pixling: could not save the settings: {e}");
             }
+            crate::overlay::skip_in_window_screenshots(app, cfg.skip_window_screenshots);
             let _ = app.emit("config-changed", &cfg);
         }
     }

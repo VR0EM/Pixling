@@ -31,6 +31,21 @@ pub fn create(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     Ok(window)
 }
 
+/// Lets window screenshots (⌘⇧4, then Space on macOS) pick the window under the buddy instead of the
+/// overlay. Only macOS needs this; see "Window screenshots" in docs/DECISIONS.md.
+pub fn skip_in_window_screenshots(app: &AppHandle, on: bool) {
+    #[cfg(target_os = "macos")]
+    if let Some(window) = app.get_webview_window(LABEL) {
+        let _ = app.run_on_main_thread(move || {
+            if let Ok(ns_window) = window.ns_window() {
+                crate::macos::skip_in_window_picker(ns_window, on);
+            }
+        });
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, on);
+}
+
 pub const WARDROBE: &str = "wardrobe";
 pub const NOTES: &str = "notes";
 pub const DIARY: &str = "diary";

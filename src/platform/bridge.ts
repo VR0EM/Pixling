@@ -42,6 +42,8 @@ export interface Config {
   hideFullscreen: boolean;
   /** Steps aside while the microphone is in use (a call). */
   hideCalls: boolean;
+  /** macOS: window screenshots (⌘⇧4, then Space) pick the window under the buddy, not the overlay. */
+  skipWindowScreenshots: boolean;
   /** A second buddy: a species id, or 'none'; its palette ('default' for its own) and character. */
   friend: string;
   friendPalette: string;
@@ -100,6 +102,7 @@ export const DEFAULT_CONFIG: Config = {
   welcomed: false,
   hideFullscreen: true,
   hideCalls: true,
+  skipWindowScreenshots: true,
   friend: 'none',
   friendPalette: 'default',
   friendCharacter: 'hyper',

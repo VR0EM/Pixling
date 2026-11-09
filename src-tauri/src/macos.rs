@@ -1,9 +1,10 @@
 //! macOS-only helpers: handing focus back, the frontmost app, and the list of windows on screen.
 
-use core_foundation::base::{CFType, TCFType};
+use core_foundation::base::{CFType, CFTypeRef, TCFType};
+use core_foundation::boolean::CFBoolean;
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::number::CFNumber;
-use core_foundation::string::CFString;
+use core_foundation::string::{CFString, CFStringRef};
 use core_graphics::window::{
     copy_window_info, kCGNullWindowID, kCGWindowListExcludeDesktopElements, kCGWindowListOptionOnScreenOnly,
 };
@@ -44,6 +45,33 @@ pub fn make_nonactivating(ns_window: *mut std::ffi::c_void) {
         if responds {
             let _: () = msg_send![window, _setPreventsActivation: true];
         }
+    }
+}
+
+#[link(name = "CoreGraphics", kind = "framework")]
+extern "C" {
+    fn CGSMainConnectionID() -> i32;
+    fn CGSSetWindowProperty(connection: i32, window: i32, key: CFStringRef, value: CFTypeRef) -> i32;
+}
+
+/// Window screenshots (⌘⇧4, then Space) pick the window under the cursor, and the overlay covers the
+/// whole screen, so they picked the overlay. The picker skips windows with this property set to true;
+/// macOS's screenshot tool sets it on its own windows. Full-screen screenshots and recordings still show
+/// the buddy. Must run on the main thread.
+pub fn skip_in_window_picker(ns_window: *mut std::ffi::c_void, on: bool) {
+    if ns_window.is_null() || MainThreadMarker::new().is_none() {
+        return;
+    }
+    let number = unsafe { &*ns_window.cast::<NSWindow>() }.windowNumber();
+    let Ok(number) = i32::try_from(number) else { return };
+    if number <= 0 {
+        return;
+    }
+    let key = CFString::from_static_string("IgnoreForScreencaptureWindowSelection");
+    let value = if on { CFBoolean::true_value() } else { CFBoolean::false_value() };
+    let error = unsafe { CGSSetWindowProperty(CGSMainConnectionID(), number, key.as_concrete_TypeRef(), value.as_CFTypeRef()) };
+    if error != 0 {
+        eprintln!("Pixling: could not set the window screenshot setting (error {error})");
     }
 }
 
